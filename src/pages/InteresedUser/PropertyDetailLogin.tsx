@@ -1,16 +1,30 @@
-import { Button } from "../components/ui/button";
+import { useState } from "react";
+import { Button } from "../../components/ui/button";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "../components/ui/card";
-import { Input } from "../components/ui/input";
-import { Home, MapPin } from "lucide-react";
-import { Link } from "react-router";
-import AuthModals from "./AuthModals";
+} from "../../components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "../../components/ui/dialog";
+import { Home, MapPin, Bell, User, Heart } from "lucide-react";
 
-export default function PropertyDetail() {
+export default function PropertyDetailLogin() {
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [openContact, setOpenContact] = useState(false);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -25,13 +39,31 @@ export default function PropertyDetail() {
           </div>
 
           {/* Acciones */}
-          <div className="flex items-center space-x-2">
-            <Link to={"/nuevo"}>
-              <Button variant="outline" size="sm">
-                Publicar
-              </Button>
-            </Link>
-            <AuthModals />
+          <div className="flex items-center space-x-4">
+            {/* Notificaciones */}
+            <button className="relative">
+              <Bell className="h-5 w-5 text-muted-foreground" />
+              <span className="absolute -top-1 -right-1 h-4 w-4 text-[10px] bg-red-500 text-white rounded-full flex items-center justify-center">
+                3
+              </span>
+            </button>
+
+            {/* Menú usuario */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center">
+                  <User className="h-6 w-6 text-muted-foreground" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>Perfil</DropdownMenuItem>
+                <DropdownMenuItem>Favoritos</DropdownMenuItem>
+                <DropdownMenuItem>Historial</DropdownMenuItem>
+                <DropdownMenuItem className="text-red-600">
+                  Cerrar sesión
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>
@@ -40,15 +72,31 @@ export default function PropertyDetail() {
       <main className="container mx-auto py-10 px-4 grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Columna principal */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Título y ubicación */}
-          <div>
-            <h1 className="text-3xl font-bold mb-1">
-              Casa Familiar con Jardín
-            </h1>
-            <div className="flex items-center text-muted-foreground">
-              <MapPin className="h-4 w-4 mr-1" />
-              Barrio Cerrado, Ciudad
+          {/* Título, ubicación y Guardar */}
+          <div className="flex items-start justify-between">
+            <div>
+              <h1 className="text-3xl font-bold mb-1">
+                Casa Familiar con Jardín
+              </h1>
+              <div className="flex items-center text-muted-foreground">
+                <MapPin className="h-4 w-4 mr-1" />
+                Barrio Cerrado, Ciudad
+              </div>
             </div>
+            <Button
+              variant="ghost"
+              className="flex items-center space-x-2"
+              onClick={() => setIsFavorite(!isFavorite)}
+            >
+              <Heart
+                className={`h-5 w-5 ${
+                  isFavorite
+                    ? "fill-red-500 text-red-500"
+                    : "text-muted-foreground"
+                }`}
+              />
+              <span>Guardar</span>
+            </Button>
           </div>
 
           {/* Galería */}
@@ -121,23 +169,47 @@ export default function PropertyDetail() {
             </CardContent>
           </Card>
 
-          {/* Formulario contacto */}
+          {/* Publicador + Contacto */}
           <Card>
             <CardHeader>
-              <CardTitle>Contáctanos</CardTitle>
+              <CardTitle>Publicado por</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Input placeholder="Nombre" />
-              <Input placeholder="Apellido" />
-              <Input type="email" placeholder="Correo electrónico" />
-              <Input placeholder="WhatsApp" />
-              <Button className="w-full bg-accent hover:bg-accent/90">
+              <div className="flex items-center space-x-3">
+                <div className="h-10 w-10 rounded-full bg-muted" />
+                <div>
+                  <p className="font-semibold">Inmobiliaria XYZ</p>
+                  <p className="text-sm text-muted-foreground">
+                    contacto@xyz.com
+                  </p>
+                </div>
+              </div>
+              <Button
+                className="w-full bg-accent hover:bg-accent/90"
+                onClick={() => setOpenContact(true)}
+              >
                 Quiero que me contacten
               </Button>
             </CardContent>
           </Card>
         </aside>
       </main>
+
+      {/* Dialog Confirmación */}
+      <Dialog open={openContact} onOpenChange={setOpenContact}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Consulta enviada</DialogTitle>
+          </DialogHeader>
+          <p className="text-muted-foreground">
+            Hemos registrado tu consulta y se agregó a tu historial de
+            consultas. Pronto el publicador se pondrá en contacto contigo.
+          </p>
+          <DialogFooter>
+            <Button onClick={() => setOpenContact(false)}>Aceptar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Footer */}
       <footer className="bg-muted py-6 px-4 mt-12">

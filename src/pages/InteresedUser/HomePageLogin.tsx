@@ -1,46 +1,60 @@
-import { Button } from "../components/ui/button";
+import { useState } from "react";
+import { Button } from "../../components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardTitle,
-} from "../components/ui/card";
-import { Input } from "../components/ui/input";
-import { Heart, Search, MapPin, Home } from "lucide-react";
+} from "../../components/ui/card";
+import { Input } from "../../components/ui/input";
+import { Heart, Search, MapPin, Home, Bell, User } from "lucide-react";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../components/ui/select";
+} from "../../components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../components/ui/dropdown-menu";
 import { Link } from "react-router";
-import AuthModals from "./AuthModals";
 
-export default function HomePageWireframe() {
-  const featuredProperties = [
+export default function HomePageLogin() {
+  const [favorites, setFavorites] = useState<number[]>([1]);
+
+  const toggleFavorite = (id: number) => {
+    setFavorites((prev) =>
+      prev.includes(id) ? prev.filter((fid) => fid !== id) : [...prev, id]
+    );
+  };
+
+  const viewedProperties = [
     {
       id: 1,
       category: "Departamento",
-      title: "Amplio Departamento Céntrico",
-      characteristics: "2 hab • 1 baño • 75m²",
-      price: "$150,000",
+      title: "Loft moderno en el centro",
+      characteristics: "1 hab • 1 baño • 50m²",
+      price: "$120,000",
       location: "Centro",
     },
     {
       id: 2,
       category: "Casa",
-      title: "Casa Familiar con Jardín",
-      characteristics: "3 hab • 2 baños • 180m²",
-      price: "$320,000",
-      location: "Barrio Cerrado",
+      title: "Casa con pileta en barrio cerrado",
+      characteristics: "4 hab • 3 baños • 250m²",
+      price: "$450,000",
+      location: "Barrio Norte",
     },
     {
       id: 3,
       category: "Terreno",
-      title: "Terreno Ideal para Inversión",
-      characteristics: "Lote de 300m²",
-      price: "$80,000",
+      title: "Terreno amplio para inversión",
+      characteristics: "Lote de 500m²",
+      price: "$95,000",
       location: "Periferia",
     },
   ];
@@ -48,8 +62,9 @@ export default function HomePageWireframe() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur px-4">
         <div className="container flex h-16 items-center justify-between">
+          {/* Logo y nombre */}
           <div className="flex items-center space-x-2">
             <Home className="h-6 w-6 text-primary" />
             <span className="font-bold text-xl text-primary font-[family-name:var(--font-space-grotesk)]">
@@ -57,13 +72,32 @@ export default function HomePageWireframe() {
             </span>
           </div>
 
-          <div className="flex items-center space-x-2">
-            <Link to={"/nuevo"}>
-              <Button variant="outline" size="sm">
-                Publicar
-              </Button>
-            </Link>
-            <AuthModals />
+          {/* Acciones */}
+          <div className="flex items-center space-x-4">
+            {/* Notificaciones */}
+            <button className="relative">
+              <Bell className="h-5 w-5 text-muted-foreground" />
+              <span className="absolute -top-1 -right-1 h-4 w-4 text-[10px] bg-red-500 text-white rounded-full flex items-center justify-center">
+                3
+              </span>
+            </button>
+
+            {/* Menú usuario */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center">
+                  <User className="h-6 w-6 text-muted-foreground" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>Perfil</DropdownMenuItem>
+                <DropdownMenuItem>Favoritos</DropdownMenuItem>
+                <DropdownMenuItem>Historial</DropdownMenuItem>
+                <DropdownMenuItem className="text-red-600">
+                  Cerrar sesión
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>
@@ -128,13 +162,13 @@ export default function HomePageWireframe() {
           </div>
         </div>
 
-        {/* Propiedades destacadas */}
-        <h2 className="text-3xl font-bold mb-4 font-[family-name:var(--font-grotesk)] text-center">
-          Propiedades destacadas
+        {/* Historial de propiedades */}
+        <h2 className="text-3xl font-bold mb-4 text-center">
+          Últimas propiedades que viste
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {featuredProperties.map((property) => (
+          {viewedProperties.map((property) => (
             <Card
               key={property.id}
               className="overflow-hidden hover:shadow-lg transition-shadow"
@@ -153,9 +187,16 @@ export default function HomePageWireframe() {
                 <Button
                   variant="ghost"
                   size="icon"
+                  onClick={() => toggleFavorite(property.id)}
                   className="absolute top-2 right-2 rounded-full bg-background/70 hover:bg-background hover:scale-110"
                 >
-                  <Heart className="h-5 w-5 fill-none stroke-black" />
+                  <Heart
+                    className={`h-5 w-5 ${
+                      favorites.includes(property.id)
+                        ? "fill-red-500 stroke-red-500"
+                        : "fill-none stroke-black"
+                    }`}
+                  />
                 </Button>
               </div>
 
@@ -176,7 +217,7 @@ export default function HomePageWireframe() {
                     {property.location}
                   </div>
                 </div>
-                <Link to={`/detail`}>
+                <Link to={`/detailLogin`}>
                   <Button className="w-full bg-primary hover:bg-primary/90">
                     Ver detalles
                   </Button>

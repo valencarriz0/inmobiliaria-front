@@ -9,6 +9,7 @@ import { Input } from "../../components/ui/input";
 import { Home, MapPin } from "lucide-react";
 import { Link } from "react-router";
 import AuthModals from "../../components/Modals/AuthModals";
+import BotonVolver from "../../components/BotonVolver";
 
 export default function PropertyDetail() {
   return (
@@ -35,7 +36,7 @@ export default function PropertyDetail() {
           </div>
         </div>
       </header>
-
+      <BotonVolver />
       {/* Main */}
       <main className="container mx-auto py-10 px-4 grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Columna principal */}

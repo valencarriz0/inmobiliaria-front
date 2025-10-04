@@ -104,13 +104,13 @@ export default function HomePageWireframe() {
             </Select>
 
             {/* Precio máximo + moneda */}
-            <div className="flex items-center border rounded-md overflow-hidden">
+            <div className="flex items-center border rounded-md overflow-hidden h-9.5">
               <Input
                 placeholder="Precio máximo"
-                className="flex-1 h-10 border-none focus-visible:ring-0"
+                className="w-full flex-1 border-none focus-visible:ring-0 h-9"
               />
-              <Select defaultValue="USD">
-                <SelectTrigger className="w-[80px] h-10 rounded-l-none border-l">
+              <Select defaultValue="ARS">
+                <SelectTrigger className="w-[80px] h-10 rounded-l-none border-l ">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

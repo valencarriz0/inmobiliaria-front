@@ -1,3 +1,4 @@
+import BotonVolver from "../../components/BotonVolver";
 import AuthModals from "../../components/Modals/AuthModals";
 import { Button } from "../../components/ui/button";
 import {
@@ -6,12 +7,10 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card";
-import { Home, ArrowLeft } from "lucide-react";
+import { Home } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
 
 export default function Publish() {
-  const navigate = useNavigate();
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* Header simplificado */}
@@ -29,17 +28,7 @@ export default function Publish() {
           <AuthModals />
         </div>
       </header>
-      <div className="container mx-auto px-4 mt-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-2 text-sm px-2 py-1 rounded-md w-auto bg-transparent hover:text-black hover:bg-[#F2F6F8]"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span className="whitespace-nowrap">Volver</span>
-        </Button>
-      </div>
+      <BotonVolver />
       {/* Contenido principal */}
       <main className="flex flex-1 items-center justify-center px-4">
         <Card className="max-w-xl w-full text-center shadow-lg rounded-2xl p-8">

@@ -7,24 +7,64 @@ import {
   CardTitle,
 } from "../../components/ui/card";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../../components/ui/alert-dialog";
+import {
+  Home,
+  MapPin,
+  Bell,
+  User,
+  Pause,
+  Play,
+  Pencil,
+  Trash,
+} from "lucide-react";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "../../components/ui/dialog";
-import { Home, MapPin, Bell, User, Heart } from "lucide-react";
 import BotonVolver from "../../components/BotonVolver";
+import { Link } from "react-router";
 
-export default function PropertyDetailLogin() {
-  const [isFavorite, setIsFavorite] = useState(false);
-  const [openContact, setOpenContact] = useState(false);
+export default function PropertyDetailPublisher() {
+  // Estado interno
+  const [status, setStatus] = useState<"Activa" | "Pausada">("Activa");
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [pauseOpen, setPauseOpen] = useState(false); // Estado para el modal de pausa
+
+  // Datos de la propiedad
+  const views = 120;
+  const inquiries = 5;
+
+  const toggleStatus = () => {
+    if (status === "Activa") {
+      setPauseOpen(true); // Abrir modal de pausa
+    } else {
+      setStatus("Activa");
+    }
+  };
+
+  const handleEdit = () => {
+    alert("Función de edición aún no implementada.");
+  };
+
+  const handleDelete = () => {
+    alert("Propiedad eliminada.");
+    setDeleteOpen(false);
+  };
+
+  const handlePause = () => {
+    setStatus("Pausada");
+    setPauseOpen(false);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -84,20 +124,6 @@ export default function PropertyDetailLogin() {
                 Barrio Cerrado, Ciudad
               </div>
             </div>
-            <Button
-              variant="ghost"
-              className="flex items-center space-x-2"
-              onClick={() => setIsFavorite(!isFavorite)}
-            >
-              <Heart
-                className={`h-5 w-5 ${
-                  isFavorite
-                    ? "fill-red-500 text-red-500"
-                    : "text-muted-foreground"
-                }`}
-              />
-              <span>Guardar</span>
-            </Button>
           </div>
 
           {/* Galería */}
@@ -145,6 +171,27 @@ export default function PropertyDetailLogin() {
 
         {/* Sidebar derecha */}
         <aside className="space-y-6">
+          {/* Estadísticas */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Estadísticas</CardTitle>
+            </CardHeader>
+            <CardContent className="flex justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Estado</p>
+                <p className="font-semibold">{status}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Vistas</p>
+                <p className="font-semibold">{views}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Consultas</p>
+                <p className="font-semibold">{inquiries}</p>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Mapa */}
           <Card className="h-56">
             <CardHeader>
@@ -155,69 +202,83 @@ export default function PropertyDetailLogin() {
             </CardContent>
           </Card>
 
-          {/* Reseñas */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Reseñas</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground text-sm">
-                ★★★★☆ (12 reseñas)
-              </p>
-              <Button variant="link" className="mt-2 p-0">
-                Ver todas las reseñas
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Publicador + Contacto */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Publicado por</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center space-x-3">
-                <div className="h-10 w-10 rounded-full bg-muted" />
-                <div>
-                  <p className="font-semibold">Inmobiliaria XYZ</p>
-                  <p className="text-sm text-muted-foreground">
-                    contacto@xyz.com
-                  </p>
-                </div>
-              </div>
+          {/* Botones de gestión */}
+          <Card className="space-y-3">
+            <CardContent className="flex flex-col gap-3">
               <Button
-                className="w-full bg-accent hover:bg-accent/90"
-                onClick={() => setOpenContact(true)}
+                variant="outline"
+                className="w-full flex items-center justify-center"
+                onClick={toggleStatus}
               >
-                Quiero que me contacten
+                {status === "Activa" ? (
+                  <>
+                    <Pause className="h-4 w-4 mr-2" /> Pausar publicación
+                  </>
+                ) : (
+                  <>
+                    <Play className="h-4 w-4 mr-2" /> Activar publicación
+                  </>
+                )}
+              </Button>
+              <Link to="/editProperty">
+                <Button
+                  variant="outline"
+                  className="w-full flex items-center justify-center"
+                >
+                  <Pencil className="h-4 w-4 mr-2" /> Editar publicación
+                </Button>
+              </Link>
+
+              <Button
+                variant="destructive"
+                className="w-full flex items-center justify-center"
+                onClick={() => setDeleteOpen(true)}
+              >
+                <Trash className="h-4 w-4 mr-2" /> Eliminar publicación
               </Button>
             </CardContent>
           </Card>
         </aside>
       </main>
 
-      {/* Dialog Confirmación */}
-      <Dialog open={openContact} onOpenChange={setOpenContact}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Consulta enviada</DialogTitle>
-          </DialogHeader>
-          <p className="text-muted-foreground">
-            Hemos registrado tu consulta y se agregó a tu historial de
-            consultas. Pronto el publicador se pondrá en contacto contigo.
-          </p>
-          <DialogFooter>
-            <Button onClick={() => setOpenContact(false)}>Aceptar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Footer */}
-      <footer className="bg-muted py-6 px-4 mt-12">
-        <div className="container mx-auto text-center text-muted-foreground text-sm">
-          © 2025 Nombre y Logo. Todos los derechos reservados.
-        </div>
-      </footer>
+      {/* Modal Confirmación Eliminar */}
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar propiedad?</AlertDialogTitle>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteOpen(false)}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700"
+              onClick={handleDelete}
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      {/* Modal Confirmación Pausar */}
+      <AlertDialog open={pauseOpen} onOpenChange={setPauseOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Pausar propiedad?</AlertDialogTitle>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setPauseOpen(false)}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-yellow-600 hover:bg-yellow-700"
+              onClick={handlePause}
+            >
+              Pausar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

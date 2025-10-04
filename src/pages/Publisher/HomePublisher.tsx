@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bell, Home, User, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import {
@@ -9,12 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../components/ui/select";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../../components/ui/dropdown-menu";
+import HeaderUser from "../../components/HeaderUser";
 
 import { MapPin } from "lucide-react";
 
@@ -77,39 +72,11 @@ export default function PublisherDashboard() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur px-4">
-        <div className="container flex h-16 items-center justify-between">
-          {/* Logo */}
-          <div className="flex items-center space-x-2">
-            <Home className="h-6 w-6 text-primary" />
-            <span className="font-bold text-xl text-primary">
-              Nombre y Logo
-            </span>
-          </div>
-
-          {/* Acciones usuario */}
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="icon">
-              <Bell className="h-5 w-5" />
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <User className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>Mi Perfil</DropdownMenuItem>
-                <DropdownMenuItem>Estadísticas</DropdownMenuItem>
-                <DropdownMenuItem>Configuración</DropdownMenuItem>
-                <DropdownMenuItem className="text-red-600">
-                  Cerrar Sesión
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-      </header>
+      <HeaderUser
+        menuItem1="Perfil"
+        menuItem2="Estadísticas"
+        menuItem3="Configuración"
+      />
 
       {/* Contenido principal */}
       <main className="container mx-auto px-4 py-8 flex-1">

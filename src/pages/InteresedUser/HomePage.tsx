@@ -16,6 +16,7 @@ import {
 } from "../../components/ui/select";
 import { Link } from "react-router";
 import AuthModals from "../../components/Modals/AuthModals";
+import Header from "../../components/Header";
 
 export default function HomePageWireframe() {
   const featuredProperties = [
@@ -48,25 +49,7 @@ export default function HomePageWireframe() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
-        <div className="container flex h-16 items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Home className="h-6 w-6 text-primary" />
-            <span className="font-bold text-xl text-primary font-[family-name:var(--font-space-grotesk)]">
-              Nombre y Logo
-            </span>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Link to={"/post"}>
-              <Button variant="outline" size="sm">
-                Publicar
-              </Button>
-            </Link>
-            <AuthModals />
-          </div>
-        </div>
-      </header>
+      <Header page={"/post"} />
 
       {/* Main */}
       <main className="container mx-auto py-12 px-4">

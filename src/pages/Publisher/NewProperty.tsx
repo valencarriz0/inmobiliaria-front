@@ -9,8 +9,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../components/ui/select";
-import { Home, Bell, User, MapPin, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import BotonVolver from "../../components/BotonVolver";
+import HeaderUser from "../../components/HeaderUser";
 
 export default function NewProperty() {
   // Estado del formulario
@@ -71,27 +72,11 @@ export default function NewProperty() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur px-4">
-        <div className="container flex h-16 items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Home className="h-6 w-6 text-primary" />
-            <span className="font-bold text-xl text-primary">
-              Nombre y Logo
-            </span>
-          </div>
-          <div className="flex items-center space-x-4">
-            <button className="relative">
-              <Bell className="h-5 w-5 text-muted-foreground" />
-              <span className="absolute -top-1 -right-1 h-4 w-4 text-[10px] bg-red-500 text-white rounded-full flex items-center justify-center">
-                3
-              </span>
-            </button>
-            <Button variant="ghost" size="icon">
-              <User className="h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-      </header>
+      <HeaderUser
+        menuItem1="Perfil"
+        menuItem2="Estadísticas"
+        menuItem3="Configuración"
+      />
       <BotonVolver />
 
       {/* Main Form */}

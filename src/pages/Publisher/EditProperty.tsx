@@ -9,7 +9,8 @@ import {
   SelectValue,
 } from "../../components/ui/select";
 import { Textarea } from "../../components/ui/textarea";
-import { Home, MapPin, Bell, User } from "lucide-react";
+import { MapPin } from "lucide-react";
+import HeaderUser from "../../components/HeaderUser";
 
 export default function EditProperty() {
   // Estado interno de la propiedad
@@ -38,29 +39,11 @@ export default function EditProperty() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur px-4">
-        <div className="container flex h-16 items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Home className="h-6 w-6 text-primary" />
-            <span className="font-bold text-xl text-primary">
-              Nombre y Logo
-            </span>
-          </div>
-
-          <div className="flex items-center space-x-4">
-            <button className="relative">
-              <Bell className="h-5 w-5 text-muted-foreground" />
-              <span className="absolute -top-1 -right-1 h-4 w-4 text-[10px] bg-red-500 text-white rounded-full flex items-center justify-center">
-                3
-              </span>
-            </button>
-
-            <Button variant="ghost" size="icon">
-              <User className="h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-      </header>
+      <HeaderUser
+        menuItem1="Perfil"
+        menuItem2="Estadísticas"
+        menuItem3="Configuración"
+      />
 
       {/* Main content */}
       <main className="container mx-auto py-10 px-4 max-w-4xl space-y-6">

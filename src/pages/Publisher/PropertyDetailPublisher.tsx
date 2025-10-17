@@ -19,8 +19,13 @@ import { MapPin, Pause, Play, Pencil, Trash } from "lucide-react";
 import BotonVolver from "../../components/BotonVolver";
 import { Link } from "react-router";
 import HeaderUser from "../../components/HeaderUser";
+import { useParams } from "react-router-dom";
+import { propiedades } from "../../data/propertiesExamples";
 
 export default function PropertyDetailPublisher() {
+  const { id } = useParams();
+  const propId = id ? Number(id) : undefined;
+  const property = propiedades.find((p) => p.id === propId) ?? propiedades[0];
   // Estado interno
   const [status, setStatus] = useState<"Activa" | "Pausada">("Activa");
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -38,9 +43,7 @@ export default function PropertyDetailPublisher() {
     }
   };
 
-  const handleEdit = () => {
-    alert("Función de edición aún no implementada.");
-  };
+  // handleEdit se puede implementar luego si se necesita
 
   const handleDelete = () => {
     alert("Propiedad eliminada.");
@@ -69,27 +72,50 @@ export default function PropertyDetailPublisher() {
           {/* Título, ubicación y Guardar */}
           <div className="flex items-start justify-between">
             <div>
-              <h1 className="text-3xl font-bold mb-1">
-                Casa Familiar con Jardín
-              </h1>
-              <div className="flex items-center text-muted-foreground">
+              <div className="flex items-center gap-3">
+                <h1 className="text-3xl font-bold mb-1">{property.title}</h1>
+                <span
+                  className={`px-3 py-1 text-xs font-semibold rounded-full text-white ${
+                    property.category === "Alquiler"
+                      ? "bg-[#477ce0]"
+                      : property.category === "Venta"
+                      ? "bg-[#58b5e0]"
+                      : "bg-accent"
+                  }`}
+                >
+                  {property.category}
+                </span>
+              </div>
+              <div className="flex items-center text-muted-foreground mt-1">
                 <MapPin className="h-4 w-4 mr-1" />
-                Barrio Cerrado, Ciudad
+                {property.location}
               </div>
             </div>
           </div>
 
           {/* Galería */}
-          <div className="grid grid-cols-3 gap-4">
-            <div className="col-span-2 h-80 bg-muted flex items-center justify-center rounded-xl">
-              Imagen Principal
+          <div className="flex items-stretch gap-4">
+            <div className="w-2/3 h-80 overflow-hidden rounded-xl bg-muted">
+              <img
+                src={property.imgUrl1}
+                alt={property.title}
+                className="object-cover w-full h-full"
+              />
             </div>
-            <div className="flex flex-col gap-4">
-              <div className="h-38 flex-1 bg-muted rounded-xl flex items-center justify-center">
-                Imagen 2
+            <div className="w-1/3 flex flex-col gap-4 h-80">
+              <div className="flex-1 overflow-hidden rounded-xl bg-muted">
+                <img
+                  src={property.imgUrl2}
+                  alt={property.title}
+                  className="object-cover w-full h-full"
+                />
               </div>
-              <div className="h-38 flex-1 bg-muted rounded-xl flex items-center justify-center">
-                Imagen 3
+              <div className="flex-1 overflow-hidden rounded-xl bg-muted">
+                <img
+                  src={property.imgUrl3}
+                  alt={property.title}
+                  className="object-cover w-full h-full"
+                />
               </div>
             </div>
           </div>
@@ -97,27 +123,25 @@ export default function PropertyDetailPublisher() {
           {/* Características y precio */}
           <div className="flex items-center justify-between border-b pb-4">
             <div className="space-x-3 text-sm">
-              <span className="px-3 py-1 rounded-full bg-accent/10 text-accent">
-                3 habitaciones
-              </span>
-              <span className="px-3 py-1 rounded-full bg-accent/10 text-accent">
-                2 baños
-              </span>
-              <span className="px-3 py-1 rounded-full bg-accent/10 text-accent">
-                180 m²
-              </span>
+              {property.characteristics?.split(",").map((char, idx) => (
+                <span
+                  key={idx}
+                  className="px-3 py-1 rounded-full bg-accent/10 text-accent"
+                >
+                  {char.trim()}
+                </span>
+              ))}
             </div>
-            <span className="text-3xl font-bold text-accent">$320,000</span>
+            <span className="text-3xl font-bold text-accent">
+              {property.price}
+            </span>
           </div>
 
           {/* Descripción */}
           <div>
             <h2 className="text-xl font-semibold mb-2">Descripción</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Esta casa familiar cuenta con amplios espacios, jardín privado y
-              excelente ubicación en un barrio cerrado con seguridad 24/7. Ideal
-              para familias que buscan comodidad y tranquilidad, con fácil
-              acceso a escuelas, comercios y transporte.
+              {property.description}
             </p>
           </div>
         </div>

@@ -74,7 +74,10 @@ export default function PublisherDashboard() {
                   <td className="p-3">2</td>
                   <td className="p-3">
                     {(() => {
-                      const estado = (p as any).estado ?? "Pausada";
+                      const estado =
+                        "estado" in p && typeof p.estado === "string"
+                          ? p.estado
+                          : "Pausada";
                       const lower = String(estado).toLowerCase();
                       if (lower === "activa" || lower === "activo") {
                         return (

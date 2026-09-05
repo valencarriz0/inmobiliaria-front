@@ -16,12 +16,12 @@ function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
       const id = el.id;
       if (id) {
         const byFor = document.querySelector(
-          `label[for=\"${id}\"]`
+          `label[for="${id}"]`
         ) as HTMLElement | null;
         if (byFor) return byFor;
 
         const bySlot = document.querySelector(
-          `[data-slot=\"label\"][for=\"${id}\"]`
+          `[data-slot="label"][for="${id}"]`
         ) as HTMLElement | null;
         if (bySlot) return bySlot;
       }
@@ -43,7 +43,7 @@ function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
         } else {
           label.classList.remove("text-destructive");
         }
-      } catch (e) {
+      } catch {
         // no-op
       }
     };

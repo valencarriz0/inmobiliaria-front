@@ -2,6 +2,8 @@ import { useNavigate } from "react-router-dom";
 import PropertyForm from "../../components/PropertyForm";
 import BotonVolver from "../../components/BotonVolver";
 import HeaderUser from "../../components/HeaderUser";
+import { propertyService } from "../../services/propertyService";
+import { MOCK_CURRENT_PUBLISHER_ID } from "../../data/mock/session";
 
 export default function NewProperty() {
   const navigate = useNavigate();
@@ -19,7 +21,10 @@ export default function NewProperty() {
           <PropertyForm
             submitLabel="Publicar"
             onCancel={() => navigate("/dashboard")}
-            onSubmit={() => alert("Formulario válido. La publicación es una simulación; no se guardaron datos.")}
+            onSubmit={async (input) => {
+              const property = await propertyService.createProperty(input, MOCK_CURRENT_PUBLISHER_ID);
+              navigate(`/detailPublisher/${property.id}`);
+            }}
           />
         </main>
       </div>

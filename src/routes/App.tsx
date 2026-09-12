@@ -31,6 +31,7 @@ function App() {
         element={<PropertyDetailPublisher />}
       />
       <Route path="/editProperty" element={<EditProperty />} />
+      <Route path="/editProperty/:id" element={<EditProperty />} />
       <Route path="/newProperty" element={<NewProperty />} />
     </Routes>
   );

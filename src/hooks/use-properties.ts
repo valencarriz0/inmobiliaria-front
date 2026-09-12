@@ -9,7 +9,7 @@ export function useProperties() {
 
   useEffect(() => {
     let cancelled = false;
-    propertyService.getAll().then(
+    propertyService.getPublicProperties().then(
       (data) => {
         if (cancelled) return;
         setProperties(data);

@@ -1,11 +1,10 @@
 import type { Property } from "../../types/property.ts";
 
-// Publisher and timestamps are synthetic fixture metadata, not real accounts/events.
-// Paused preserves the existing dashboard labels; public filtering is a later task.
-// Unknown areas/room counts remain null rather than inventing missing data.
+// Initial demo data only. Areas, room counts, owners and dates are fictional.
+// Active/paused examples and two publishers exercise the prototype visibility rules.
 export const mockProperties: Property[] = [
   {
-    "id": 1,
+    "id": "1",
     "title": "Hermosa casa en el centro",
     "description": "Esta hermosa casa ubicada en el corazón de la ciudad ofrece un espacio amplio y cómodo para toda la familia. Cuenta con tres habitaciones, dos baños completos, una cocina moderna y un patio grande ideal para reuniones y actividades al aire libre.",
     "operationType": "sale",
@@ -17,8 +16,8 @@ export const mockProperties: Property[] = [
       "province": "Córdoba",
       "city": "Córdoba"
     },
-    "totalArea": null,
-    "rooms": null,
+    "totalArea": 150,
+    "rooms": 4,
     "bedrooms": 3,
     "bathrooms": 2,
     "services": [],
@@ -31,12 +30,12 @@ export const mockProperties: Property[] = [
       "https://plus.unsplash.com/premium_photo-1689609950069-2961f80b1e70?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjF8fGhvdXNlfGVufDB8fDB8fHww&auto=format&fit=crop&q=60&w=600"
     ],
     "publisherId": 1,
-    "publicationStatus": "paused",
+    "publicationStatus": "active",
     "createdAt": "2025-01-01T00:00:00.000Z",
     "updatedAt": "2025-01-01T00:00:00.000Z"
   },
   {
-    "id": 2,
+    "id": "2",
     "title": "Departamento moderno",
     "description": "Este departamento moderno y luminoso está situado en una zona privilegiada de la ciudad. Con dos habitaciones, un baño completo y un balcón con vistas panorámicas, es perfecto para jóvenes profesionales o parejas que buscan comodidad y estilo de vida urbano.",
     "operationType": "rent",
@@ -48,8 +47,8 @@ export const mockProperties: Property[] = [
       "province": "Santa Fe",
       "city": "Rosario"
     },
-    "totalArea": null,
-    "rooms": null,
+    "totalArea": 75,
+    "rooms": 3,
     "bedrooms": 2,
     "bathrooms": 1,
     "services": [],
@@ -67,7 +66,7 @@ export const mockProperties: Property[] = [
     "updatedAt": "2025-01-01T00:00:00.000Z"
   },
   {
-    "id": 3,
+    "id": "3",
     "title": "Departamento en zona residencial",
     "description": "Este departamento se encuentra en una tranquila zona residencial, ideal para familias. Cuenta con todos los servicios disponibles, incluyendo agua, electricidad y acceso a internet, y está cerca de escuelas, comercios y áreas verdes.",
     "operationType": "sale",
@@ -80,7 +79,7 @@ export const mockProperties: Property[] = [
       "city": "Mendoza"
     },
     "totalArea": 120,
-    "rooms": null,
+    "rooms": 4,
     "bedrooms": 3,
     "bathrooms": 2,
     "services": [],
@@ -91,12 +90,12 @@ export const mockProperties: Property[] = [
       "https://plus.unsplash.com/premium_photo-1683769251695-963095b23d67?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mzd8fGFwYXJ0bWVudHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600"
     ],
     "publisherId": 1,
-    "publicationStatus": "paused",
+    "publicationStatus": "active",
     "createdAt": "2025-01-01T00:00:00.000Z",
     "updatedAt": "2025-01-01T00:00:00.000Z"
   },
   {
-    "id": 4,
+    "id": "4",
     "title": "Departamento en Palermo",
     "description": "Este departamento moderno y acogedor está ubicado en el vibrante barrio de Palermo. Con dos habitaciones, un baño completo y una cocina equipada, es perfecto para quienes buscan disfrutar de la vida urbana con todas las comodidades cerca.",
     "operationType": "rent",
@@ -109,7 +108,7 @@ export const mockProperties: Property[] = [
       "city": "Buenos Aires"
     },
     "totalArea": 80,
-    "rooms": null,
+    "rooms": 3,
     "bedrooms": 2,
     "bathrooms": 1,
     "services": [],
@@ -119,13 +118,13 @@ export const mockProperties: Property[] = [
       "https://plus.unsplash.com/premium_photo-1676321046262-4978a752fb15?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8YXBhcnRtZW50fGVufDB8fDB8fHww&auto=format&fit=crop&q=60&w=600",
       "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8YXBhcnRtZW50fGVufDB8fDB8fHww&auto=format&fit=crop&q=60&w=600"
     ],
-    "publisherId": 1,
-    "publicationStatus": "paused",
+    "publisherId": 2,
+    "publicationStatus": "active",
     "createdAt": "2025-01-01T00:00:00.000Z",
     "updatedAt": "2025-01-01T00:00:00.000Z"
   },
   {
-    "id": 5,
+    "id": "5",
     "title": "Casa en las afueras",
     "description": "Esta casa en las afueras ofrece un entorno tranquilo y espacioso, ideal para familias que buscan alejarse del bullicio de la ciudad. Con un amplio terreno y todas las comodidades necesarias, es el lugar perfecto para disfrutar de la naturaleza.",
     "operationType": "sale",
@@ -138,7 +137,7 @@ export const mockProperties: Property[] = [
       "city": "Córdoba"
     },
     "totalArea": 150,
-    "rooms": null,
+    "rooms": 4,
     "bedrooms": 3,
     "bathrooms": 2,
     "services": [],
@@ -154,7 +153,7 @@ export const mockProperties: Property[] = [
     "updatedAt": "2025-01-01T00:00:00.000Z"
   },
   {
-    "id": 6,
+    "id": "6",
     "title": "Departamento céntrico",
     "description": "Este departamento céntrico es ideal para estudiantes o profesionales que buscan estar cerca de todo. Con una habitación cómoda, un baño completo y una cocina funcional, ofrece todo lo necesario para una vida práctica en la ciudad.",
     "operationType": "rent",
@@ -167,7 +166,7 @@ export const mockProperties: Property[] = [
       "city": "La Plata"
     },
     "totalArea": 50,
-    "rooms": null,
+    "rooms": 2,
     "bedrooms": 1,
     "bathrooms": 1,
     "services": [],
@@ -178,7 +177,7 @@ export const mockProperties: Property[] = [
       "https://images.unsplash.com/photo-1529408686214-b48b8532f72c?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NDB8fGFwYXJ0bWVudHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600"
     ],
     "publisherId": 1,
-    "publicationStatus": "paused",
+    "publicationStatus": "active",
     "createdAt": "2025-01-01T00:00:00.000Z",
     "updatedAt": "2025-01-01T00:00:00.000Z"
   }

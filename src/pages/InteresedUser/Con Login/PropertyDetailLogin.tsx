@@ -5,7 +5,7 @@ import { useProperty } from "../../../hooks/use-property";
 
 export default function PropertyDetailLogin() {
   const { id } = useParams();
-  const { property, loading, error } = useProperty(id, true);
+  const { property, loading, error } = useProperty(id);
 
   return (
     <div className="min-h-screen bg-background">

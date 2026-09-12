@@ -1,10 +1,11 @@
 import { CURRENCIES } from "../constants/property.ts";
 import { getPropertyCities } from "../constants/locations.ts";
 import type { Property } from "../types/property.ts";
+import type { EditablePropertyData } from "../types/property-input.ts";
 import type { PropertyFormSubmission, PropertyFormValues } from "../types/property-form.ts";
 import { validatePropertyForm } from "./validation.ts";
 
-export function createPropertyFormValues(property?: Property): PropertyFormValues {
+export function createPropertyFormValues(property?: EditablePropertyData & Pick<Property, "images">): PropertyFormValues {
   return {
     title: property?.title ?? "",
     description: property?.description ?? "",

@@ -25,7 +25,7 @@ export interface PropertyLocation {
 }
 
 export interface Property {
-  readonly id: number;
+  readonly id: string;
   title: string;
   description: string;
   operationType: OperationType;
@@ -33,10 +33,10 @@ export interface Property {
   price: number;
   currency: Currency;
   location: PropertyLocation;
-  /** m². Null means the legacy example did not provide this information. */
-  totalArea: number | null;
-  /** Total rooms, distinct from bedrooms. Null means not reported. */
-  rooms: number | null;
+  /** Positive area in m². */
+  totalArea: number;
+  /** Total rooms, distinct from bedrooms. At least one. */
+  rooms: number;
   bedrooms?: number;
   bathrooms?: number;
   /** Years. */

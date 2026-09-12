@@ -1,18 +1,14 @@
 import type { Property } from "./property.ts";
+import type { EditablePropertyData, PropertyImageInput } from "./property-input.ts";
 
-export type PropertyFormImage =
-  | { kind: "existing"; id: string; url: Property["images"][number] }
-  | { kind: "new"; id: string; file: File };
+export type PropertyFormImage = PropertyImageInput & { id: string };
 
 type NumericField =
   | "price" | "totalArea" | "rooms" | "bedrooms" | "bathrooms"
   | "age" | "garage" | "expenses" | "taxes" | "commissions";
 
 // Only editable domain data. Identity, publication state and server metadata stay out.
-export type PropertyFormData = Pick<Property,
-  | NumericField | "title" | "description" | "operationType" | "propertyType"
-  | "currency" | "location" | "propertyCondition" | "services" | "amenities" | "acceptsPets"
-> & { totalArea: number; rooms: number };
+export type PropertyFormData = EditablePropertyData;
 
 export type PropertyFormValues = {
   [K in NumericField]: string;

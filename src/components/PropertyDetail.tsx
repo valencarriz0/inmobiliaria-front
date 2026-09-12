@@ -1,3 +1,4 @@
+import PropertyGallery from "./PropertyGallery";
 import { useState } from "react";
 import { Button } from "./../components/ui/button";
 import {
@@ -87,31 +88,7 @@ export default function PropertyDetail({ property }: { property: Property }) {
             </Button>
           </div>
 
-          <div className="flex items-stretch gap-4">
-            <div className="w-2/3 h-80 overflow-hidden rounded-xl bg-muted">
-              <img
-                src={property.images[0]}
-                alt={property.title}
-                className="object-cover w-full h-full"
-              />
-            </div>
-            <div className="w-1/3 flex flex-col gap-4 h-80">
-              <div className="flex-1 overflow-hidden rounded-xl bg-muted">
-                <img
-                  src={property.images[1]}
-                  alt={property.title}
-                  className="object-cover w-full h-full"
-                />
-              </div>
-              <div className="flex-1 overflow-hidden rounded-xl bg-muted">
-                <img
-                  src={property.images[2]}
-                  alt={property.title}
-                  className="object-cover w-full h-full"
-                />
-              </div>
-            </div>
-          </div>
+          <PropertyGallery property={property} />
 
           {/* Características y precio */}
           <div className="flex items-center justify-between border-b pb-4">
@@ -129,8 +106,7 @@ export default function PropertyDetail({ property }: { property: Property }) {
           <div>
             <h2 className="text-xl font-semibold mb-2">Descripción</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Propiedad tipo {OPERATION_TYPES[property.operationType]} ubicada en {formatLocation(property.location)}.
-              Ideal para quienes buscan confort y una excelente ubicación.
+              {property.description}
             </p>
           </div>
         </div>

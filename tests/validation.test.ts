@@ -231,7 +231,7 @@ test("provincia y localidad deben corresponder; cambiar provincia limpia localid
   assert.equal(validatePropertyForm({ ...changed, city: "Rosario" }).city, undefined);
 });
 
-test("edición inicializa desde Property sin inventar superficie ni ambientes desconocidos", () => {
+test("edición inicializa desde Property con todos sus datos de dominio", () => {
   for (const property of mockProperties) {
     const values = createPropertyFormValues(property);
     const errors = validatePropertyForm(values);
@@ -241,8 +241,8 @@ test("edición inicializa desde Property sin inventar superficie ni ambientes de
     assert.equal(values.totalArea, property.totalArea?.toString() ?? "");
     assert.equal(errors.province, undefined);
     assert.equal(errors.city, undefined);
-    if (property.rooms === null) assert.ok(errors.rooms);
-    if (property.totalArea === null) assert.ok(errors.totalArea);
+    assert.equal(errors.rooms, undefined);
+    assert.equal(errors.totalArea, undefined);
     assert.deepEqual(values.images.map((image) => image.kind === "existing" ? image.url : undefined), property.images);
     assert.notEqual(values.services, property.services);
     assert.notEqual(values.amenities, property.amenities);
@@ -264,7 +264,7 @@ test("edición combina imágenes existentes y archivos nuevos sin convertirlos e
 });
 
 test("preparar un envío no modifica Property ni sus datos originales", () => {
-  const property = mockProperties.find((item) => item.id === 1);
+  const property = mockProperties.find((item) => item.id === "1");
   assert.ok(property);
   const before = structuredClone(property);
   const values = createPropertyFormValues({ ...property, totalArea: 100, rooms: 4, acceptsPets: false });

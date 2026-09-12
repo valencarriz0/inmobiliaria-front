@@ -16,13 +16,13 @@ export function formatCharacteristics(property: Property): string[] {
   const characteristics: string[] = [];
   if (property.bedrooms !== undefined) {
     characteristics.push(`${property.bedrooms} ${property.bedrooms === 1 ? "habitación" : "habitaciones"}`);
-  } else if (property.rooms !== null) {
+  } else {
     characteristics.push(`${property.rooms} ${property.rooms === 1 ? "ambiente" : "ambientes"}`);
   }
   if (property.bathrooms !== undefined) {
     characteristics.push(`${property.bathrooms} ${property.bathrooms === 1 ? "baño" : "baños"}`);
   }
-  if (property.totalArea !== null) characteristics.push(`${property.totalArea}m²`);
+  characteristics.push(`${property.totalArea}m²`);
   characteristics.push(...property.amenities.map((amenity) => PROPERTY_AMENITIES[amenity]));
   return characteristics;
 }

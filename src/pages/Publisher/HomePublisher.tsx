@@ -2,13 +2,14 @@ import { Button } from "../../components/ui/button";
 import HeaderUser from "../../components/HeaderUser";
 import { Link } from "react-router";
 import SearchBarPublisher from "../../components/SearchBarPublisher";
-import { useProperties } from "../../hooks/use-properties";
+import { usePublisherProperties } from "../../hooks/use-publisher-properties";
+import { MOCK_CURRENT_PUBLISHER_ID } from "../../data/mock/session";
 import { OPERATION_TYPES, PUBLICATION_STATUSES } from "../../constants/property";
 import { formatLocation } from "../../lib/formatters";
 import { Badge } from "../../components/ui/badge";
 
 export default function PublisherDashboard() {
-  const { properties, loading, error } = useProperties();
+  const { properties, loading, error } = usePublisherProperties(MOCK_CURRENT_PUBLISHER_ID);
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* Header */}
@@ -24,7 +25,7 @@ export default function PublisherDashboard() {
 
         {/* Encabezado sección */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-          <h2 className="text-2xl font-bold">Propiedades Destacadas</h2>
+          <h2 className="text-2xl font-bold">Mis propiedades</h2>
           <Link to="/newProperty">
             <Button className="bg-primary text-white hover:bg-primary/90">
               Publicar Nueva Propiedad

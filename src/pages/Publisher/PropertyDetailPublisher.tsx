@@ -1,4 +1,5 @@
-import { useState } from "react";
+import PropertyGallery from "../../components/PropertyGallery";
+import { useRef, useState } from "react";
 import { Button } from "../../components/ui/button";
 import {
   Card,
@@ -11,6 +12,7 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
+  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
@@ -19,51 +21,72 @@ import { MapPin, Pause, Play, Pencil, Trash } from "lucide-react";
 import BotonVolver from "../../components/BotonVolver";
 import { Link } from "react-router";
 import HeaderUser from "../../components/HeaderUser";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useProperty } from "../../hooks/use-property";
-import type { Property, PublicationStatus } from "../../types/property";
+import { propertyService } from "../../services/propertyService";
+import { MOCK_CURRENT_PUBLISHER_ID } from "../../data/mock/session";
+import { FieldError } from "../../components/ui/field-error";
+import type { Property } from "../../types/property";
 import { OPERATION_TYPES, PUBLICATION_STATUSES } from "../../constants/property";
 import { formatCharacteristics, formatLocation, formatPrice } from "../../lib/formatters";
 
 export default function PropertyDetailPublisher() {
   const { id } = useParams();
-  const { property, loading, error } = useProperty(id, true);
+  const { property, loading, error, refresh } = useProperty(id, "publisher");
 
   if (loading) return <p role="status" className="text-center py-10">Cargando propiedad...</p>;
   if (error) return <p role="alert" className="text-center py-10">{error}</p>;
-  if (!property) return <p className="text-center py-10">Propiedad no encontrada</p>;
+  if (!property || property.publicationStatus === "deleted" || property.publisherId !== MOCK_CURRENT_PUBLISHER_ID) {
+    return (
+      <div className="text-center py-10 space-y-4">
+        <p>Propiedad no disponible</p>
+        <Button asChild><Link to="/dashboard">Volver a mis propiedades</Link></Button>
+      </div>
+    );
+  }
 
-  return <PublisherPropertyDetail key={property.id} property={property} />;
+  return <PublisherPropertyDetail key={property.id} property={property} refresh={refresh} />;
 }
 
-function PublisherPropertyDetail({ property }: { property: Property }) {
-  // Existing demo interaction remains local; this does not update publicationStatus.
-  const [status, setStatus] = useState<Exclude<PublicationStatus, "deleted">>("active");
+function PublisherPropertyDetail({ property, refresh }: { property: Property; refresh: () => void }) {
+  const navigate = useNavigate();
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [pauseOpen, setPauseOpen] = useState(false); // Estado para el modal de pausa
+  const [pauseOpen, setPauseOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [actionError, setActionError] = useState<string>();
+  const inFlight = useRef(false);
 
-  // Datos de la propiedad
+  // Existing display-only demo metrics remain outside the property CRUD.
   const views = 120;
   const inquiries = 5;
 
-  const toggleStatus = () => {
-    if (status === "active") {
-      setPauseOpen(true); // Abrir modal de pausa
-    } else {
-      setStatus("active");
+  const runAction = async (action: "pause" | "reactivate" | "delete") => {
+    if (inFlight.current) return;
+    inFlight.current = true;
+    setSaving(true);
+    setActionError(undefined);
+    try {
+      if (action === "delete") {
+        await propertyService.softDeleteProperty(property.id);
+        navigate("/dashboard");
+      } else {
+        if (action === "pause") await propertyService.pauseProperty(property.id);
+        else await propertyService.reactivateProperty(property.id);
+        setPauseOpen(false);
+        refresh();
+      }
+    } catch (error) {
+      setActionError(error instanceof Error ? error.message : "No se pudo completar la operación. Intentá nuevamente.");
+    } finally {
+      inFlight.current = false;
+      setSaving(false);
     }
   };
 
-  // handleEdit se puede implementar luego si se necesita
-
-  const handleDelete = () => {
-    alert("Propiedad eliminada.");
-    setDeleteOpen(false);
-  };
-
-  const handlePause = () => {
-    setStatus("paused");
-    setPauseOpen(false);
+  const toggleStatus = () => {
+    setActionError(undefined);
+    if (property.publicationStatus === "active") setPauseOpen(true);
+    else void runAction("reactivate");
   };
 
   return (
@@ -105,31 +128,7 @@ function PublisherPropertyDetail({ property }: { property: Property }) {
           </div>
 
           {/* Galería */}
-          <div className="flex items-stretch gap-4">
-            <div className="w-2/3 h-80 overflow-hidden rounded-xl bg-muted">
-              <img
-                src={property.images[0]}
-                alt={property.title}
-                className="object-cover w-full h-full"
-              />
-            </div>
-            <div className="w-1/3 flex flex-col gap-4 h-80">
-              <div className="flex-1 overflow-hidden rounded-xl bg-muted">
-                <img
-                  src={property.images[1]}
-                  alt={property.title}
-                  className="object-cover w-full h-full"
-                />
-              </div>
-              <div className="flex-1 overflow-hidden rounded-xl bg-muted">
-                <img
-                  src={property.images[2]}
-                  alt={property.title}
-                  className="object-cover w-full h-full"
-                />
-              </div>
-            </div>
-          </div>
+          <PropertyGallery property={property} />
 
           {/* Características y precio */}
           <div className="flex items-center justify-between border-b pb-4">
@@ -167,7 +166,7 @@ function PublisherPropertyDetail({ property }: { property: Property }) {
             <CardContent className="flex justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Estado</p>
-                <p className="font-semibold">{PUBLICATION_STATUSES[status]}</p>
+                <p className="font-semibold">{PUBLICATION_STATUSES[property.publicationStatus]}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Vistas</p>
@@ -192,13 +191,16 @@ function PublisherPropertyDetail({ property }: { property: Property }) {
 
           {/* Botones de gestión */}
           <Card className="space-y-3">
-            <CardContent className="flex flex-col gap-3">
+            <CardContent className="flex flex-col gap-3" aria-busy={saving}>
+              {!deleteOpen && !pauseOpen && <FieldError>{actionError}</FieldError>}
+              {saving && <p role="status" className="text-sm">Guardando cambios...</p>}
               <Button
                 variant="outline"
                 className="w-full flex items-center justify-center"
                 onClick={toggleStatus}
+                disabled={saving}
               >
-                {status === "active" ? (
+                {property.publicationStatus === "active" ? (
                   <>
                     <Pause className="h-4 w-4 mr-2" /> Pausar publicación
                   </>
@@ -208,19 +210,20 @@ function PublisherPropertyDetail({ property }: { property: Property }) {
                   </>
                 )}
               </Button>
-              <Link to="/editProperty">
-                <Button
-                  variant="outline"
-                  className="w-full flex items-center justify-center"
-                >
-                  <Pencil className="h-4 w-4 mr-2" /> Editar publicación
-                </Button>
-              </Link>
+              <Button
+                variant="outline"
+                className="w-full flex items-center justify-center"
+                disabled={saving}
+                onClick={() => navigate(`/editProperty/${property.id}`)}
+              >
+                <Pencil className="h-4 w-4 mr-2" /> Editar publicación
+              </Button>
 
               <Button
                 variant="destructive"
                 className="w-full flex items-center justify-center"
-                onClick={() => setDeleteOpen(true)}
+                onClick={() => { setActionError(undefined); setDeleteOpen(true); }}
+                disabled={saving}
               >
                 <Trash className="h-4 w-4 mr-2" /> Eliminar publicación
               </Button>
@@ -230,18 +233,23 @@ function PublisherPropertyDetail({ property }: { property: Property }) {
       </main>
 
       {/* Modal Confirmación Eliminar */}
-      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+      <AlertDialog open={deleteOpen} onOpenChange={(open) => { if (!inFlight.current) setDeleteOpen(open); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>¿Eliminar propiedad?</AlertDialogTitle>
+            <AlertDialogDescription>
+              La publicación dejará de aparecer en el catálogo y en tus propiedades.
+            </AlertDialogDescription>
           </AlertDialogHeader>
+          <FieldError>{actionError}</FieldError>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setDeleteOpen(false)}>
+            <AlertDialogCancel disabled={saving}>
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction
               className="bg-red-600 hover:bg-red-700"
-              onClick={handleDelete}
+              disabled={saving}
+              onClick={(event) => { event.preventDefault(); void runAction("delete"); }}
             >
               Eliminar
             </AlertDialogAction>
@@ -249,18 +257,23 @@ function PublisherPropertyDetail({ property }: { property: Property }) {
         </AlertDialogContent>
       </AlertDialog>
       {/* Modal Confirmación Pausar */}
-      <AlertDialog open={pauseOpen} onOpenChange={setPauseOpen}>
+      <AlertDialog open={pauseOpen} onOpenChange={(open) => { if (!inFlight.current) setPauseOpen(open); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>¿Pausar propiedad?</AlertDialogTitle>
+            <AlertDialogDescription>
+              No aparecerá en el catálogo mientras esté pausada. Podrás reactivarla desde tu panel.
+            </AlertDialogDescription>
           </AlertDialogHeader>
+          <FieldError>{actionError}</FieldError>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setPauseOpen(false)}>
+            <AlertDialogCancel disabled={saving}>
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction
               className="bg-yellow-600 hover:bg-yellow-700"
-              onClick={handlePause}
+              disabled={saving}
+              onClick={(event) => { event.preventDefault(); void runAction("pause"); }}
             >
               Pausar
             </AlertDialogAction>

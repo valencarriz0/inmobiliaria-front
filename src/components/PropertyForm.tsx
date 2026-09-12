@@ -1,4 +1,4 @@
-import { useState, type FormEvent, type ComponentProps } from "react";
+import { useRef, useState, type FormEvent, type ComponentProps } from "react";
 import {
   CURRENCIES, OPERATION_TYPES, PROPERTY_TYPES, PROPERTY_CONDITIONS,
   PROPERTY_SERVICES, PROPERTY_AMENITIES,
@@ -21,7 +21,7 @@ interface PropertyFormProps {
   /** Mount after loading; use the property ID as key when switching properties. */
   initialProperty?: Property;
   submitLabel: string;
-  onSubmit: (input: PropertyFormSubmission) => void;
+  onSubmit: (input: PropertyFormSubmission) => Promise<void>;
   onCancel: () => void;
 }
 
@@ -38,6 +38,9 @@ type TextField = {
 export default function PropertyForm({ initialProperty, submitLabel, onSubmit, onCancel }: PropertyFormProps) {
   const [values, setValues] = useState(() => createPropertyFormValues(initialProperty));
   const [imageSelectionError, setImageSelectionError] = useState<string>();
+  const [saving, setSaving] = useState(false);
+  const [submitError, setSubmitError] = useState<string>();
+  const submitting = useRef(false);
   const { errors, fieldProps, errorId, validateForm, touch } = useFormValidation(() => {
     const errors = validatePropertyForm(values);
     return { ...errors, images: imageSelectionError ?? errors.images };
@@ -104,15 +107,29 @@ export default function PropertyForm({ initialProperty, submitLabel, onSubmit, o
     );
   }
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (submitting.current) return;
     if (!validateForm(event.currentTarget)) return;
     const input = toPropertyInput(values);
-    if (input) onSubmit(input);
+    if (!input) return;
+    submitting.current = true;
+    setSaving(true);
+    setSubmitError(undefined);
+    try {
+      await onSubmit(input);
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : "No se pudo guardar la propiedad. Intentá nuevamente.");
+    } finally {
+      submitting.current = false;
+      setSaving(false);
+    }
   };
 
   return (
-    <form noValidate onSubmit={handleSubmit} className="space-y-6">
+    <form noValidate onSubmit={handleSubmit} className="space-y-6" aria-busy={saving}>
+      <FieldError>{submitError}</FieldError>
+      <fieldset disabled={saving} className="space-y-6 min-w-0">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="md:col-span-2">
           {inputField("title", "Título", true, undefined, "Ejemplo: Casa familiar con jardín")}
@@ -227,8 +244,9 @@ export default function PropertyForm({ initialProperty, submitLabel, onSubmit, o
 
       <div className="flex justify-center gap-4 mt-6">
         <Button variant="outline" type="button" onClick={onCancel}>Cancelar</Button>
-        <Button type="submit">{submitLabel}</Button>
+        <Button type="submit" disabled={saving}>{saving ? "Guardando..." : submitLabel}</Button>
       </div>
+      </fieldset>
     </form>
   );
 }

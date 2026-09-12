@@ -3,20 +3,16 @@ import { Card, CardContent, CardDescription, CardTitle } from "./ui/card.tsx";
 import { Heart, MapPin } from "lucide-react";
 import { Button } from "./ui/button.tsx";
 import { Link } from "react-router-dom";
-import { useProperties } from "../hooks/use-properties";
+import type { Property } from "../types/property";
 import { OPERATION_TYPES } from "../constants/property";
 import { formatCharacteristics, formatLocation, formatPrice } from "../lib/formatters";
 
 type PropertyListProps = {
+  properties: Property[];
   loggedIn?: boolean;
 };
 
-const PropertyList = ({ loggedIn = false }: PropertyListProps) => {
-  const { properties, loading, error } = useProperties();
-  if (loading) return <p role="status">Cargando propiedades...</p>;
-  if (error) return <p role="alert">{error}</p>;
-  if (properties.length === 0) return <p>No hay propiedades disponibles.</p>;
-
+const PropertyList = ({ properties, loggedIn = false }: PropertyListProps) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {properties.map((property) => (
@@ -48,6 +44,8 @@ const PropertyList = ({ loggedIn = false }: PropertyListProps) => {
             <Button
               variant="ghost"
               size="icon"
+              disabled
+              aria-label="Favoritos no disponibles"
               className="absolute top-2 right-2 rounded-full bg-background/70 hover:bg-background hover:scale-110"
             >
               <Heart className="h-5 w-5 fill-none stroke-black" />
@@ -62,7 +60,7 @@ const PropertyList = ({ loggedIn = false }: PropertyListProps) => {
               {formatCharacteristics(property).join(", ")}
             </CardDescription>
 
-            <div className="flex items-center justify-between mt-3 mb-4">
+            <div className="flex flex-wrap items-center justify-between gap-2 mt-3 mb-4">
               <span className="text-2xl font-bold text-accent">
                 {formatPrice(property.price, property.currency)}
               </span>
@@ -73,17 +71,15 @@ const PropertyList = ({ loggedIn = false }: PropertyListProps) => {
             </div>
 
             {/*Enlace dinámico con el ID. Si está logueado, ir a detailLogin/:id */}
-            <Link
+            <Button asChild className="w-full bg-primary hover:bg-primary/90"><Link
               to={
                 loggedIn
                   ? `/detailLogin/${property.id}`
                   : `/detail/${property.id}`
               }
             >
-              <Button className="w-full bg-primary hover:bg-primary/90">
-                Ver detalles
-              </Button>
-            </Link>
+              Ver detalles
+            </Link></Button>
           </CardContent>
         </Card>
       ))}

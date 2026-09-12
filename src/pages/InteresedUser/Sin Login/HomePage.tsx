@@ -1,6 +1,5 @@
 import Header from "../../../components/Header";
-import SearchBar from "../../../components/SearchBar";
-import PropertyList from "../../../components/PropertyList";
+import PropertyCatalog from "../../../components/PropertyCatalog";
 
 export default function HomePageWireframe() {
   return (
@@ -10,14 +9,7 @@ export default function HomePageWireframe() {
 
       {/* Main */}
       <main className="container mx-auto py-12 px-4">
-        <SearchBar />
-
-        {/* Propiedades destacadas */}
-        <h2 className="text-3xl font-bold mb-4 font-[family-name:var(--font-grotesk)] text-center">
-          Propiedades destacadas
-        </h2>
-
-        <PropertyList />
+        <PropertyCatalog />
       </main>
 
       {/* Footer */}

@@ -1,15 +1,18 @@
 import { PROPERTY_AMENITIES } from "../constants/property.ts";
 import type { Currency, Property, PropertyLocation } from "../types/property.ts";
 
-// Preserve the existing price presentation while keeping amounts numeric.
-const priceFormatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
+const numberFormatter = new Intl.NumberFormat("es-AR", { maximumFractionDigits: 2 });
 
 export function formatPrice(price: number, currency: Currency): string {
-  return `${currency} $${priceFormatter.format(price)}`;
+  return `${currency} ${numberFormatter.format(price)}`;
+}
+
+export function formatArea(area: number): string {
+  return `${numberFormatter.format(area)} m²`;
 }
 
 export function formatLocation(location: PropertyLocation): string {
-  return `${location.city}, ${location.country}`;
+  return [...new Set([location.city, location.province, location.country])].join(", ");
 }
 
 export function formatCharacteristics(property: Property): string[] {
@@ -22,7 +25,7 @@ export function formatCharacteristics(property: Property): string[] {
   if (property.bathrooms !== undefined) {
     characteristics.push(`${property.bathrooms} ${property.bathrooms === 1 ? "baño" : "baños"}`);
   }
-  characteristics.push(`${property.totalArea}m²`);
+  characteristics.push(formatArea(property.totalArea));
   characteristics.push(...property.amenities.map((amenity) => PROPERTY_AMENITIES[amenity]));
   return characteristics;
 }

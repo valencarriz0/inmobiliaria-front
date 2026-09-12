@@ -43,7 +43,7 @@ export function changePropertyProvince(values: PropertyFormValues, province: str
   };
 }
 
-// Called only after shared validation succeeds, so empty/invalid numbers cannot leak.
+// Se llama solo después de que la validación compartida tiene éxito, por lo que no pueden filtrarse números vacíos o inválidos.
 export function toPropertyInput(values: PropertyFormValues): PropertyFormSubmission | undefined {
   if (Object.values(validatePropertyForm(values)).some(Boolean)) return;
   const { operationType, propertyType, currency } = values;

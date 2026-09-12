@@ -1,7 +1,5 @@
-// no hooks needed here
 import HeaderUser from "../../../components/HeaderUser";
-import SearchBar from "../../../components/SearchBar";
-import PropertyList from "../../../components/PropertyList";
+import PropertyCatalog from "../../../components/PropertyCatalog";
 
 export default function HomePageLogin() {
   return (
@@ -15,12 +13,7 @@ export default function HomePageLogin() {
 
       {/* Main */}
       <main className="container mx-auto py-12 px-4">
-        <SearchBar />
-        {/* Historial de propiedades */}
-        <h2 className="text-3xl font-bold mb-4 text-center">
-          Últimas propiedades que viste
-        </h2>
-        <PropertyList loggedIn />
+        <PropertyCatalog loggedIn />
       </main>
 
       {/* Footer */}

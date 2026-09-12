@@ -144,7 +144,7 @@ export default function PropertyForm({ initialProperty, submitLabel, onSubmit, o
         {inputField("number", "Altura", false, "numeric", "Ejemplo: 1234")}
         {selectField("propertyType", "Tipo de inmueble", values.propertyType, optionList(PROPERTY_TYPES),
           (value) => updateField("propertyType", value), true)}
-        {selectField("operationType", "Tipo de operación", values.operationType, optionList(OPERATION_TYPES),
+        {selectField("operationType", "Categoría", values.operationType, optionList(OPERATION_TYPES),
           (value) => updateField("operationType", value), true)}
         {inputField("price", "Precio", true, "decimal", "Ejemplo: 150000")}
         {selectField("currency", "Moneda", values.currency, CURRENCIES.map((value) => ({ value, label: value })),

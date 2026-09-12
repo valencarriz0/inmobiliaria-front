@@ -1,8 +1,10 @@
 import { mockProperties } from "../data/mock/properties.ts";
 import { createMockPropertyStore, type MockPropertyStore } from "../data/mock/property-store.ts";
 import { createPropertyFormValues, toPropertyInput } from "../lib/property-form.ts";
+import { createPropertySearchValues, validatePropertySearch } from "../lib/property-search.ts";
 import type { Property, PublicationStatus } from "../types/property.ts";
 import type { CreatePropertyInput, UpdatePropertyInput } from "../types/property-input.ts";
+import type { PropertySearchFilters } from "../types/property-search.ts";
 
 function normalizeInput(input: CreatePropertyInput): CreatePropertyInput {
   // Reuse the form rules and its explicit editable-field whitelist, including at runtime.
@@ -38,8 +40,21 @@ export function createPropertyService(store: MockPropertyStore) {
     async getAllInternal(): Promise<Property[]> {
       return store.getAll();
     },
-    async getPublicProperties(): Promise<Property[]> {
-      return store.getAll().filter((property) => property.publicationStatus === "active");
+    async getPublicProperties(filters: PropertySearchFilters = {}): Promise<Property[]> {
+      const errors = validatePropertySearch(createPropertySearchValues(filters));
+      const error = Object.values(errors).find(Boolean);
+      if (error) throw new Error(error);
+
+      return store.getAll().filter((property) =>
+        property.publicationStatus === "active"
+        && (!filters.operationType || property.operationType === filters.operationType)
+        && (!filters.propertyType || property.propertyType === filters.propertyType)
+        && (!filters.province || property.location.province === filters.province)
+        && (!filters.city || property.location.city === filters.city)
+        && (!filters.currency || property.currency === filters.currency)
+        && (filters.minPrice === undefined || property.price >= filters.minPrice)
+        && (filters.maxPrice === undefined || property.price <= filters.maxPrice),
+      );
     },
     async getPublicPropertyById(id: Property["id"]): Promise<Property | undefined> {
       const property = store.getById(id);

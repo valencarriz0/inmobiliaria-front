@@ -1,7 +1,6 @@
 import type { Property } from "../../types/property.ts";
 import type { PropertyImageInput } from "../../types/property-input.ts";
 
-// Session-only storage. Every read/write crosses a clone boundary like a JSON API.
 export function createMockPropertyStore(seed: readonly Property[]) {
   const records = new Map(seed.map((property) => [property.id, structuredClone(property)]));
   const ownedUrls = new Set<string>();

@@ -96,7 +96,7 @@ export function validatePropertyForm(values: PropertyFormValues): PropertyFormEr
   const errors: PropertyFormErrors = {};
   if (!values.title.trim()) errors.title = "Ingresá el título de la propiedad.";
   if (!values.description.trim()) errors.description = "Ingresá una descripción de la propiedad.";
-  if (!isOptionKey(OPERATION_TYPES, values.operationType)) errors.operationType = "Seleccioná un tipo de operación válido.";
+  if (!isOptionKey(OPERATION_TYPES, values.operationType)) errors.operationType = "Seleccioná una categoría válida.";
   if (!isOptionKey(PROPERTY_TYPES, values.propertyType)) errors.propertyType = "Seleccioná un tipo de inmueble válido.";
   if (!CURRENCIES.some((currency) => currency === values.currency)) errors.currency = "Seleccioná una moneda válida.";
   if (!isOptionKey(PROPERTY_LOCATIONS, values.province)) errors.province = "Seleccioná una provincia del catálogo.";

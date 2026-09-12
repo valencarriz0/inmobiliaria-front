@@ -14,10 +14,8 @@ export default function PropertyDetailPage() {
   if (!property) {
     return (
       <div className="text-center py-10">
-        <h2 className="text-2xl font-semibold mb-4">Propiedad no encontrada</h2>
-        <Link to="/">
-          <Button>Volver al inicio</Button>
-        </Link>
+        <h2 className="text-2xl font-semibold mb-4">Propiedad no disponible</h2>
+        <Button asChild><Link to="/">Volver al catálogo</Link></Button>
       </div>
     );
   }

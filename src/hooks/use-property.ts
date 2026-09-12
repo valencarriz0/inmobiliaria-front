@@ -32,8 +32,8 @@ export function useProperty(id: string | undefined, scope: PropertyScope = "publ
     void load();
     return () => { cancelled = true; };
   }, [id, scope, revision]);
-
-  // Hide stale data as soon as the route, visibility scope or refresh changes.
+ 
+// Ocultar datos obsoletos tan pronto como cambien la ruta, el ámbito de visibilidad o la actualización.
   const current = result?.id === id && result?.scope === scope && result?.revision === revision ? result : undefined;
   return { property: current?.property, loading: !current, error: current?.error ?? null, refresh };
 }

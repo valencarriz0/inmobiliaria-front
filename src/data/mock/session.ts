@@ -1,4 +1,4 @@
 import type { Property } from "../../types/property.ts";
 
-// Approved publisher for the prototype only. Replace with the authenticated user later.
+// Editor autorizado solo para el prototipo. Reemplazar más adelante con el usuario autenticado.
 export const MOCK_CURRENT_PUBLISHER_ID: Property["publisherId"] = 1;

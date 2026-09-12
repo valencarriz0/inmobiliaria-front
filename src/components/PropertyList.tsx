@@ -3,23 +3,30 @@ import { Card, CardContent, CardDescription, CardTitle } from "./ui/card.tsx";
 import { Heart, MapPin } from "lucide-react";
 import { Button } from "./ui/button.tsx";
 import { Link } from "react-router-dom";
-import { propiedades } from "../data/propertiesExamples.ts";
+import { useProperties } from "../hooks/use-properties";
+import { OPERATION_TYPES } from "../constants/property";
+import { formatCharacteristics, formatLocation, formatPrice } from "../lib/formatters";
 
 type PropertyListProps = {
   loggedIn?: boolean;
 };
 
 const PropertyList = ({ loggedIn = false }: PropertyListProps) => {
+  const { properties, loading, error } = useProperties();
+  if (loading) return <p role="status">Cargando propiedades...</p>;
+  if (error) return <p role="alert">{error}</p>;
+  if (properties.length === 0) return <p>No hay propiedades disponibles.</p>;
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {propiedades.map((property) => (
+      {properties.map((property) => (
         <Card
           key={property.id}
           className="overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col"
         >
           <div className="relative h-64 md:h-56 lg:h-64 w-full flex-shrink-0">
             <img
-              src={property.imgUrl1}
+              src={property.images[0]}
               alt={property.title}
               className="object-cover w-full h-full"
             />
@@ -27,14 +34,14 @@ const PropertyList = ({ loggedIn = false }: PropertyListProps) => {
             {/* Categoría */}
             <span
               className={`absolute top-2 left-2 px-3 py-1 text-xs font-semibold rounded-full text-white ${
-                property.category === "Alquiler"
+                property.operationType === "rent"
                   ? "bg-[#477ce0]"
-                  : property.category === "Venta"
+                  : property.operationType === "sale"
                   ? "bg-[#58b5e0]"
                   : "bg-accent"
               }`}
             >
-              {property.category}
+              {OPERATION_TYPES[property.operationType]}
             </span>
 
             {/* Favorito */}
@@ -52,16 +59,16 @@ const PropertyList = ({ loggedIn = false }: PropertyListProps) => {
               {property.title}
             </CardTitle>
             <CardDescription className="text-sm text-muted-foreground">
-              {property.characteristics}
+              {formatCharacteristics(property).join(", ")}
             </CardDescription>
 
             <div className="flex items-center justify-between mt-3 mb-4">
               <span className="text-2xl font-bold text-accent">
-                {property.price}
+                {formatPrice(property.price, property.currency)}
               </span>
               <div className="flex items-center text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4 mr-1" />
-                {property.location}
+                {formatLocation(property.location)}
               </div>
             </div>
 

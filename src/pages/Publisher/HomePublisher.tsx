@@ -1,12 +1,14 @@
-// no hooks needed here
 import { Button } from "../../components/ui/button";
 import HeaderUser from "../../components/HeaderUser";
 import { Link } from "react-router";
 import SearchBarPublisher from "../../components/SearchBarPublisher";
-import { propiedades } from "../../data/propertiesExamples";
+import { useProperties } from "../../hooks/use-properties";
+import { OPERATION_TYPES, PUBLICATION_STATUSES } from "../../constants/property";
+import { formatLocation } from "../../lib/formatters";
 import { Badge } from "../../components/ui/badge";
 
 export default function PublisherDashboard() {
+  const { properties, loading, error } = useProperties();
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* Header */}
@@ -46,40 +48,40 @@ export default function PublisherDashboard() {
               </tr>
             </thead>
             <tbody>
-              {propiedades.map((p) => (
+              {loading ? <tr><td colSpan={8} className="p-3" role="status">Cargando propiedades...</td></tr>
+                : error ? <tr><td colSpan={8} className="p-3" role="alert">{error}</td></tr>
+                : properties.length === 0 ? <tr><td colSpan={8} className="p-3">No hay propiedades disponibles.</td></tr>
+                : null}
+              {properties.map((p) => (
                 <tr key={p.id} className="border-t hover:bg-muted/30">
                   <td className="p-3">
                     <img
-                      src={p.imgUrl1}
+                      src={p.images[0]}
                       alt={p.title}
                       className="w-16 h-16 object-cover rounded"
                     />
                   </td>
                   <td className="p-3">{p.title}</td>
-                  <td className="p-3">{p.location}</td>
+                  <td className="p-3">{formatLocation(p.location)}</td>
                   <td className="p-3">
                     <span
                       className={`px-2 py-1 text-xs font-semibold rounded-full text-white ${
-                        p.category === "Alquiler"
+                        p.operationType === "rent"
                           ? "bg-[#477ce0]"
-                          : p.category === "Venta"
+                          : p.operationType === "sale"
                           ? "bg-[#58b5e0]"
                           : "bg-accent"
                       }`}
                     >
-                      {p.category}
+                      {OPERATION_TYPES[p.operationType]}
                     </span>
                   </td>
                   <td className="p-3">120</td>
                   <td className="p-3">2</td>
                   <td className="p-3">
                     {(() => {
-                      const estado =
-                        "estado" in p && typeof p.estado === "string"
-                          ? p.estado
-                          : "Pausada";
-                      const lower = String(estado).toLowerCase();
-                      if (lower === "activa" || lower === "activo") {
+                      const estado = PUBLICATION_STATUSES[p.publicationStatus];
+                      if (p.publicationStatus === "active") {
                         return (
                           <Badge className="border-green-500 text-green-600 bg-white rounded-full">
                             {estado}

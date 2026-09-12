@@ -1,3 +1,4 @@
+import { CURRENCIES, OPERATION_TYPES, PROPERTY_TYPES, PROPERTY_SERVICES } from "../../constants/property";
 import { useState, type FormEvent } from "react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -9,7 +10,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../components/ui/select";
-import { Plus } from "lucide-react";
+import { Label } from "../../components/ui/label";
+import { FieldError } from "../../components/ui/field-error";
+import PropertyImages from "../../components/PropertyImages";
+import { useFormValidation } from "../../hooks/use-form-validation";
+import { validateProperty } from "../../lib/validation";
 import BotonVolver from "../../components/BotonVolver";
 import HeaderUser from "../../components/HeaderUser";
 
@@ -22,7 +27,7 @@ export default function EditProperty() {
   const [propertyType, setPropertyType] = useState("");
   const [category, setCategory] = useState("");
   const [price, setPrice] = useState("");
-  const [currency, setCurrency] = useState("ARS");
+  const [currency, setCurrency] = useState<string>(CURRENCIES[0]);
   const [area, setArea] = useState("");
   const [rooms, setRooms] = useState("");
   const [garages, setGarages] = useState("");
@@ -34,8 +39,6 @@ export default function EditProperty() {
     null,
     null,
   ]);
-
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const toggleService = (service: string) => {
     if (services.includes(service)) {
@@ -51,92 +54,17 @@ export default function EditProperty() {
     setImages(newImages);
   };
 
-  const validate = () => {
-    const newErrors: { [key: string]: string } = {};
-
-    if (!title.trim()) {
-      newErrors.title = "El título es obligatorio.";
-    }
-
-    if (!province) {
-      newErrors.province = "La provincia es obligatoria.";
-    }
-
-    if (!city) {
-      newErrors.city = "La localidad es obligatoria.";
-    }
-
-    if (!street.trim()) {
-      newErrors.street = "La calle es obligatoria.";
-    }
-
-    if (!propertyType) {
-      newErrors.propertyType = "El tipo de propiedad es obligatorio.";
-    }
-
-    if (!category) {
-      newErrors.category = "La categoría es obligatoria.";
-    }
-
-    if (!price) {
-      newErrors.price = "El precio es obligatorio.";
-    } else if (isNaN(Number(price)) || Number(price) <= 0) {
-      newErrors.price = "El precio debe ser un número mayor a cero.";
-    }
-
-    if (!currency) {
-      newErrors.currency = "Debe seleccionar una moneda.";
-    }
-
-    if (!area) {
-      newErrors.area = "La superficie es obligatoria.";
-    } else if (isNaN(Number(area)) || Number(area) <= 0) {
-      newErrors.area = "La superficie debe ser un número mayor a cero.";
-    }
-
-    if (!rooms) {
-      newErrors.rooms = "Debe indicar la cantidad de ambientes.";
-    } else if (isNaN(Number(rooms)) || Number(rooms) <= 0) {
-      newErrors.rooms =
-        "La cantidad de ambientes debe ser un número mayor a cero.";
-    }
-
-    if (!bathrooms) {
-      newErrors.bathrooms = "Debe indicar la cantidad de baños.";
-    } else if (isNaN(Number(bathrooms)) || Number(bathrooms) < 0) {
-      newErrors.bathrooms =
-        "La cantidad de baños debe ser un número válido.";
-    }
-
-    if (
-      garages &&
-      (isNaN(Number(garages)) || Number(garages) < 0)
-    ) {
-      newErrors.garages =
-        "La cantidad de cocheras debe ser un número válido.";
-    }
-
-    if (!description.trim()) {
-      newErrors.description = "La descripción es obligatoria.";
-    }
-
-    if (!images[0]) {
-      newErrors.images =
-        "Debe subir al menos una imagen principal.";
-    }
-
-    return newErrors;
-  };
+  const { errors, fieldProps, errorId, validateForm, touch } = useFormValidation(() =>
+    validateProperty({
+      title, province, city, street, number, propertyType, category, price,
+      currency, area, rooms, bathrooms, garages, description, images,
+    }, 1)
+  );
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const validationErrors = validate();
-
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      return;
-    }
+    if (!validateForm(e.currentTarget)) return;
 
     alert("Propiedad actualizada correctamente!");
   };
@@ -157,54 +85,48 @@ export default function EditProperty() {
 
           <p className="text-sm text-muted-foreground">
             Los ítems con{" "}
-            <span className="text-red-600">*</span> son obligatorios
+            <span className="text-destructive">*</span> son obligatorios
           </p>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form noValidate onSubmit={handleSubmit} className="space-y-6">
             {/* Datos principales */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
               {/* Título */}
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium mb-1">
-                  Título <span className="text-red-600">*</span>
-                </label>
+                <Label htmlFor={fieldProps("title").id} className="block text-sm font-medium mb-1">
+                  Título <span className="text-destructive">*</span>
+                </Label>
 
                 <Input
+                  {...fieldProps("title")}
+                  aria-required={true}
                   value={title}
-                  onChange={(e) => {
-                    setTitle(e.target.value);
-                    setErrors({ ...errors, title: "" });
-                  }}
+                  onChange={(e) => setTitle(e.target.value)}
                   className={`bg-white ${
-                    errors.title ? "border-red-500" : ""
+                    errors.title ? "border-destructive" : ""
                   }`}
                   placeholder="Ejemplo: Casa familiar con jardín"
                 />
 
-                {errors.title && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.title}
-                  </p>
-                )}
+                <FieldError id={errorId("title")}>{errors.title}</FieldError>
               </div>
 
               {/* Provincia */}
               <div>
-                <label className="block text-sm font-medium mb-1">
-                  Provincia <span className="text-red-600">*</span>
-                </label>
+                <Label htmlFor={fieldProps("province").id} className="block text-sm font-medium mb-1">
+                  Provincia <span className="text-destructive">*</span>
+                </Label>
 
                 <Select
                   value={province}
-                  onValueChange={(value) => {
-                    setProvince(value);
-                    setErrors({ ...errors, province: "" });
-                  }}
+                  onValueChange={setProvince}
                 >
                   <SelectTrigger
+                    {...fieldProps("province")}
+                    aria-required
                     className={`bg-white ${
-                      errors.province ? "border-red-500" : ""
+                      errors.province ? "border-destructive" : ""
                     }`}
                   >
                     <SelectValue placeholder="Seleccione provincia" />
@@ -219,29 +141,24 @@ export default function EditProperty() {
                   </SelectContent>
                 </Select>
 
-                {errors.province && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.province}
-                  </p>
-                )}
+                <FieldError id={errorId("province")}>{errors.province}</FieldError>
               </div>
 
               {/* Localidad */}
               <div>
-                <label className="block text-sm font-medium mb-1">
-                  Localidad <span className="text-red-600">*</span>
-                </label>
+                <Label htmlFor={fieldProps("city").id} className="block text-sm font-medium mb-1">
+                  Localidad <span className="text-destructive">*</span>
+                </Label>
 
                 <Select
                   value={city}
-                  onValueChange={(value) => {
-                    setCity(value);
-                    setErrors({ ...errors, city: "" });
-                  }}
+                  onValueChange={setCity}
                 >
                   <SelectTrigger
+                    {...fieldProps("city")}
+                    aria-required
                     className={`bg-white ${
-                      errors.city ? "border-red-500" : ""
+                      errors.city ? "border-destructive" : ""
                     }`}
                   >
                     <SelectValue placeholder="Seleccione localidad" />
@@ -257,75 +174,65 @@ export default function EditProperty() {
                   </SelectContent>
                 </Select>
 
-                {errors.city && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.city}
-                  </p>
-                )}
+                <FieldError id={errorId("city")}>{errors.city}</FieldError>
               </div>
 
               {/* Calle */}
               <div>
-                <label className="block text-sm font-medium mb-1">
-                  Calle <span className="text-red-600">*</span>
-                </label>
+                <Label htmlFor={fieldProps("street").id} className="block text-sm font-medium mb-1">
+                  Calle <span className="text-destructive">*</span>
+                </Label>
 
                 <Input
+                  {...fieldProps("street")}
+                  aria-required={true}
                   value={street}
-                  onChange={(e) => {
-                    setStreet(e.target.value);
-                    setErrors({ ...errors, street: "" });
-                  }}
+                  onChange={(e) => setStreet(e.target.value)}
                   className={`bg-white ${
-                    errors.street ? "border-red-500" : ""
+                    errors.street ? "border-destructive" : ""
                   }`}
                   placeholder="Ejemplo: Av. Libertador"
                 />
 
-                {errors.street && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.street}
-                  </p>
-                )}
+                <FieldError id={errorId("street")}>{errors.street}</FieldError>
               </div>
 
               {/* Altura */}
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <Label htmlFor={fieldProps("number").id} className="block text-sm font-medium mb-1">
                   Altura
-                </label>
+                </Label>
 
                 <Input
+                  {...fieldProps("number")}
+                  aria-required={false}
                   value={number}
                   onChange={(e) => setNumber(e.target.value)}
                   className="bg-white"
                   placeholder="Ejemplo: 1234"
-                  type="number"
-                  min="0"
+                  type="text"
+                  inputMode="numeric"
                 />
+                <FieldError id={errorId("number")}>{errors.number}</FieldError>
               </div>
 
               {/* Tipo de propiedad */}
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <Label htmlFor={fieldProps("propertyType").id} className="block text-sm font-medium mb-1">
                   Tipo de propiedad{" "}
-                  <span className="text-red-600">*</span>
-                </label>
+                  <span className="text-destructive">*</span>
+                </Label>
 
                 <Select
                   value={propertyType}
-                  onValueChange={(value) => {
-                    setPropertyType(value);
-                    setErrors({
-                      ...errors,
-                      propertyType: "",
-                    });
-                  }}
+                  onValueChange={setPropertyType}
                 >
                   <SelectTrigger
+                    {...fieldProps("propertyType")}
+                    aria-required
                     className={`bg-white ${
                       errors.propertyType
-                        ? "border-red-500"
+                        ? "border-destructive"
                         : ""
                     }`}
                   >
@@ -333,44 +240,32 @@ export default function EditProperty() {
                   </SelectTrigger>
 
                   <SelectContent>
-                    <SelectItem value="Casa">Casa</SelectItem>
-                    <SelectItem value="Departamento">
-                      Departamento
-                    </SelectItem>
-                    <SelectItem value="Terreno">
-                      Terreno
-                    </SelectItem>
-                    <SelectItem value="Local Comercial">
-                      Local Comercial
-                    </SelectItem>
+                    {Object.entries(PROPERTY_TYPES).map(([value, label]) => (
+                      <SelectItem key={value} value={value}>{label}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
 
-                {errors.propertyType && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.propertyType}
-                  </p>
-                )}
+                <FieldError id={errorId("propertyType")}>{errors.propertyType}</FieldError>
               </div>
 
               {/* Categoría */}
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <Label htmlFor={fieldProps("category").id} className="block text-sm font-medium mb-1">
                   Categoría{" "}
-                  <span className="text-red-600">*</span>
-                </label>
+                  <span className="text-destructive">*</span>
+                </Label>
 
                 <Select
                   value={category}
-                  onValueChange={(value) => {
-                    setCategory(value);
-                    setErrors({ ...errors, category: "" });
-                  }}
+                  onValueChange={setCategory}
                 >
                   <SelectTrigger
+                    {...fieldProps("category")}
+                    aria-required
                     className={`bg-white ${
                       errors.category
-                        ? "border-red-500"
+                        ? "border-destructive"
                         : ""
                     }`}
                   >
@@ -378,69 +273,55 @@ export default function EditProperty() {
                   </SelectTrigger>
 
                   <SelectContent>
-                    <SelectItem value="Venta">Venta</SelectItem>
-                    <SelectItem value="Alquiler">
-                      Alquiler
-                    </SelectItem>
-                    <SelectItem value="Alquiler temporario">
-                      Alquiler temporario
-                    </SelectItem>
+                    {Object.entries(OPERATION_TYPES).map(([value, label]) => (
+                      <SelectItem key={value} value={value}>{label}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
 
-                {errors.category && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.category}
-                  </p>
-                )}
+                <FieldError id={errorId("category")}>{errors.category}</FieldError>
               </div>
 
               {/* Precio */}
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <Label htmlFor={fieldProps("price").id} className="block text-sm font-medium mb-1">
                   Precio{" "}
-                  <span className="text-red-600">*</span>
-                </label>
+                  <span className="text-destructive">*</span>
+                </Label>
 
                 <Input
+                  {...fieldProps("price")}
+                  aria-required={true}
                   value={price}
-                  onChange={(e) => {
-                    setPrice(e.target.value);
-                    setErrors({ ...errors, price: "" });
-                  }}
+                  onChange={(e) => setPrice(e.target.value)}
                   className={`bg-white ${
-                    errors.price ? "border-red-500" : ""
+                    errors.price ? "border-destructive" : ""
                   }`}
                   placeholder="Ejemplo: 150000"
-                  type="number"
-                  min="0"
+                  type="text"
+                  inputMode="decimal"
                 />
 
-                {errors.price && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.price}
-                  </p>
-                )}
+                <FieldError id={errorId("price")}>{errors.price}</FieldError>
               </div>
 
               {/* Moneda */}
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <Label htmlFor={fieldProps("currency").id} className="block text-sm font-medium mb-1">
                   Tipo de moneda{" "}
-                  <span className="text-red-600">*</span>
-                </label>
+                  <span className="text-destructive">*</span>
+                </Label>
 
                 <Select
                   value={currency}
-                  onValueChange={(value) => {
-                    setCurrency(value);
-                    setErrors({ ...errors, currency: "" });
-                  }}
+                  onValueChange={setCurrency}
                 >
                   <SelectTrigger
+                    {...fieldProps("currency")}
+                    aria-required
                     className={`bg-white ${
                       errors.currency
-                        ? "border-red-500"
+                        ? "border-destructive"
                         : ""
                     }`}
                   >
@@ -448,137 +329,108 @@ export default function EditProperty() {
                   </SelectTrigger>
 
                   <SelectContent>
-                    <SelectItem value="ARS">ARS</SelectItem>
-                    <SelectItem value="USD">USD</SelectItem>
+                    {CURRENCIES.map((currency) => (
+                      <SelectItem key={currency} value={currency}>{currency}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
 
-                {errors.currency && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.currency}
-                  </p>
-                )}
+                <FieldError id={errorId("currency")}>{errors.currency}</FieldError>
               </div>
 
               {/* Superficie */}
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <Label htmlFor={fieldProps("area").id} className="block text-sm font-medium mb-1">
                   Superficie en m²{" "}
-                  <span className="text-red-600">*</span>
-                </label>
+                  <span className="text-destructive">*</span>
+                </Label>
 
                 <Input
+                  {...fieldProps("area")}
+                  aria-required={true}
                   value={area}
-                  onChange={(e) => {
-                    setArea(e.target.value);
-                    setErrors({ ...errors, area: "" });
-                  }}
+                  onChange={(e) => setArea(e.target.value)}
                   className={`bg-white ${
-                    errors.area ? "border-red-500" : ""
+                    errors.area ? "border-destructive" : ""
                   }`}
                   placeholder="Ejemplo: 100"
-                  type="number"
-                  min="0"
+                  type="text"
+                  inputMode="decimal"
                 />
 
-                {errors.area && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.area}
-                  </p>
-                )}
+                <FieldError id={errorId("area")}>{errors.area}</FieldError>
               </div>
 
               {/* Ambientes */}
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <Label htmlFor={fieldProps("rooms").id} className="block text-sm font-medium mb-1">
                   Cantidad de ambientes{" "}
-                  <span className="text-red-600">*</span>
-                </label>
+                  <span className="text-destructive">*</span>
+                </Label>
 
                 <Input
+                  {...fieldProps("rooms")}
+                  aria-required={true}
                   value={rooms}
-                  onChange={(e) => {
-                    setRooms(e.target.value);
-                    setErrors({ ...errors, rooms: "" });
-                  }}
+                  onChange={(e) => setRooms(e.target.value)}
                   className={`bg-white ${
-                    errors.rooms ? "border-red-500" : ""
+                    errors.rooms ? "border-destructive" : ""
                   }`}
                   placeholder="Ejemplo: 3"
-                  type="number"
-                  min="1"
+                  type="text"
+                  inputMode="numeric"
                 />
 
-                {errors.rooms && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.rooms}
-                  </p>
-                )}
+                <FieldError id={errorId("rooms")}>{errors.rooms}</FieldError>
               </div>
 
               {/* Baños */}
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <Label htmlFor={fieldProps("bathrooms").id} className="block text-sm font-medium mb-1">
                   Cantidad de baños{" "}
-                  <span className="text-red-600">*</span>
-                </label>
+                  <span className="text-destructive">*</span>
+                </Label>
 
                 <Input
+                  {...fieldProps("bathrooms")}
+                  aria-required={true}
                   value={bathrooms}
-                  onChange={(e) => {
-                    setBathrooms(e.target.value);
-                    setErrors({
-                      ...errors,
-                      bathrooms: "",
-                    });
-                  }}
+                  onChange={(e) => setBathrooms(e.target.value)}
                   className={`bg-white ${
                     errors.bathrooms
-                      ? "border-red-500"
+                      ? "border-destructive"
                       : ""
                   }`}
                   placeholder="Ejemplo: 2"
-                  type="number"
-                  min="0"
+                  type="text"
+                  inputMode="numeric"
                 />
 
-                {errors.bathrooms && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.bathrooms}
-                  </p>
-                )}
+                <FieldError id={errorId("bathrooms")}>{errors.bathrooms}</FieldError>
               </div>
 
               {/* Cocheras */}
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <Label htmlFor={fieldProps("garages").id} className="block text-sm font-medium mb-1">
                   Cantidad de cocheras
-                </label>
+                </Label>
 
                 <Input
+                  {...fieldProps("garages")}
+                  aria-required={false}
                   value={garages}
-                  onChange={(e) => {
-                    setGarages(e.target.value);
-                    setErrors({
-                      ...errors,
-                      garages: "",
-                    });
-                  }}
+                  onChange={(e) => setGarages(e.target.value)}
                   className={`bg-white ${
                     errors.garages
-                      ? "border-red-500"
+                      ? "border-destructive"
                       : ""
                   }`}
                   placeholder="Ejemplo: 1"
-                  type="number"
-                  min="0"
+                  type="text"
+                  inputMode="numeric"
                 />
 
-                {errors.garages && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.garages}
-                  </p>
-                )}
+                <FieldError id={errorId("garages")}>{errors.garages}</FieldError>
               </div>
             </div>
 
@@ -589,8 +441,8 @@ export default function EditProperty() {
               </p>
 
               <div className="flex flex-wrap gap-6">
-                {["Luz", "Gas", "Agua"].map((service) => (
-                  <label
+                {Object.entries(PROPERTY_SERVICES).map(([service, label]) => (
+                  <Label
                     key={service}
                     className="flex items-center gap-2 cursor-pointer"
                   >
@@ -602,99 +454,48 @@ export default function EditProperty() {
                     />
 
                     <span className="text-sm">
-                      {service}
+                      {label}
                     </span>
-                  </label>
+                  </Label>
                 ))}
               </div>
             </div>
 
             {/* Descripción */}
             <div>
-              <label className="block text-sm font-medium mb-1">
+              <Label htmlFor={fieldProps("description").id} className="block text-sm font-medium mb-1">
                 Descripción{" "}
-                <span className="text-red-600">*</span>
-              </label>
+                <span className="text-destructive">*</span>
+              </Label>
 
               <Textarea
+                  {...fieldProps("description")}
+                  aria-required={true}
                 placeholder="Ejemplo: Hermosa casa ubicada en zona tranquila..."
                 rows={5}
                 value={description}
-                onChange={(e) => {
-                  setDescription(e.target.value);
-                  setErrors({
-                    ...errors,
-                    description: "",
-                  });
-                }}
+                onChange={(e) => setDescription(e.target.value)}
                 className={`bg-white ${
                   errors.description
-                    ? "border-red-500"
+                    ? "border-destructive"
                     : ""
                 }`}
               />
 
-              {errors.description && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.description}
-                </p>
-              )}
+              <FieldError id={errorId("description")}>{errors.description}</FieldError>
             </div>
 
-            {/* Imágenes */}
-            <div>
-              <p className="text-sm font-medium mb-2">
-                Imágenes (mínimo una principal)
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {images.map((img, idx) => (
-                  <div
-                    key={idx}
-                    className={`h-48 rounded-lg flex flex-col items-center justify-center cursor-pointer border-dashed border-2 ${
-                      errors.images && idx === 0
-                        ? "border-red-500"
-                        : "border-border"
-                    }`}
-                    onClick={() => {
-                      const file = window.prompt(
-                        "Ingrese URL de la imagen o seleccione archivo local"
-                      );
-
-                      if (file) {
-                        handleImageChange(
-                          idx,
-                          new File([], file)
-                        );
-                      }
-
-                      setErrors({
-                        ...errors,
-                        images: "",
-                      });
-                    }}
-                  >
-                    <Plus className="h-6 w-6 text-muted-foreground" />
-
-                    <span className="ml-2 mt-2 text-center">
-                      {img
-                        ? img.name
-                        : `Imagen ${idx + 1}${
-                            idx === 0
-                              ? " (principal) *"
-                              : ""
-                          }`}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              {errors.images && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.images}
-                </p>
-              )}
-            </div>
+            <PropertyImages
+              images={images}
+              onChange={(index, file) => {
+                handleImageChange(index, file);
+                touch("images");
+              }}
+              fieldProps={fieldProps("images")}
+              error={errors.images}
+              errorId={errorId("images")}
+              minimum={1}
+            />
 
             {/* Botones */}
             <div className="flex justify-center gap-4 mt-6">

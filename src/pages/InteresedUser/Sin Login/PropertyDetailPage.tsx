@@ -1,12 +1,15 @@
 import { useParams, Link } from "react-router-dom";
-import { propiedades } from "../../../data/propertiesExamples.ts";
+import { useProperty } from "../../../hooks/use-property";
 import { Button } from "../../../components/ui/button.tsx";
 import Header from "../../../components/Header.tsx";
 import PropertyDetail from "../../../components/PropertyDetail.tsx";
 
 export default function PropertyDetailPage() {
   const { id } = useParams();
-  const property = propiedades.find((p) => p.id === Number(id));
+  const { property, loading, error } = useProperty(id);
+
+  if (loading) return <p role="status" className="text-center py-10">Cargando propiedad...</p>;
+  if (error) return <p role="alert" className="text-center py-10">{error}</p>;
 
   if (!property) {
     return (
@@ -24,7 +27,7 @@ export default function PropertyDetailPage() {
       {/* Header */}
       <Header page="/post" />
 
-      <PropertyDetail />
+      <PropertyDetail key={property.id} property={property} />
     </div>
   );
 }

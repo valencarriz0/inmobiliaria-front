@@ -6,7 +6,9 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card";
-import { Input } from "../../components/ui/input";
+import { InputField } from "../../components/ui/input-field";
+import { useFormValidation } from "../../hooks/use-form-validation";
+import { validateEmail, validatePassword, validatePasswordConfirmation, validatePhone } from "../../lib/validation";
 import { Button } from "../../components/ui/button";
 import { ArrowLeft, Home } from "lucide-react";
 
@@ -23,59 +25,24 @@ export default function PublisherRegistrationView() {
     direccion: "",
   });
 
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const { errors, fieldProps, errorId, validateForm } = useFormValidation(() => ({
+    email: validateEmail(formData.email),
+    password: validatePassword(formData.password),
+    confirmPassword: validatePasswordConfirmation(formData.confirmPassword, formData.password),
+    nombre: !formData.nombre.trim() ? "El nombre o razón social es obligatorio." : undefined,
+    cuit: !formData.cuit.trim() ? "El CUIT/CUIL es obligatorio."
+      : !/^\d{11}$/.test(formData.cuit) ? "El CUIT/CUIL debe tener 11 números, sin guiones." : undefined,
+    telefono: validatePhone(formData.telefono),
+    direccion: !formData.direccion.trim() ? "La dirección es obligatoria." : undefined,
+  }));
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    setErrors({ ...errors, [e.target.name]: "" }); // Limpia el error al escribir
   };
 
-  const validate = () => {
-    const newErrors: { [key: string]: string } = {};
-
-    if (!formData.email)
-      newErrors.email = "El correo electrónico es obligatorio.";
-    else if (!/\S+@\S+\.\S+/.test(formData.email))
-      newErrors.email = "El formato del correo no es válido.";
-
-    if (!formData.password)
-      newErrors.password = "La contraseña es obligatoria.";
-    else if (formData.password.length < 6)
-      newErrors.password = "Debe tener al menos 6 caracteres.";
-
-    if (!formData.confirmPassword)
-      newErrors.confirmPassword = "Debe confirmar la contraseña.";
-    else if (formData.password !== formData.confirmPassword)
-      newErrors.confirmPassword = "Las contraseñas no coinciden.";
-
-    if (!formData.nombre)
-      newErrors.nombre = "El nombre o razón social es obligatorio.";
-
-    if (!formData.cuit) newErrors.cuit = "El CUIT/CUIL es obligatorio.";
-    else if (!/^\d{11}$/.test(formData.cuit))
-      newErrors.cuit = "El CUIT/CUIL debe tener 11 números.";
-
-    if (!formData.telefono) newErrors.telefono = "El teléfono es obligatorio.";
-    else if (!/^\d+$/.test(formData.telefono))
-      newErrors.telefono = "El teléfono solo debe contener números.";
-
-    if (!formData.direccion)
-      newErrors.direccion = "La dirección es obligatoria.";
-
-    return newErrors;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    const validationErrors = validate();
-
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      return;
-    }
-
-    console.log("Datos enviados:", formData);
+    if (!validateForm(e.currentTarget)) return;
     navigate("/dashboard");
   };
 
@@ -125,52 +92,54 @@ export default function PublisherRegistrationView() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form noValidate onSubmit={handleSubmit} className="space-y-6">
               {/* Inicio de sesión */}
               <div className="space-y-3">
                 <p className="font-black">Datos de Inicio de sesión</p>
                 <div>
-                  <Input
-                    name="email"
+                  <InputField
+                    {...fieldProps("email")}
+                    label="Correo electrónico"
+                    required
+                    error={errors.email}
+                    errorId={errorId("email")}
+                    autoComplete="email"
                     type="email"
                     placeholder="Correo electrónico"
                     value={formData.email}
                     onChange={handleChange}
                     className="bg-white"
                   />
-                  {errors.email && (
-                    <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-                  )}
                 </div>
                 <div>
-                  <Input
-                    name="password"
+                  <InputField
+                    {...fieldProps("password")}
+                    label="Contraseña"
+                    required
+                    error={errors.password}
+                    errorId={errorId("password")}
+                    autoComplete="new-password"
                     type="password"
                     placeholder="Contraseña"
                     value={formData.password}
                     onChange={handleChange}
                     className="bg-white"
                   />
-                  {errors.password && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors.password}
-                    </p>
-                  )}
                 </div>
                 <div>
-                  <Input
-                    name="confirmPassword"
+                  <InputField
+                    {...fieldProps("confirmPassword")}
+                    label="Repetir contraseña"
+                    required
+                    error={errors.confirmPassword}
+                    errorId={errorId("confirmPassword")}
+                    autoComplete="new-password"
                     type="password"
                     placeholder="Repetir contraseña"
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     className="bg-white"
                   />
-                  {errors.confirmPassword && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors.confirmPassword}
-                    </p>
-                  )}
                 </div>
               </div>
 
@@ -178,57 +147,61 @@ export default function PublisherRegistrationView() {
               <div className="space-y-3">
                 <p className="font-black">Datos de validación</p>
                 <div>
-                  <Input
-                    name="nombre"
+                  <InputField
+                    {...fieldProps("nombre")}
+                    label="Nombre o razón social"
+                    required
+                    error={errors.nombre}
+                    errorId={errorId("nombre")}
+                    autoComplete="organization"
                     placeholder="Nombre o Razón Social"
                     value={formData.nombre}
                     onChange={handleChange}
                     className="bg-white"
                   />
-                  {errors.nombre && (
-                    <p className="text-red-500 text-sm mt-1">{errors.nombre}</p>
-                  )}
                 </div>
                 <div>
-                  <Input
-                    name="cuit"
+                  <InputField
+                    {...fieldProps("cuit")}
+                    label="CUIT / CUIL"
+                    required
+                    error={errors.cuit}
+                    errorId={errorId("cuit")}
+                    inputMode="numeric"
                     placeholder="CUIT / CUIL"
                     value={formData.cuit}
                     onChange={handleChange}
                     className="bg-white"
                   />
-                  {errors.cuit && (
-                    <p className="text-red-500 text-sm mt-1">{errors.cuit}</p>
-                  )}
                 </div>
                 <div>
-                  <Input
-                    name="telefono"
+                  <InputField
+                    {...fieldProps("telefono")}
+                    label="Teléfono"
+                    required
+                    error={errors.telefono}
+                    errorId={errorId("telefono")}
+                    autoComplete="tel"
                     type="tel"
                     placeholder="Teléfono"
                     value={formData.telefono}
                     onChange={handleChange}
                     className="bg-white"
                   />
-                  {errors.telefono && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors.telefono}
-                    </p>
-                  )}
                 </div>
                 <div>
-                  <Input
-                    name="direccion"
+                  <InputField
+                    {...fieldProps("direccion")}
+                    label="Dirección"
+                    required
+                    error={errors.direccion}
+                    errorId={errorId("direccion")}
+                    autoComplete="street-address"
                     placeholder="Dirección"
                     value={formData.direccion}
                     onChange={handleChange}
                     className="bg-white"
                   />
-                  {errors.direccion && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors.direccion}
-                    </p>
-                  )}
                 </div>
               </div>
 

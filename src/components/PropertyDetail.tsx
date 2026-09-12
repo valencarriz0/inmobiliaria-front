@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
 import { Button } from "./../components/ui/button";
 import {
   Card,
@@ -7,35 +6,40 @@ import {
   CardHeader,
   CardTitle,
 } from "./../components/ui/card";
-import { Input } from "./../components/ui/input";
+import { InputField } from "./ui/input-field";
+import { useFormValidation } from "../hooks/use-form-validation";
+import { validateEmail, validateName, validatePhone } from "../lib/validation";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from "./../components/ui/dialog";
 import { MapPin, Heart } from "lucide-react";
 import BotonVolver from "./../components/BotonVolver";
-import { propiedades } from "./../data/propertiesExamples";
+import type { Property } from "../types/property";
+import { OPERATION_TYPES } from "../constants/property";
+import { formatCharacteristics, formatLocation, formatPrice } from "../lib/formatters";
 
-export default function PropertyDetail() {
+export default function PropertyDetail({ property }: { property: Property }) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [openContact, setOpenContact] = useState(false);
   const [contactNombre, setContactNombre] = useState("");
   const [contactApellido, setContactApellido] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [contactWhatsapp, setContactWhatsapp] = useState("");
-  const [contactErrors, setContactErrors] = useState<{
-    nombre?: string;
-    apellido?: string;
-    email?: string;
-    whatsapp?: string;
-  }>({});
-  // Obtener id desde la ruta y buscar propiedad en data
-  const { id } = useParams();
-  const propId = id ? Number(id) : undefined;
-  const property = propiedades.find((p) => p.id === propId) ?? propiedades[0];
+  const contactValidation = useFormValidation(() => ({
+    nombre: validateName(contactNombre, "nombre"),
+    apellido: validateName(contactApellido, "apellido"),
+    email: validateEmail(contactEmail),
+    whatsapp: validatePhone(contactWhatsapp),
+  }));
+  const changeContactOpen = (open: boolean) => {
+    setOpenContact(open);
+    contactValidation.resetValidation();
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -52,19 +56,19 @@ export default function PropertyDetail() {
                 <h1 className="text-3xl font-bold mb-1">{property.title}</h1>
                 <span
                   className={`px-3 py-1 text-xs font-semibold rounded-full text-white ${
-                    property.category === "Alquiler"
+                    property.operationType === "rent"
                       ? "bg-[#477ce0]"
-                      : property.category === "Venta"
+                      : property.operationType === "sale"
                       ? "bg-[#58b5e0]"
                       : "bg-accent"
                   }`}
                 >
-                  {property.category}
+                  {OPERATION_TYPES[property.operationType]}
                 </span>
               </div>
               <div className="flex items-center text-muted-foreground mt-1">
                 <MapPin className="h-4 w-4 mr-1" />
-                {property.location}
+                {formatLocation(property.location)}
               </div>
             </div>
             <Button
@@ -86,7 +90,7 @@ export default function PropertyDetail() {
           <div className="flex items-stretch gap-4">
             <div className="w-2/3 h-80 overflow-hidden rounded-xl bg-muted">
               <img
-                src={property.imgUrl1}
+                src={property.images[0]}
                 alt={property.title}
                 className="object-cover w-full h-full"
               />
@@ -94,14 +98,14 @@ export default function PropertyDetail() {
             <div className="w-1/3 flex flex-col gap-4 h-80">
               <div className="flex-1 overflow-hidden rounded-xl bg-muted">
                 <img
-                  src={property.imgUrl2}
+                  src={property.images[1]}
                   alt={property.title}
                   className="object-cover w-full h-full"
                 />
               </div>
               <div className="flex-1 overflow-hidden rounded-xl bg-muted">
                 <img
-                  src={property.imgUrl3}
+                  src={property.images[2]}
                   alt={property.title}
                   className="object-cover w-full h-full"
                 />
@@ -113,11 +117,11 @@ export default function PropertyDetail() {
           <div className="flex items-center justify-between border-b pb-4">
             <div className="space-x-3 text-sm">
               <span className="px-3 py-1 rounded-full bg-accent/10 text-accent">
-                {property.characteristics}
+                {formatCharacteristics(property).join(", ")}
               </span>
             </div>
             <span className="text-3xl font-bold text-accent">
-              {property.price}
+              {formatPrice(property.price, property.currency)}
             </span>
           </div>
 
@@ -125,7 +129,7 @@ export default function PropertyDetail() {
           <div>
             <h2 className="text-xl font-semibold mb-2">Descripción</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Propiedad tipo {property.category} ubicada en {property.location}.
+              Propiedad tipo {OPERATION_TYPES[property.operationType]} ubicada en {formatLocation(property.location)}.
               Ideal para quienes buscan confort y una excelente ubicación.
             </p>
           </div>
@@ -175,7 +179,7 @@ export default function PropertyDetail() {
               </div>
               <Button
                 className="w-full bg-accent hover:bg-accent/90"
-                onClick={() => setOpenContact(true)}
+                onClick={() => changeContactOpen(true)}
               >
                 Quiero que me contacten
               </Button>
@@ -185,128 +189,35 @@ export default function PropertyDetail() {
       </main>
 
       {/* Dialog Contacto con formulario */}
-      <Dialog open={openContact} onOpenChange={setOpenContact}>
-        <DialogContent>
+      <Dialog open={openContact} onOpenChange={changeContactOpen}>
+        <DialogContent className="max-h-[90dvh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Contactar al publicador</DialogTitle>
+            <DialogDescription>Completá tus datos para que el publicador pueda contactarte.</DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Input
-                placeholder="Nombre"
-                className="bg-white dark:bg-input/30"
-                value={contactNombre}
-                onChange={(e) => setContactNombre(e.target.value)}
-              />
-              {contactErrors.nombre && (
-                <p className="text-sm text-red-600 mt-1">
-                  {contactErrors.nombre}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <Input
-                placeholder="Apellido"
-                className="bg-white dark:bg-input/30"
-                value={contactApellido}
-                onChange={(e) => setContactApellido(e.target.value)}
-              />
-              {contactErrors.apellido && (
-                <p className="text-sm text-red-600 mt-1">
-                  {contactErrors.apellido}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <Input
-                type="email"
-                placeholder="Correo electrónico"
-                className="bg-white dark:bg-input/30"
-                value={contactEmail}
-                onChange={(e) => setContactEmail(e.target.value)}
-              />
-              {contactErrors.email && (
-                <p className="text-sm text-red-600 mt-1">
-                  {contactErrors.email}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <Input
-                placeholder="WhatsApp"
-                className="bg-white dark:bg-input/30"
-                value={contactWhatsapp}
-                onChange={(e) => setContactWhatsapp(e.target.value)}
-              />
-              {contactErrors.whatsapp && (
-                <p className="text-sm text-red-600 mt-1">
-                  {contactErrors.whatsapp}
-                </p>
-              )}
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              onClick={() => {
-                const errors: typeof contactErrors = {};
-
-                if (!contactNombre.trim() || contactNombre.trim().length < 2) {
-                  errors.nombre =
-                    "Ingrese un nombre válido (mínimo 2 caracteres).";
-                }
-
-                if (
-                  !contactApellido.trim() ||
-                  contactApellido.trim().length < 2
-                ) {
-                  errors.apellido =
-                    "Ingrese un apellido válido (mínimo 2 caracteres).";
-                }
-
-                const emailRegex = /^\S+@\S+\.\S+$/;
-                if (!contactEmail.trim() || !emailRegex.test(contactEmail)) {
-                  errors.email = "Ingrese un correo electrónico válido.";
-                }
-
-                const digits = contactWhatsapp.replace(/\D/g, "");
-                if (!digits || digits.length < 7) {
-                  errors.whatsapp =
-                    "Ingrese un número de WhatsApp válido (al menos 7 dígitos).";
-                }
-
-                setContactErrors(errors);
-
-                if (Object.keys(errors).length === 0) {
-                  // Aquí poner la lógica de envío real (API)
-                  console.log("Consulta enviada:", {
-                    nombre: contactNombre,
-                    apellido: contactApellido,
-                    email: contactEmail,
-                    whatsapp: contactWhatsapp,
-                    propertyId: property.id,
-                  });
-                  // Resetear formulario
-                  setContactNombre("");
-                  setContactApellido("");
-                  setContactEmail("");
-                  setContactWhatsapp("");
-                  setOpenContact(false);
-                  setTimeout(
-                    () =>
-                      alert(
-                        "Consulta enviada. El publicador se pondrá en contacto."
-                      ),
-                    100
-                  );
-                }
-              }}
-            >
-              Enviar consulta
-            </Button>
-          </DialogFooter>
+          <form noValidate className="space-y-4" onSubmit={(event) => {
+            event.preventDefault();
+            if (!contactValidation.validateForm(event.currentTarget)) return;
+            // Aquí se conectará el envío de la consulta con la API.
+            setContactNombre("");
+            setContactApellido("");
+            setContactEmail("");
+            setContactWhatsapp("");
+            changeContactOpen(false);
+            setTimeout(() => alert("Consulta enviada. El publicador se pondrá en contacto."), 100);
+          }}>
+            {[
+              { name: "nombre", label: "Nombre", value: contactNombre, setValue: setContactNombre, type: "text", autoComplete: "given-name" },
+              { name: "apellido", label: "Apellido", value: contactApellido, setValue: setContactApellido, type: "text", autoComplete: "family-name" },
+              { name: "email", label: "Correo electrónico", value: contactEmail, setValue: setContactEmail, type: "email", autoComplete: "email" },
+              { name: "whatsapp", label: "WhatsApp", value: contactWhatsapp, setValue: setContactWhatsapp, type: "tel", autoComplete: "tel" },
+            ].map((field) => (
+              <InputField key={field.name} {...contactValidation.fieldProps(field.name)} label={field.label} type={field.type} autoComplete={field.autoComplete} required placeholder={field.label} value={field.value} onChange={(event) => field.setValue(event.target.value)} error={contactValidation.errors[field.name]} errorId={contactValidation.errorId(field.name)} />
+            ))}
+            <DialogFooter>
+              <Button type="submit">Enviar consulta</Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 

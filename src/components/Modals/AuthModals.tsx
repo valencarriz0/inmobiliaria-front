@@ -1,299 +1,96 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
+import { InputField } from "../ui/input-field";
+import { useFormValidation } from "../../hooks/use-form-validation";
+import { validateEmail, validateName, validatePassword, validatePasswordConfirmation } from "../../lib/validation";
 
 export default function AuthModals() {
   const [openLogin, setOpenLogin] = useState(false);
   const [openRegister, setOpenRegister] = useState(false);
+  const [login, setLogin] = useState({ email: "", password: "" });
+  const [registration, setRegistration] = useState({ nombre: "", apellido: "", email: "", password: "", passwordConfirm: "" });
 
-  // Estados del login
-  const [loginEmail, setLoginEmail] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
-  const [loginErrors, setLoginErrors] = useState<{
-    email?: string;
-    password?: string;
-  }>({});
+  const loginValidation = useFormValidation(() => ({
+    email: validateEmail(login.email),
+    password: validatePassword(login.password),
+  }));
+  const registerValidation = useFormValidation(() => ({
+    nombre: validateName(registration.nombre, "nombre"),
+    apellido: validateName(registration.apellido, "apellido"),
+    email: validateEmail(registration.email),
+    password: validatePassword(registration.password),
+    passwordConfirm: validatePasswordConfirmation(registration.passwordConfirm, registration.password),
+  }));
 
-  // Estados del registro
-  const [regNombre, setRegNombre] = useState("");
-  const [regApellido, setRegApellido] = useState("");
-  const [regEmail, setRegEmail] = useState("");
-  const [regPassword, setRegPassword] = useState("");
-  const [regPasswordConfirm, setRegPasswordConfirm] = useState("");
-  const [regErrors, setRegErrors] = useState<{
-    nombre?: string;
-    apellido?: string;
-    email?: string;
-    password?: string;
-    passwordConfirm?: string;
-  }>({});
-
-  // Función para validar email
-  const emailRegex = /^\S+@\S+\.\S+$/;
+  const changeLoginOpen = (open: boolean) => {
+    setOpenLogin(open);
+    loginValidation.resetValidation();
+  };
+  const changeRegisterOpen = (open: boolean) => {
+    setOpenRegister(open);
+    registerValidation.resetValidation();
+  };
 
   return (
     <>
-      {/* Botón en Header que abre Login */}
-      <Button
-        size="sm"
-        className="bg-accent hover:bg-accent/90"
-        onClick={() => setOpenLogin(true)}
-      >
+      <Button size="sm" className="bg-accent hover:bg-accent/90" onClick={() => changeLoginOpen(true)}>
         Acceder
       </Button>
-
-      {/* ------------------- MODAL LOGIN ------------------- */}
-      <Dialog open={openLogin} onOpenChange={setOpenLogin}>
-        <DialogContent className="sm:max-w-md">
+      <Dialog open={openLogin} onOpenChange={changeLoginOpen}>
+        <DialogContent className="sm:max-w-md max-h-[90dvh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-center text-xl font-bold">
-              Inicio de Sesión
-            </DialogTitle>
+            <DialogTitle className="text-center text-xl font-bold">Inicio de Sesión</DialogTitle>
+            <DialogDescription className="text-center">Completá tu correo y contraseña para acceder.</DialogDescription>
           </DialogHeader>
-
-          <div className="space-y-4">
-            {/* Email */}
-            <div>
-              <Label htmlFor="email">Correo electrónico</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="tu@email.com"
-                className="bg-white dark:bg-input/30"
-                value={loginEmail}
-                onChange={(e) => setLoginEmail(e.target.value)}
-              />
-              {loginErrors.email && (
-                <p className="text-sm text-red-600 mt-1">{loginErrors.email}</p>
-              )}
-            </div>
-
-            {/* Password */}
-            <div>
-              <Label htmlFor="password">Contraseña</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="********"
-                className="bg-white dark:bg-input/30"
-                value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
-              />
-              {loginErrors.password && (
-                <p className="text-sm text-red-600 mt-1">
-                  {loginErrors.password}
-                </p>
-              )}
-            </div>
-
-            {/* Links */}
+          <form noValidate className="space-y-4" onSubmit={(event) => {
+            event.preventDefault();
+            if (!loginValidation.validateForm(event.currentTarget)) return;
+            // La autenticación real se conectará con la API.
+            alert("Inicio de sesión exitoso.");
+            changeLoginOpen(false);
+            setLogin({ email: "", password: "" });
+          }}>
+            <InputField {...loginValidation.fieldProps("email")} label="Correo electrónico" type="email" autoComplete="email" required placeholder="tu@email.com" value={login.email} onChange={(event) => setLogin({ ...login, email: event.target.value })} error={loginValidation.errors.email} errorId={loginValidation.errorId("email")} />
+            <InputField {...loginValidation.fieldProps("password")} label="Contraseña" type="password" autoComplete="current-password" required placeholder="********" value={login.password} onChange={(event) => setLogin({ ...login, password: event.target.value })} error={loginValidation.errors.password} errorId={loginValidation.errorId("password")} />
             <div className="flex flex-col items-center text-sm text-muted-foreground">
-              <Button variant="link" className="p-0 h-auto text-xs">
-                Olvidé mi contraseña
-              </Button>
-              <p>
-                ¿No estás registrado?{" "}
-                <Button
-                  variant="link"
-                  className="p-0 h-auto text-xs text-primary"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setOpenLogin(false);
-                    setOpenRegister(true);
-                  }}
-                >
-                  Regístrate aquí
-                </Button>
+              <Button type="button" variant="link" className="p-0 h-auto text-xs">Olvidé mi contraseña</Button>
+              <p>¿No estás registrado?{" "}
+                <Button type="button" variant="link" className="p-0 h-auto text-xs text-primary" onClick={() => {
+                  changeLoginOpen(false);
+                  changeRegisterOpen(true);
+                }}>Regístrate aquí</Button>
               </p>
             </div>
-
-            {/* Botón Iniciar */}
-            <Button
-              className="w-full bg-primary hover:bg-primary/90"
-              onClick={() => {
-                const errors: typeof loginErrors = {};
-
-                if (!loginEmail.trim() || !emailRegex.test(loginEmail)) {
-                  errors.email = "Ingrese un correo electrónico válido.";
-                }
-                if (!loginPassword.trim() || loginPassword.length < 6) {
-                  errors.password =
-                    "La contraseña debe tener al menos 6 caracteres.";
-                }
-
-                setLoginErrors(errors);
-
-                if (Object.keys(errors).length === 0) {
-                  // Aquí iría la lógica real de login (API, supabase, etc.)
-                  console.log("Inicio de sesión:", {
-                    email: loginEmail,
-                    password: loginPassword,
-                  });
-                  alert("Inicio de sesión exitoso.");
-                  setOpenLogin(false);
-                  setLoginEmail("");
-                  setLoginPassword("");
-                }
-              }}
-            >
-              Iniciar
-            </Button>
-          </div>
+            <Button type="submit" className="w-full bg-primary hover:bg-primary/90">Iniciar</Button>
+          </form>
         </DialogContent>
       </Dialog>
-
-      {/* ------------------- MODAL REGISTRO ------------------- */}
-      <Dialog open={openRegister} onOpenChange={setOpenRegister}>
-        <DialogContent className="sm:max-w-md">
+      <Dialog open={openRegister} onOpenChange={changeRegisterOpen}>
+        <DialogContent className="sm:max-w-md max-h-[90dvh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-center text-xl font-bold">
-              Registro
-            </DialogTitle>
+            <DialogTitle className="text-center text-xl font-bold">Registro</DialogTitle>
+            <DialogDescription className="text-center">Completá todos los campos para crear tu cuenta.</DialogDescription>
           </DialogHeader>
-
-          <div className="space-y-4">
-            {/* Nombre */}
-            <div>
-              <Label htmlFor="nombre">Nombre</Label>
-              <Input
-                id="nombre"
-                placeholder="Tu nombre"
-                className="bg-white dark:bg-input/30"
-                value={regNombre}
-                onChange={(e) => setRegNombre(e.target.value)}
-              />
-              {regErrors.nombre && (
-                <p className="text-sm text-red-600 mt-1">{regErrors.nombre}</p>
-              )}
-            </div>
-
-            {/* Apellido */}
-            <div>
-              <Label htmlFor="apellido">Apellido</Label>
-              <Input
-                id="apellido"
-                placeholder="Tu apellido"
-                className="bg-white dark:bg-input/30"
-                value={regApellido}
-                onChange={(e) => setRegApellido(e.target.value)}
-              />
-              {regErrors.apellido && (
-                <p className="text-sm text-red-600 mt-1">
-                  {regErrors.apellido}
-                </p>
-              )}
-            </div>
-
-            {/* Email */}
-            <div>
-              <Label htmlFor="email">Correo electrónico</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="tu@email.com"
-                className="bg-white dark:bg-input/30"
-                value={regEmail}
-                onChange={(e) => setRegEmail(e.target.value)}
-              />
-              {regErrors.email && (
-                <p className="text-sm text-red-600 mt-1">{regErrors.email}</p>
-              )}
-            </div>
-
-            {/* Contraseña */}
-            <div>
-              <Label htmlFor="password">Contraseña</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="********"
-                className="bg-white dark:bg-input/30"
-                value={regPassword}
-                onChange={(e) => setRegPassword(e.target.value)}
-              />
-              {regErrors.password && (
-                <p className="text-sm text-red-600 mt-1">
-                  {regErrors.password}
-                </p>
-              )}
-            </div>
-
-            {/* Confirmar Contraseña */}
-            <div>
-              <Label htmlFor="passwordConfirm">Repetir contraseña</Label>
-              <Input
-                id="passwordConfirm"
-                type="password"
-                placeholder="********"
-                className="bg-white dark:bg-input/30"
-                value={regPasswordConfirm}
-                onChange={(e) => setRegPasswordConfirm(e.target.value)}
-              />
-              {regErrors.passwordConfirm && (
-                <p className="text-sm text-red-600 mt-1">
-                  {regErrors.passwordConfirm}
-                </p>
-              )}
-            </div>
-
-            <Button
-              className="w-full bg-primary hover:bg-primary/90"
-              onClick={() => {
-                const errors: typeof regErrors = {};
-
-                // Expresión regular: solo letras (mayúsculas, minúsculas y acentos), y espacios
-                const soloLetras = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
-
-                if (!regNombre.trim() || regNombre.length < 2) {
-                  errors.nombre =
-                    "Ingrese un nombre válido (mínimo 2 caracteres).";
-                } else if (!soloLetras.test(regNombre)) {
-                  errors.nombre = "El nombre solo puede contener letras.";
-                }
-
-                if (!regApellido.trim() || regApellido.length < 2) {
-                  errors.apellido =
-                    "Ingrese un apellido válido (mínimo 2 caracteres).";
-                } else if (!soloLetras.test(regApellido)) {
-                  errors.apellido = "El apellido solo puede contener letras.";
-                }
-
-                if (!emailRegex.test(regEmail)) {
-                  errors.email = "Ingrese un correo electrónico válido.";
-                }
-
-                if (regPassword.length < 6) {
-                  errors.password =
-                    "La contraseña debe tener al menos 6 caracteres.";
-                }
-
-                if (regPasswordConfirm !== regPassword) {
-                  errors.passwordConfirm = "Las contraseñas no coinciden.";
-                }
-
-                setRegErrors(errors);
-
-                if (Object.keys(errors).length === 0) {
-                  console.log("Registro:", {
-                    nombre: regNombre,
-                    apellido: regApellido,
-                    email: regEmail,
-                  });
-                  alert("Registro exitoso.");
-                  setOpenRegister(false);
-                  setRegNombre("");
-                  setRegApellido("");
-                  setRegEmail("");
-                  setRegPassword("");
-                  setRegPasswordConfirm("");
-                }
-              }}
-            >
-              Registrarse
-            </Button>
-          </div>
+          <form noValidate className="space-y-4" onSubmit={(event) => {
+            event.preventDefault();
+            if (!registerValidation.validateForm(event.currentTarget)) return;
+            // El registro real se conectará con la API.
+            alert("Registro exitoso.");
+            changeRegisterOpen(false);
+            setRegistration({ nombre: "", apellido: "", email: "", password: "", passwordConfirm: "" });
+          }}>
+            {([
+              { name: "nombre", label: "Nombre", type: "text", autoComplete: "given-name", placeholder: "Tu nombre" },
+              { name: "apellido", label: "Apellido", type: "text", autoComplete: "family-name", placeholder: "Tu apellido" },
+              { name: "email", label: "Correo electrónico", type: "email", autoComplete: "email", placeholder: "tu@email.com" },
+              { name: "password", label: "Contraseña", type: "password", autoComplete: "new-password", placeholder: "Al menos 6 caracteres" },
+              { name: "passwordConfirm", label: "Repetir contraseña", type: "password", autoComplete: "new-password", placeholder: "Repetí tu contraseña" },
+            ] as const).map((field) => (
+              <InputField key={field.name} {...registerValidation.fieldProps(field.name)} label={field.label} type={field.type} autoComplete={field.autoComplete} placeholder={field.placeholder} required value={registration[field.name]} onChange={(event) => setRegistration({ ...registration, [field.name]: event.target.value })} error={registerValidation.errors[field.name]} errorId={registerValidation.errorId(field.name)} />
+            ))}
+            <Button type="submit" className="w-full bg-primary hover:bg-primary/90">Registrarse</Button>
+          </form>
         </DialogContent>
       </Dialog>
     </>

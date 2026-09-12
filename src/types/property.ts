@@ -2,6 +2,7 @@ import type {
   CURRENCIES,
   OPERATION_TYPES,
   PROPERTY_AMENITIES,
+  PROPERTY_CONDITIONS,
   PROPERTY_SERVICES,
   PROPERTY_TYPES,
   PUBLICATION_STATUSES,
@@ -11,7 +12,7 @@ export type OperationType = keyof typeof OPERATION_TYPES;
 export type PropertyType = keyof typeof PROPERTY_TYPES;
 export type Currency = (typeof CURRENCIES)[number];
 export type PublicationStatus = keyof typeof PUBLICATION_STATUSES;
-export type PropertyCondition = "new" | "excellent" | "good" | "to-renovate";
+export type PropertyCondition = keyof typeof PROPERTY_CONDITIONS;
 export type PropertyService = keyof typeof PROPERTY_SERVICES;
 export type PropertyAmenity = keyof typeof PROPERTY_AMENITIES;
 

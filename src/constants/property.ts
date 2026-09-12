@@ -19,6 +19,21 @@ export const PUBLICATION_STATUSES = {
   deleted: "Eliminada",
 } as const;
 
+export const PROPERTY_CONDITIONS = {
+  new: "Nuevo",
+  excellent: "Excelente",
+  good: "Bueno",
+  "to-renovate": "A refaccionar",
+} as const;
+
+export const PROPERTY_IMAGE_RULES = {
+  min: 2,
+  max: 5,
+  maxSizeMB: 5,
+  mimeTypes: ["image/jpeg", "image/png", "image/webp"],
+  formatsLabel: "JPEG/JPG, PNG o WebP",
+} as const;
+
 export const PROPERTY_SERVICES = {
   electricity: "Luz",
   gas: "Gas",

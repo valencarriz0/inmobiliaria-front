@@ -10,12 +10,7 @@ export default function PropertyDetailLogin() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <HeaderUser
-        menuItem1="Perfil"
-        menuItem2="Favoritos"
-        menuItem3="Historial"
-      />
+      <HeaderUser />
       {loading ? <p role="status" className="text-center py-10">Cargando propiedad...</p>
         : error ? <p role="alert" className="text-center py-10">{error}</p>
         : property ? <PropertyDetail key={property.id} property={property} />

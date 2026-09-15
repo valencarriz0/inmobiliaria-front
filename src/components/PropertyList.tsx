@@ -1,11 +1,11 @@
-// React import not required with new JSX transform
 import { Card, CardContent, CardDescription, CardTitle } from "./ui/card.tsx";
-import { Heart, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { Button } from "./ui/button.tsx";
 import { Link } from "react-router-dom";
 import type { Property } from "../types/property";
 import { OPERATION_TYPES } from "../constants/property";
 import { formatCharacteristics, formatLocation, formatPrice } from "../lib/formatters";
+import FavoriteHeartButton from "./FavoriteHeartButton";
 
 type PropertyListProps = {
   properties: Property[];
@@ -41,15 +41,11 @@ const PropertyList = ({ properties, loggedIn = false }: PropertyListProps) => {
             </span>
 
             {/* Favorito */}
-            <Button
-              variant="ghost"
-              size="icon"
-              disabled
-              aria-label="Favoritos no disponibles"
+            <FavoriteHeartButton
+              property={property}
               className="absolute top-2 right-2 rounded-full bg-background/70 hover:bg-background hover:scale-110"
-            >
-              <Heart className="h-5 w-5 fill-none stroke-black" />
-            </Button>
+              heartClassName="h-5 w-5"
+            />
           </div>
 
           <CardContent className="p-4 flex-1">

@@ -1,18 +1,17 @@
 import Header from "../../../components/Header";
 import PropertyCatalog from "../../../components/PropertyCatalog";
+import { useUserPreview } from "../../../hooks/use-user-preview";
 
 export default function HomePageWireframe() {
+  const { user } = useUserPreview();
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <Header page={"/post"} />
 
-      {/* Main */}
       <main className="container mx-auto py-12 px-4">
-        <PropertyCatalog />
+        <PropertyCatalog loggedIn={Boolean(user)} />
       </main>
 
-      {/* Footer */}
       <footer className="bg-muted py-8 px-4 mt-12">
         <div className="container mx-auto text-center text-muted-foreground text-sm">
           © 2025 Nombre y Logo. Todos los derechos reservados.

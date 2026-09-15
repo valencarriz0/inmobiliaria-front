@@ -29,6 +29,8 @@ import { FieldError } from "../../components/ui/field-error";
 import type { Property } from "../../types/property";
 import { OPERATION_TYPES, PUBLICATION_STATUSES } from "../../constants/property";
 import { formatCharacteristics, formatLocation, formatPrice } from "../../lib/formatters";
+import { mockConsultations, mockPropertyViews } from "../../data/mock/activity";
+import { propertyMetrics } from "../../lib/publisher-properties";
 
 export default function PropertyDetailPublisher() {
   const { id } = useParams();
@@ -56,9 +58,7 @@ function PublisherPropertyDetail({ property, refresh }: { property: Property; re
   const [actionError, setActionError] = useState<string>();
   const inFlight = useRef(false);
 
-  // Existing display-only demo metrics remain outside the property CRUD.
-  const views = 120;
-  const inquiries = 5;
+  const { views, consultations: inquiries } = propertyMetrics(property.id, mockPropertyViews, mockConsultations);
 
   const runAction = async (action: "pause" | "reactivate" | "delete") => {
     if (inFlight.current) return;
@@ -91,15 +91,10 @@ function PublisherPropertyDetail({ property, refresh }: { property: Property; re
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <HeaderUser
-        menuItem1="Perfil"
-        menuItem2="Estadísticas"
-        menuItem3="Configuración"
-      />
+      <HeaderUser />
 
-      <BotonVolver />
-      {/* Main */}
+      <BotonVolver to="/dashboard" />
+      {/* Contenido principal */}
       <main className="container mx-auto py-10 px-4 grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Columna principal */}
         <div className="lg:col-span-2 space-y-6">

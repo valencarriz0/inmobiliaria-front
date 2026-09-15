@@ -2,6 +2,11 @@ import { PROPERTY_AMENITIES } from "../constants/property.ts";
 import type { Currency, Property, PropertyLocation } from "../types/property.ts";
 
 const numberFormatter = new Intl.NumberFormat("es-AR", { maximumFractionDigits: 2 });
+const dateFormatter = new Intl.DateTimeFormat("es-AR", { dateStyle: "medium", timeStyle: "short", timeZone: "America/Argentina/Buenos_Aires" });
+
+export function formatDate(date: string): string {
+  return dateFormatter.format(new Date(date));
+}
 
 export function formatPrice(price: number, currency: Currency): string {
   return `${currency} ${numberFormatter.format(price)}`;

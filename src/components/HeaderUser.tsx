@@ -1,64 +1,61 @@
-import React from "react";
-import { Bell, Home, User } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
+import { Heart, Home, User } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { useUserPreview } from "../hooks/use-user-preview";
+import { Button } from "./ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import NotificationsMenu from "./NotificationsMenu";
+import { canUseInterestedFeatures } from "../lib/user-properties";
 
-interface HeaderUserProps {
-  menuItem1: React.ReactNode;
-  menuItem2: React.ReactNode;
-  menuItem3: React.ReactNode;
-}
+export default function HeaderUser() {
+  const { user, setUser } = useUserPreview();
+  const navigate = useNavigate();
+  if (!user) return null;
 
-const HeaderUser: React.FC<HeaderUserProps> = ({
-  menuItem1,
-  menuItem2,
-  menuItem3,
-}) => {
+  const home = user.role === "publisher" ? "/dashboard" : user.role === "admin" ? "/admin" : "/HomePageLogin";
+  const links = [
+    { label: "Perfil", to: "/profile" },
+    { label: "Catálogo", to: "/HomePageLogin" },
+    ...(canUseInterestedFeatures(user) ? [
+      { label: "Favoritos", to: "/favorites" },
+      { label: "Mis consultas", to: "/consultations" },
+    ] : []),
+    ...(user.role === "publisher" ? [
+      { label: "Mis propiedades", to: "/dashboard" },
+      { label: "Publicar nueva propiedad", to: "/newProperty" },
+      { label: "Estadísticas", to: "/statistics" },
+      { label: "Consultas recibidas", to: "/publisher/consultations" },
+    ] : user.role === "admin" ? [
+      { label: "Administración", to: "/admin" },
+    ] : [
+      { label: "Quiero publicar propiedades", to: "/become-publisher" },
+    ]),
+  ];
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
-      <div className="container flex h-16 items-center justify-between">
-        {/* Logo y nombre */}
-        <div className="flex items-center space-x-2">
-          <Home className="h-6 w-6 text-primary" />
-          <span className="font-bold text-xl text-primary font-[family-name:var(--font-space-grotesk)]">
-            InmuConnect
-          </span>
-        </div>
-
-        {/* Acciones */}
-        <div className="flex items-center space-x-4">
-          {/* Notificaciones */}
-          <button className="relative">
-            <Bell className="h-5 w-5 text-muted-foreground" />
-            <span className="absolute -top-1 -right-1 h-4 w-4 text-[10px] bg-red-500 text-white rounded-full flex items-center justify-center">
-              3
-            </span>
-          </button>
-
-          {/* Menú usuario */}
+      <div className="container mx-auto flex h-16 items-center justify-between gap-2">
+        <Link to={home} className="flex items-center gap-1 sm:gap-2">
+          <Home className="h-5 w-5 sm:h-6 sm:w-6 text-primary shrink-0" />
+          <span className="font-bold text-base sm:text-xl text-primary">InmuConnect</span>
+        </Link>
+        <div className="flex items-center gap-1 sm:gap-3">
+          <span className="hidden sm:inline text-xs text-muted-foreground">Vista previa</span>
+          {canUseInterestedFeatures(user) && <Button asChild variant="ghost" size="icon" title="Favoritos"><Link to="/favorites" aria-label="Favoritos"><Heart className="h-5 w-5 text-muted-foreground" /></Link></Button>}
+          <NotificationsMenu />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center">
-                <User className="h-6 w-6 text-muted-foreground" />
-              </button>
+              <Button variant="ghost" size="icon" aria-label="Menú de usuario"><User className="h-6 w-6 text-muted-foreground" /></Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>{menuItem1}</DropdownMenuItem>
-              <DropdownMenuItem>{menuItem2}</DropdownMenuItem>
-              <DropdownMenuItem>{menuItem3}</DropdownMenuItem>
-              <DropdownMenuItem className="text-red-600">
-                {"Cerrar sesión"}
-              </DropdownMenuItem>
+            <DropdownMenuContent align="end" className="max-w-[calc(100vw-2rem)]">
+              <DropdownMenuLabel className="max-w-64 truncate">{user.firstName} {user.lastName}</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {links.map(({ label, to }) => <DropdownMenuItem key={label} asChild><Link to={to}>{label}</Link></DropdownMenuItem>)}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-red-600" onSelect={() => { setUser(null); navigate("/", { replace: true }); }}>Cerrar sesión (salir de vista previa)</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </div>
     </header>
   );
-};
-
-export default HeaderUser;
+}

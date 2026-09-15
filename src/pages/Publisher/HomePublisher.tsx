@@ -7,21 +7,21 @@ import { MOCK_CURRENT_PUBLISHER_ID } from "../../data/mock/session";
 import { OPERATION_TYPES, PUBLICATION_STATUSES } from "../../constants/property";
 import { formatLocation } from "../../lib/formatters";
 import { Badge } from "../../components/ui/badge";
+import { useState } from "react";
+import { filterPublisherProperties, propertyMetrics, type PublisherFilters } from "../../lib/publisher-properties";
+import { mockConsultations, mockPropertyViews } from "../../data/mock/activity";
 
 export default function PublisherDashboard() {
   const { properties, loading, error } = usePublisherProperties(MOCK_CURRENT_PUBLISHER_ID);
+  const [filters, setFilters] = useState<PublisherFilters>({ query: "", status: "all" });
+  const filteredProperties = filterPublisherProperties(properties, filters);
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      {/* Header */}
-      <HeaderUser
-        menuItem1="Perfil"
-        menuItem2="Estadísticas"
-        menuItem3="Configuración"
-      />
+      <HeaderUser />
 
       {/* Contenido principal */}
       <main className="container mx-auto px-4 py-8 flex-1">
-        <SearchBarPublisher />
+        <SearchBarPublisher filters={filters} onChange={setFilters} />
 
         {/* Encabezado sección */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
@@ -32,9 +32,10 @@ export default function PublisherDashboard() {
             </Button>
           </Link>
         </div>
+        <p className="text-sm text-muted-foreground mb-4">Las visitas y consultas que se muestran son datos de ejemplo.</p>
 
         {/* Listado de propiedades (tabla simple) */}
-        <div className="border rounded-lg overflow-hidden">
+        <div className="border rounded-lg overflow-x-auto">
           <table className="w-full text-left">
             <thead className="bg-muted">
               <tr>
@@ -51,9 +52,9 @@ export default function PublisherDashboard() {
             <tbody>
               {loading ? <tr><td colSpan={8} className="p-3" role="status">Cargando propiedades...</td></tr>
                 : error ? <tr><td colSpan={8} className="p-3" role="alert">{error}</td></tr>
-                : properties.length === 0 ? <tr><td colSpan={8} className="p-3">No hay propiedades disponibles.</td></tr>
+                : filteredProperties.length === 0 ? <tr><td colSpan={8} className="p-3" role="status">{properties.length ? "No hay propiedades que coincidan con la búsqueda." : "No hay propiedades disponibles."}</td></tr>
                 : null}
-              {properties.map((p) => (
+              {filteredProperties.map((p) => (
                 <tr key={p.id} className="border-t hover:bg-muted/30">
                   <td className="p-3">
                     <img
@@ -77,8 +78,8 @@ export default function PublisherDashboard() {
                       {OPERATION_TYPES[p.operationType]}
                     </span>
                   </td>
-                  <td className="p-3">120</td>
-                  <td className="p-3">2</td>
+                  <td className="p-3">{propertyMetrics(p.id, mockPropertyViews, mockConsultations).views}</td>
+                  <td className="p-3">{propertyMetrics(p.id, mockPropertyViews, mockConsultations).consultations}</td>
                   <td className="p-3">
                     {(() => {
                       const estado = PUBLICATION_STATUSES[p.publicationStatus];
@@ -89,7 +90,6 @@ export default function PublisherDashboard() {
                           </Badge>
                         );
                       }
-                      // default: pausada
                       return (
                         <Badge className="border-amber-500 text-amber-700 bg-white rounded-full">
                           {estado}

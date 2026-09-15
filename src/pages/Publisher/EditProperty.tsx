@@ -26,8 +26,8 @@ export default function EditProperty() {
 
   return (
     <div className="min-h-screen bg-background">
-      <HeaderUser menuItem1="Perfil" menuItem2="Estadísticas" menuItem3="Configuración" />
-      <BotonVolver />
+      <HeaderUser />
+      <BotonVolver to={`/detailPublisher/${property.id}`} />
       <div className="container mx-auto py-10 px-4 max-w-6xl bg-gray-50 rounded-lg shadow-md">
         <main className="space-y-8">
           <h1 className="text-3xl font-bold">Editar propiedad</h1>

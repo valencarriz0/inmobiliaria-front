@@ -1,5 +1,5 @@
 import PropertyGallery from "./PropertyGallery";
-import { useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { InputField } from "./ui/input-field";
@@ -11,8 +11,18 @@ import BotonVolver from "./BotonVolver";
 import type { Property } from "../types/property";
 import { OPERATION_TYPES, PROPERTY_TYPES, PROPERTY_CONDITIONS, PROPERTY_SERVICES, PROPERTY_AMENITIES } from "../constants/property";
 import { formatArea, formatLocation, formatPrice } from "../lib/formatters";
+import { rememberProperty } from "../lib/recent-properties";
+import { useUserPreview } from "../hooks/use-user-preview";
+import { Textarea } from "./ui/textarea";
+import { Label } from "./ui/label";
+import FavoriteHeartButton from "./FavoriteHeartButton";
 
 export default function PropertyDetail({ property }: { property: Property }) {
+  const { user } = useUserPreview();
+  const messageId = useId();
+  const [message, setMessage] = useState("");
+  const [reviewed, setReviewed] = useState(false);
+  useEffect(() => { rememberProperty(property.id); }, [property.id]);
   const [openContact, setOpenContact] = useState(false);
   const [contactNombre, setContactNombre] = useState("");
   const [contactApellido, setContactApellido] = useState("");
@@ -25,7 +35,15 @@ export default function PropertyDetail({ property }: { property: Property }) {
     whatsapp: validatePhone(contactWhatsapp),
   }));
   const changeContactOpen = (open: boolean) => {
+    if (open) {
+      setContactNombre(user?.firstName ?? "");
+      setContactApellido(user?.lastName ?? "");
+      setContactEmail(user?.email ?? "");
+      setContactWhatsapp(user?.phone ?? "");
+      setMessage("");
+    }
     setOpenContact(open);
+    setReviewed(false);
     contactValidation.resetValidation();
   };
   const address = [property.location.street, property.location.number].filter(Boolean).join(" ");
@@ -51,17 +69,27 @@ export default function PropertyDetail({ property }: { property: Property }) {
       <main className="container mx-auto py-10 px-4 grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 min-w-0 space-y-6">
           <div>
-            <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-3xl font-bold mb-1 break-words">{property.title}</h1>
-              <span className={`px-3 py-1 text-xs font-semibold rounded-full text-white ${
-                property.operationType === "rent" ? "bg-[#477ce0]"
-                  : property.operationType === "sale" ? "bg-[#58b5e0]" : "bg-accent"
-              }`}>{OPERATION_TYPES[property.operationType]}</span>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-3">
+                  <h1 className="text-3xl font-bold mb-1 break-words">{property.title}</h1>
+                  <span className={`px-3 py-1 text-xs font-semibold rounded-full text-white ${
+                    property.operationType === "rent" ? "bg-[#477ce0]"
+                      : property.operationType === "sale" ? "bg-[#58b5e0]" : "bg-accent"
+                  }`}>{OPERATION_TYPES[property.operationType]}</span>
+                </div>
+                <p className="flex items-start text-muted-foreground mt-1">
+                  <MapPin className="h-4 w-4 mr-1 mt-1 shrink-0" aria-hidden="true" />
+                  <span>{address && `${address}, `}{formatLocation(property.location)}</span>
+                </p>
+              </div>
+              <FavoriteHeartButton
+                property={property}
+                className="rounded-full bg-background/70 hover:bg-background hover:scale-110 shrink-0"
+                buttonClassName="rounded-full bg-background/70 hover:bg-background hover:scale-110 shrink-0"
+                heartClassName="h-5 w-5"
+              />
             </div>
-            <p className="flex items-start text-muted-foreground mt-1">
-              <MapPin className="h-4 w-4 mr-1 mt-1 shrink-0" aria-hidden="true" />
-              <span>{address && `${address}, `}{formatLocation(property.location)}</span>
-            </p>
           </div>
 
           <PropertyGallery property={property} />
@@ -131,17 +159,22 @@ export default function PropertyDetail({ property }: { property: Property }) {
           </DialogHeader>
           <form noValidate className="space-y-4" onSubmit={(event) => {
             event.preventDefault();
-            contactValidation.validateForm(event.currentTarget);
+            setReviewed(contactValidation.validateForm(event.currentTarget));
           }}>
             {[
               { name: "nombre", label: "Nombre", value: contactNombre, setValue: setContactNombre, type: "text", autoComplete: "given-name" },
               { name: "apellido", label: "Apellido", value: contactApellido, setValue: setContactApellido, type: "text", autoComplete: "family-name" },
               { name: "email", label: "Correo electrónico", value: contactEmail, setValue: setContactEmail, type: "email", autoComplete: "email" },
-              { name: "whatsapp", label: "WhatsApp", value: contactWhatsapp, setValue: setContactWhatsapp, type: "tel", autoComplete: "tel" },
+              { name: "whatsapp", label: "WhatsApp / teléfono", value: contactWhatsapp, setValue: setContactWhatsapp, type: "tel", autoComplete: "tel" },
             ].map((field) => (
-              <InputField key={field.name} {...contactValidation.fieldProps(field.name)} label={field.label} type={field.type} autoComplete={field.autoComplete} required placeholder={field.label} value={field.value} onChange={(event) => field.setValue(event.target.value)} error={contactValidation.errors[field.name]} errorId={contactValidation.errorId(field.name)} />
+              <InputField key={field.name} {...contactValidation.fieldProps(field.name)} label={field.label} type={field.type} autoComplete={field.autoComplete} required placeholder={field.label} value={field.value} onChange={(event) => { field.setValue(event.target.value); setReviewed(false); }} error={contactValidation.errors[field.name]} errorId={contactValidation.errorId(field.name)} />
             ))}
-            <DialogFooter><Button type="submit" disabled>Enviar consulta</Button></DialogFooter>
+            <div className="space-y-2">
+              <Label htmlFor={messageId}>Mensaje (opcional)</Label>
+              <Textarea id={messageId} name="message" rows={3} value={message} onChange={(event) => { setMessage(event.target.value); setReviewed(false); }} placeholder="Ej.: Quisiera saber si aceptan mascotas o coordinar una visita." />
+            </div>
+            {reviewed && <p role="status" className="text-sm text-muted-foreground">Los datos están completos. El envío todavía no está disponible; no se envió ninguna consulta.</p>}
+            <DialogFooter><Button type="submit">Revisar consulta</Button></DialogFooter>
           </form>
         </DialogContent>
       </Dialog>

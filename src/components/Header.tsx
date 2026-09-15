@@ -1,35 +1,26 @@
-import React from "react";
 import { Home } from "lucide-react";
-import { Button } from "./ui/button";
 import { Link } from "react-router-dom";
+import { Button } from "./ui/button";
 import AuthModals from "./Modals/AuthModals";
+import HeaderUser from "./HeaderUser";
+import { useUserPreview } from "../hooks/use-user-preview";
 
-interface HeaderProps {
-  page: string;
-}
+export default function Header({ page }: { page: string }) {
+  const { user } = useUserPreview();
+  if (user) return <HeaderUser />;
 
-const Header: React.FC<HeaderProps> = ({ page }) => {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
-      <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <Home className="h-6 w-6 text-primary" />
-          <span className="font-bold text-xl text-primary font-[family-name:var(--font-space-grotesk)]">
-            InmuConnect
-          </span>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <Link to={page}>
-            <Button variant="outline" size="sm">
-              Publicar
-            </Button>
-          </Link>
+      <div className="container mx-auto flex h-16 items-center justify-between gap-2">
+        <Link to="/" className="flex items-center gap-1 sm:gap-2">
+          <Home className="h-5 w-5 sm:h-6 sm:w-6 text-primary shrink-0" />
+          <span className="font-bold text-base sm:text-xl text-primary">InmuConnect</span>
+        </Link>
+        <div className="flex items-center gap-2">
+          <Button asChild variant="outline" size="sm" className="px-2 text-xs sm:px-3 sm:text-sm"><Link to={page}>Publicar</Link></Button>
           <AuthModals />
         </div>
       </div>
     </header>
   );
-};
-
-export default Header;
+}

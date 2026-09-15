@@ -5,6 +5,7 @@ import type { PropertySearchFilters } from "../types/property-search";
 import PropertyList from "./PropertyList";
 import SearchBar from "./SearchBar";
 import { Button } from "./ui/button";
+import RecentProperties from "./RecentProperties";
 
 export default function PropertyCatalog({ loggedIn = false }: { loggedIn?: boolean }) {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -47,6 +48,7 @@ export default function PropertyCatalog({ loggedIn = false }: { loggedIn?: boole
             </>
           )}
       </section>
+      <RecentProperties loggedIn={loggedIn} />
     </>
   );
 }

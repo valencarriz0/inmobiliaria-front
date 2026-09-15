@@ -15,6 +15,9 @@ export function validateEmail(value: string) {
 export function validatePassword(value: string) {
   if (!value.trim()) return "La contraseña es obligatoria.";
   if (value.length < 6) return "La contraseña debe tener al menos 6 caracteres.";
+  if (value.length > 72 || new TextEncoder().encode(value).length > 72) {
+    return "La contraseña no puede superar 72 caracteres ni 72 bytes.";
+  }
 }
 
 export function validatePasswordConfirmation(value: string, password: string) {

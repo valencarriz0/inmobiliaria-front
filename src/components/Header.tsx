@@ -3,10 +3,10 @@ import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import AuthModals from "./Modals/AuthModals";
 import HeaderUser from "./HeaderUser";
-import { useUserPreview } from "../hooks/use-user-preview";
+import { useAuth } from "../hooks/use-auth";
 
 export default function Header({ page }: { page: string }) {
-  const { user } = useUserPreview();
+  const { user } = useAuth();
   if (user) return <HeaderUser />;
 
   return (

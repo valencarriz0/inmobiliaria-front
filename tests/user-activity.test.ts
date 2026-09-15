@@ -4,6 +4,14 @@ import { recentPropertyIds, readRecentProperties, rememberProperty, RECENT_PROPE
 import { filterPublisherProperties, propertyMetrics, publisherStatistics } from "../src/lib/publisher-properties.ts";
 import { mockProperties } from "../src/data/mock/properties.ts";
 import { mockConsultations, mockPropertyViews, mockPublisherNotifications } from "../src/data/mock/activity.ts";
+import type { AuthUser, UserRole } from "../src/types/user.ts";
+
+function authenticatedUser(role: UserRole): AuthUser {
+  return {
+    id: `${role}-user`, firstName: "Ana", lastName: "Pérez", email: `${role}@example.com`, phone: null,
+    role, accountStatus: "active", createdAt: "2026-01-01T00:00:00.000Z", updatedAt: "2026-01-01T00:00:00.000Z",
+  };
+}
 
 test("vistas recientes conserva seis IDs únicos y antepone la última visita", () => {
   const before = ["1", "2", "3", "4", "5", "6"];
@@ -106,34 +114,38 @@ test("los ejemplos relacionan consultas y notificaciones con las propiedades cor
 
 test("interesado y publicador comparten Favoritos; visitante y administrador no", async () => {
   const { canUseInterestedFeatures, canFavoriteProperty } = await import("../src/lib/user-properties.ts");
-  const { MOCK_USERS } = await import("../src/data/mock/session.ts");
-  assert.equal(canUseInterestedFeatures(MOCK_USERS.interested), true);
-  assert.equal(canUseInterestedFeatures(MOCK_USERS.publisher), true);
-  assert.equal(canUseInterestedFeatures(MOCK_USERS.admin), false);
+  const interested = authenticatedUser("interested");
+  const publisher = authenticatedUser("publisher");
+  const admin = authenticatedUser("admin");
+  assert.equal(canUseInterestedFeatures(interested), true);
+  assert.equal(canUseInterestedFeatures(publisher), true);
+  assert.equal(canUseInterestedFeatures(admin), false);
   assert.equal(canUseInterestedFeatures(null), false);
   for (const property of mockProperties) {
-    assert.equal(canFavoriteProperty(MOCK_USERS.interested, property), true);
-    assert.equal(canFavoriteProperty(MOCK_USERS.admin, property), false);
+    assert.equal(canFavoriteProperty(interested, property), true);
+    assert.equal(canFavoriteProperty(admin, property), false);
     assert.equal(canFavoriteProperty(null, property), false);
   }
 });
 
 test("el visitante no acumula un estado de Favoritos y el contexto de permisos del corazón se mantiene estable", async () => {
   const { canFavoriteProperty } = await import("../src/lib/user-properties.ts");
-  const { MOCK_USERS } = await import("../src/data/mock/session.ts");
+  const propertyFromAnotherPublisher = mockProperties.find(({ publisherId }) => publisherId !== 1);
+  assert.ok(propertyFromAnotherPublisher);
   assert.equal(canFavoriteProperty(null, mockProperties[0]), false);
-  assert.equal(canFavoriteProperty(MOCK_USERS.interested, mockProperties[0]), true);
-  assert.equal(canFavoriteProperty(MOCK_USERS.publisher, mockProperties[0]), true);
+  assert.equal(canFavoriteProperty(authenticatedUser("interested"), mockProperties[0]), true);
+  assert.equal(canFavoriteProperty(authenticatedUser("publisher"), propertyFromAnotherPublisher), true);
 });
 
 test("el publicador puede guardar propiedades ajenas pero nunca propias, también al cambiar de rol", async () => {
   const { canFavoriteProperty, isOwnProperty } = await import("../src/lib/user-properties.ts");
-  const { MOCK_USERS } = await import("../src/data/mock/session.ts");
+  const publisher = authenticatedUser("publisher");
+  const interested = authenticatedUser("interested");
   for (const property of mockProperties) {
-    assert.equal(isOwnProperty(MOCK_USERS.publisher, property), property.publisherId === 1);
-    assert.equal(canFavoriteProperty(MOCK_USERS.publisher, property), property.publisherId !== 1);
+    assert.equal(isOwnProperty(publisher, property), property.publisherId === 1);
+    assert.equal(canFavoriteProperty(publisher, property), property.publisherId !== 1);
   }
   const previouslySaved = mockProperties.filter(({ id }) => id === "1" || id === "4");
-  assert.equal(previouslySaved.filter((property) => canFavoriteProperty(MOCK_USERS.interested, property)).length, 2);
-  assert.deepEqual(previouslySaved.filter((property) => canFavoriteProperty(MOCK_USERS.publisher, property)).map(({ id }) => id), ["4"]);
+  assert.equal(previouslySaved.filter((property) => canFavoriteProperty(interested, property)).length, 2);
+  assert.deepEqual(previouslySaved.filter((property) => canFavoriteProperty(publisher, property)).map(({ id }) => id), ["4"]);
 });

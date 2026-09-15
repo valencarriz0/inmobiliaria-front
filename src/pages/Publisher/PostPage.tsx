@@ -1,6 +1,6 @@
 import BotonVolver from "../../components/BotonVolver";
 import Header from "../../components/Header";
-import { useUserPreview } from "../../hooks/use-user-preview";
+import { useAuth } from "../../hooks/use-auth";
 import { Button } from "../../components/ui/button";
 import {
   Card,
@@ -10,10 +10,13 @@ import {
 } from "../../components/ui/card";
 import { Home } from "lucide-react";
 import { Link, Navigate } from "react-router-dom";
+import { publishingEntryRedirect } from "../../lib/auth-navigation";
 
 export default function Publish() {
-  const { user } = useUserPreview();
-  if (user) return <Navigate to={user.role === "interested" ? "/become-publisher" : user.role === "publisher" ? "/dashboard" : "/profile"} replace />;
+  const { user } = useAuth();
+  const redirect = user ? publishingEntryRedirect(user.role) : null;
+  if (redirect) return <Navigate to={redirect} replace />;
+  const registrationPath = user?.role === "interested" ? "/become-publisher" : "/register";
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header page="/register" />
@@ -39,8 +42,8 @@ export default function Publish() {
             </div>
 
             <Button asChild className="w-full min-h-12 h-auto whitespace-normal text-lg bg-accent hover:bg-accent/90">
-              <Link to="/register">
-                Regístrate ahora y comienza
+              <Link to={registrationPath}>
+                {user ? "Quiero publicar propiedades" : "Regístrate ahora y comienza"}
               </Link>
             </Button>
           </CardContent>

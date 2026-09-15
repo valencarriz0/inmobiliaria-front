@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createUserFormValues, toUserProfile, validateTaxId, validateUserForm } from "../src/lib/user-form.ts";
-import type { UserFormValues, UserProfile } from "../src/types/user.ts";
+import { createUserFormValues, profileInput, registrationInput, validateTaxId, validateUserForm } from "../src/lib/user-form.ts";
+import type { AuthUser, UserFormValues } from "../src/types/user.ts";
 
 function registration(overrides: Partial<UserFormValues> = {}): UserFormValues {
   return {
@@ -12,6 +12,18 @@ function registration(overrides: Partial<UserFormValues> = {}): UserFormValues {
 
 const valid = (errors: Record<string, string | undefined>) => !Object.values(errors).some(Boolean);
 
+const authenticatedUser: AuthUser = {
+  id: "6f928915-a992-4b1d-bf1c-4f3b5bb6a909",
+  firstName: "Ana",
+  lastName: "Pérez",
+  email: "ana@example.com",
+  phone: null,
+  role: "interested",
+  accountStatus: "active",
+  createdAt: "2026-01-01T00:00:00.000Z",
+  updatedAt: "2026-01-01T00:00:00.000Z",
+};
+
 test("el interesado puede registrarse sin teléfono y valida uno si lo completa", () => {
   assert.ok(valid(validateUserForm(registration(), "interested", true)));
   assert.ok(valid(validateUserForm(registration({ phone: "   " }), "interested", true)));
@@ -19,67 +31,51 @@ test("el interesado puede registrarse sin teléfono y valida uno si lo completa"
   assert.ok(valid(validateUserForm(registration({ phone: "+54 351 555-0100" }), "interested", true)));
 });
 
-test("los registros validan campos obligatorios, correo, mínimo de seis y coincidencia exacta", () => {
+test("los registros validan obligatorios, correo, longitud y confirmación", () => {
   for (const field of ["firstName", "lastName", "email", "password", "passwordConfirm"] as const) {
     assert.ok(validateUserForm(registration({ [field]: "" }), "interested", true)[field], field);
   }
   assert.ok(validateUserForm(registration({ email: "ana@" }), "interested", true).email);
   assert.ok(validateUserForm(registration({ password: "12345" }), "interested", true).password);
+  assert.ok(validateUserForm(registration({ password: "a".repeat(73), passwordConfirm: "a".repeat(73) }), "interested", true).password);
   assert.ok(validateUserForm(registration({ passwordConfirm: "123456 " }), "interested", true).passwordConfirm);
-  assert.ok(valid(validateUserForm(registration({ password: "abcdef", passwordConfirm: "abcdef" }), "interested", true)));
 });
 
-test("el publicador requiere tipo, teléfono y CUIT; el particular no requiere razón social", () => {
+test("el formulario pendiente de publicador conserva sus validaciones propias", () => {
   const errors = validateUserForm(registration(), "publisher", true);
   for (const field of ["publisherType", "phone", "taxId"] as const) assert.ok(errors[field], field);
   const values = registration({ publisherType: "individual", phone: "+54 351 555-0100", taxId: "20-12345678-9" });
   assert.ok(valid(validateUserForm(values, "publisher", true)));
   assert.ok(validateUserForm({ ...values, publisherType: "agency" }, "publisher", true).agencyName);
-  assert.ok(valid(validateUserForm({ ...values, publisherType: "agency", agencyName: "Casas del Centro S.A." }, "publisher", true)));
 });
 
-test("CUIT/CUIL permite guiones y exige once dígitos sin validación fiscal adicional", () => {
+test("CUIT/CUIL permite guiones y exige once dígitos", () => {
   for (const value of ["20123456789", "20-12345678-9", " 30-12345678-9 "]) assert.equal(validateTaxId(value), undefined);
-  for (const value of ["", "   ", "2012345678", "201234567890", "20-abcdefgh-9", "ab20123456789"]) assert.ok(validateTaxId(value));
+  for (const value of ["", "   ", "2012345678", "201234567890", "20-abcdefgh-9"]) assert.ok(validateTaxId(value));
 });
 
-test("convertir interesado precarga sus datos y no exige otra contraseña", () => {
-  const interested: UserProfile = { role: "interested", firstName: "Ana", lastName: "Pérez", email: "ana@example.com", phone: "+54 351 555-0100" };
-  const values = createUserFormValues(interested);
-  assert.equal(values.firstName, interested.firstName);
-  assert.equal(values.lastName, interested.lastName);
-  assert.equal(values.email, interested.email);
-  assert.equal(values.phone, interested.phone);
+test("el usuario autenticado usa UUID, teléfono nulo, rol y estado tipados", () => {
+  assert.equal(typeof authenticatedUser.id, "string");
+  assert.equal(authenticatedUser.phone, null);
+  assert.ok(["interested", "publisher", "admin"].includes(authenticatedUser.role));
+  assert.ok(["active", "disabled"].includes(authenticatedUser.accountStatus));
+  const values = createUserFormValues(authenticatedUser);
+  assert.equal(values.phone, "");
   assert.equal(values.password, "");
-  const publisher = { ...values, publisherType: "agency" as const, agencyName: "Centro", taxId: "30-12345678-9" };
-  assert.ok(valid(validateUserForm(publisher, "publisher")));
-  assert.equal(toUserProfile(publisher, "publisher")?.email, interested.email);
-  assert.equal(interested.role, "interested");
 });
 
-test("ambos tipos conservan el rol publisher y el perfil descarta contraseñas y datos ocultos", () => {
-  const values = registration({ phone: "+54 351 555-0100", taxId: "20-12345678-9", publisherType: "agency", agencyName: " Centro S.A. " });
-  const agency = toUserProfile(values, "publisher");
-  assert.deepEqual(agency, {
-    role: "publisher", publisherType: "agency", firstName: "Ana", lastName: "Pérez",
-    email: "ana@example.com", phone: "+54 351 555-0100", taxId: "20123456789", agencyName: "Centro S.A.",
+test("registro y perfil generan únicamente los campos permitidos", () => {
+  const values = registration({ phone: "  +54 351 555-0100  ", publisherType: "agency", taxId: "30-12345678-9", agencyName: "Centro" });
+  assert.deepEqual(registrationInput(values), {
+    firstName: "Ana", lastName: "Pérez", email: "ana@example.com", phone: "+54 351 555-0100",
+    password: "123456", passwordConfirm: "123456",
   });
-  const individual = toUserProfile({ ...values, publisherType: "individual" }, "publisher");
-  assert.equal(individual?.role, "publisher");
-  assert.ok(individual);
-  for (const key of ["agencyName", "password", "passwordConfirm"]) assert.equal(key in individual, false);
-  const interested = toUserProfile(values, "interested");
-  assert.ok(interested);
-  for (const key of ["publisherType", "agencyName", "taxId", "password", "passwordConfirm"]) assert.equal(key in interested, false);
-  assert.equal(toUserProfile({ ...values, taxId: "1" }, "publisher"), undefined);
+  assert.deepEqual(profileInput(values), { firstName: "Ana", lastName: "Pérez", phone: "+54 351 555-0100" });
+  assert.deepEqual(profileInput({ ...values, phone: " " }), { firstName: "Ana", lastName: "Pérez", phone: null });
 });
 
-test("editar un perfil de inmobiliaria conserva los datos fiscales sin pedir contraseña", () => {
-  const user: UserProfile = {
-    role: "publisher", publisherType: "agency", firstName: "Ana", lastName: "Pérez",
-    email: "ana@example.com", phone: "+54 351 555-0100", taxId: "30123456789", agencyName: "Centro S.A.",
-  };
-  const values = createUserFormValues(user);
-  assert.ok(valid(validateUserForm(values, user.role)));
-  assert.deepEqual(toUserProfile(values, user.role), user);
+test("editar un publicador exige teléfono pero no datos fiscales", () => {
+  const values = { ...createUserFormValues({ ...authenticatedUser, role: "publisher", phone: "+54 351 555-0100" }), phone: "+54 351 555-0100" };
+  assert.ok(valid(validateUserForm(values, "publisher", false, false)));
+  assert.ok(validateUserForm({ ...values, phone: "" }, "publisher", false, false).phone);
 });

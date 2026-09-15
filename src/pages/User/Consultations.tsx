@@ -3,12 +3,12 @@ import HeaderUser from "../../components/HeaderUser";
 import ConsultationCard from "../../components/ConsultationCard";
 import { Card, CardContent } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
-import { useUserPreview } from "../../hooks/use-user-preview";
+import { useAuth } from "../../hooks/use-auth";
 import { mockConsultations } from "../../data/mock/activity";
 import { isOwnProperty } from "../../lib/user-properties";
 
 export default function Consultations({ publisher = false }: { publisher?: boolean }) {
-  const { user } = useUserPreview();
+  const { user } = useAuth();
   const consultations = mockConsultations.filter((consultation) => publisher
     ? isOwnProperty(user, consultation) && consultation.userEmail !== user?.email
     : Boolean(user) && consultation.userEmail === user?.email && !isOwnProperty(user, consultation),

@@ -1,9 +1,9 @@
 import Header from "../../../components/Header";
 import PropertyCatalog from "../../../components/PropertyCatalog";
-import { useUserPreview } from "../../../hooks/use-user-preview";
+import { useAuth } from "../../../hooks/use-auth";
 
 export default function HomePageWireframe() {
-  const { user } = useUserPreview();
+  const { user } = useAuth();
   return (
     <div className="min-h-screen bg-background">
       <Header page={"/post"} />

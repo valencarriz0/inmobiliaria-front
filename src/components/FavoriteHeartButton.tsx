@@ -1,7 +1,7 @@
 import { Heart } from "lucide-react";
 import { Button } from "./ui/button";
 import type { Property } from "../types/property";
-import { useUserPreview } from "../hooks/use-user-preview";
+import { useAuth } from "../hooks/use-auth";
 import { canFavoriteProperty, isOwnProperty } from "../lib/user-properties";
 
 type FavoriteHeartButtonProps = {
@@ -19,7 +19,7 @@ export default function FavoriteHeartButton({
   heartClassName,
   stopAtOwnProperty = true,
 }: FavoriteHeartButtonProps) {
-  const { user, favoriteIds, toggleFavorite, openAuthDialog } = useUserPreview();
+  const { user, favoriteIds, toggleFavorite, openAuthDialog } = useAuth();
 
   if (stopAtOwnProperty && isOwnProperty(user, property)) return null;
 

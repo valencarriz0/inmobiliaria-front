@@ -12,13 +12,13 @@ import type { Property } from "../types/property";
 import { OPERATION_TYPES, PROPERTY_TYPES, PROPERTY_CONDITIONS, PROPERTY_SERVICES, PROPERTY_AMENITIES } from "../constants/property";
 import { formatArea, formatLocation, formatPrice } from "../lib/formatters";
 import { rememberProperty } from "../lib/recent-properties";
-import { useUserPreview } from "../hooks/use-user-preview";
+import { useAuth } from "../hooks/use-auth";
 import { Textarea } from "./ui/textarea";
 import { Label } from "./ui/label";
 import FavoriteHeartButton from "./FavoriteHeartButton";
 
 export default function PropertyDetail({ property }: { property: Property }) {
-  const { user } = useUserPreview();
+  const { user } = useAuth();
   const messageId = useId();
   const [message, setMessage] = useState("");
   const [reviewed, setReviewed] = useState(false);

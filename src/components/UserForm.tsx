@@ -1,7 +1,7 @@
 import { useState, type ComponentProps, type FormEvent } from "react";
 import { useFormValidation } from "../hooks/use-form-validation";
-import { createUserFormValues, toUserProfile, validateUserForm } from "../lib/user-form";
-import type { UserFormValues, UserProfile, UserRole } from "../types/user";
+import { createUserFormValues, validateUserForm } from "../lib/user-form";
+import type { AuthUser, UserFormValues, UserRole } from "../types/user";
 import { Button } from "./ui/button";
 import { InputField } from "./ui/input-field";
 import { Label } from "./ui/label";
@@ -9,36 +9,38 @@ import { FieldError } from "./ui/field-error";
 
 interface UserFormProps {
   role: UserRole;
-  initialUser?: UserProfile;
+  initialUser?: AuthUser;
   withPassword?: boolean;
   readOnlyEmail?: boolean;
+  publisherFields?: boolean;
   submitLabel: string;
-  onSubmit: (profile: UserProfile) => void;
+  onSubmit: (values: UserFormValues) => void | boolean | Promise<void | boolean>;
   onCancel?: () => void;
+  isSubmitting?: boolean;
+  formError?: string;
+  serverErrors?: Partial<Record<keyof UserFormValues, string>>;
 }
 
-export default function UserForm({ role, initialUser, withPassword = false, readOnlyEmail = false, submitLabel, onSubmit, onCancel }: UserFormProps) {
+export default function UserForm({ role, initialUser, withPassword = false, readOnlyEmail = false, publisherFields = false, submitLabel, onSubmit, onCancel, isSubmitting = false, formError, serverErrors = {} }: UserFormProps) {
   const [values, setValues] = useState(() => createUserFormValues(initialUser));
-  const { errors, fieldProps, errorId, validateForm } = useFormValidation(() => validateUserForm(values, role, withPassword));
-  const publisher = role === "publisher";
+  const { errors, fieldProps, errorId, validateForm } = useFormValidation(() => validateUserForm(values, role, withPassword, publisherFields));
+  const publisher = publisherFields;
   const agency = publisher && values.publisherType === "agency";
 
   function input(field: keyof UserFormValues, label: string, options: ComponentProps<"input"> = {}) {
     return <InputField
       {...fieldProps(field)} label={label} required value={values[field]}
       onChange={(event) => setValues({ ...values, [field]: event.target.value })}
-      {...options} error={errors[field]} errorId={errorId(field)}
+      {...options} disabled={isSubmitting || options.disabled} error={errors[field] ?? serverErrors[field]} errorId={errorId(field)}
     />;
   }
 
-  function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!validateForm(event.currentTarget)) return;
-    const profile = toUserProfile({ ...values, email: readOnlyEmail && initialUser ? initialUser.email : values.email }, role);
-    if (!profile) return;
-    // La vista previa solo conserva el perfil en memoria; las contraseñas no salen del formulario.
-    setValues((previous) => ({ ...previous, password: "", passwordConfirm: "" }));
-    onSubmit(profile);
+    const submittedValues = { ...values, email: readOnlyEmail && initialUser ? initialUser.email : values.email };
+    const succeeded = await onSubmit(submittedValues);
+    if (succeeded !== false) setValues((previous) => ({ ...previous, password: "", passwordConfirm: "" }));
   }
 
   return (
@@ -75,8 +77,9 @@ export default function UserForm({ role, initialUser, withPassword = false, read
       </div>}
       <div className="flex flex-col-reverse sm:flex-row gap-3">
         {onCancel && <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>}
-        <Button type="submit" className="flex-1">{submitLabel}</Button>
+        <Button type="submit" className="flex-1" disabled={isSubmitting}>{isSubmitting ? "Procesando..." : submitLabel}</Button>
       </div>
+      {formError && <p role="alert" className="text-sm text-red-600">{formError}</p>}
     </form>
   );
 }

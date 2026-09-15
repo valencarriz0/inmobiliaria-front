@@ -5,11 +5,11 @@ import PropertyList from "../../components/PropertyList";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import { useProperties } from "../../hooks/use-properties";
-import { useUserPreview } from "../../hooks/use-user-preview";
+import { useAuth } from "../../hooks/use-auth";
 import { canFavoriteProperty } from "../../lib/user-properties";
 
 export default function Favorites() {
-  const { user, favoriteIds } = useUserPreview();
+  const { user, favoriteIds } = useAuth();
   const { properties, loading, error, refresh } = useProperties({}, favoriteIds.length > 0);
   const favorites = properties.filter((property) => favoriteIds.includes(property.id) && canFavoriteProperty(user, property));
 

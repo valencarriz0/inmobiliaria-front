@@ -2,14 +2,14 @@ import { Bell } from "lucide-react";
 import { Link } from "react-router-dom";
 import { mockPublisherNotifications } from "../data/mock/activity";
 import { MOCK_CURRENT_PUBLISHER_ID } from "../data/mock/session";
-import { useUserPreview } from "../hooks/use-user-preview";
+import { useAuth } from "../hooks/use-auth";
 import { formatDate } from "../lib/formatters";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
 
 export default function NotificationsMenu() {
-  const { user } = useUserPreview();
+  const { user } = useAuth();
   const notifications = user?.role === "publisher"
     ? mockPublisherNotifications.filter((notification) => notification.publisherId === MOCK_CURRENT_PUBLISHER_ID) : [];
 

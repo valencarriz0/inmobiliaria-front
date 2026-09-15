@@ -1,17 +1,18 @@
 import { Heart, Home, User } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { useUserPreview } from "../hooks/use-user-preview";
+import { useAuth } from "../hooks/use-auth";
 import { Button } from "./ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import NotificationsMenu from "./NotificationsMenu";
 import { canUseInterestedFeatures } from "../lib/user-properties";
+import { roleHome } from "../lib/auth-navigation";
 
 export default function HeaderUser() {
-  const { user, setUser } = useUserPreview();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   if (!user) return null;
 
-  const home = user.role === "publisher" ? "/dashboard" : user.role === "admin" ? "/admin" : "/HomePageLogin";
+  const home = roleHome(user.role);
   const links = [
     { label: "Perfil", to: "/profile" },
     { label: "Catálogo", to: "/HomePageLogin" },
@@ -39,7 +40,6 @@ export default function HeaderUser() {
           <span className="font-bold text-base sm:text-xl text-primary">InmuConnect</span>
         </Link>
         <div className="flex items-center gap-1 sm:gap-3">
-          <span className="hidden sm:inline text-xs text-muted-foreground">Vista previa</span>
           {canUseInterestedFeatures(user) && <Button asChild variant="ghost" size="icon" title="Favoritos"><Link to="/favorites" aria-label="Favoritos"><Heart className="h-5 w-5 text-muted-foreground" /></Link></Button>}
           <NotificationsMenu />
           <DropdownMenu>
@@ -51,7 +51,7 @@ export default function HeaderUser() {
               <DropdownMenuSeparator />
               {links.map(({ label, to }) => <DropdownMenuItem key={label} asChild><Link to={to}>{label}</Link></DropdownMenuItem>)}
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-red-600" onSelect={() => { setUser(null); navigate("/", { replace: true }); }}>Cerrar sesión (salir de vista previa)</DropdownMenuItem>
+              <DropdownMenuItem className="text-red-600" onSelect={() => { logout(); navigate("/", { replace: true }); }}>Cerrar sesión</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

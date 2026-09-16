@@ -1,8 +1,16 @@
-import type { Consultation } from "../../types/consultation.ts";
 import { mockProperties } from "./properties.ts";
 
-// Las consultas y visitas son ejemplos fijos; no se generan al completar el formulario.
-export const mockConsultations: Consultation[] = [
+// Datos fijos para estadísticas y notificaciones de ejemplo.
+interface MockConsultationSeed {
+  id: string;
+  propertyId: string;
+  createdAt: string;
+  userEmail?: string;
+  contact: { firstName: string; lastName: string; email: string; phone: string };
+  message?: string;
+}
+
+const mockConsultationSeeds = [
   {
     id: "consultation-1", propertyId: "1", createdAt: "2026-09-12T15:30:00-03:00",
     userEmail: "ana@example.com",
@@ -19,7 +27,9 @@ export const mockConsultations: Consultation[] = [
     contact: { firstName: "Diego", lastName: "Ruiz", email: "diego@example.com", phone: "+54 351 555-0200" },
     message: "¿La propiedad tiene espacio para guardar un auto?",
   },
-].flatMap((consultation) => {
+] satisfies MockConsultationSeed[];
+
+export const mockConsultations = mockConsultationSeeds.flatMap((consultation) => {
   const property = mockProperties.find(({ id }) => id === consultation.propertyId);
   return property ? [{ ...consultation, publisherId: property.publisherId, propertyTitle: property.title, propertyImage: property.images[0] }] : [];
 });

@@ -4,7 +4,6 @@ import BotonVolver from "../../components/BotonVolver";
 import HeaderUser from "../../components/HeaderUser";
 import { useProperty } from "../../hooks/use-property";
 import { publisherPropertyService } from "../../services/publisherPropertyService";
-import { MOCK_CURRENT_PUBLISHER_ID } from "../../data/mock/session";
 import { Button } from "../../components/ui/button";
 
 export default function EditProperty() {
@@ -13,9 +12,8 @@ export default function EditProperty() {
   const navigate = useNavigate();
 
   if (loading) return <p role="status" className="text-center py-10">Cargando propiedad...</p>;
-  if (error || !property || property.publicationStatus === "deleted" || property.publisherId !== MOCK_CURRENT_PUBLISHER_ID) {
-    const message = error ?? (!property || property.publicationStatus === "deleted"
-      ? "Propiedad no encontrada" : "No podés editar una propiedad de otro publicador.");
+  if (error || !property || property.publicationStatus === "deleted") {
+    const message = error ?? "Propiedad no encontrada";
     return (
       <div className="text-center py-10 space-y-4">
         <p role="alert">{message}</p>

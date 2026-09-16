@@ -1,5 +1,5 @@
 import PropertyGallery from "./PropertyGallery";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useState, type FormEvent } from "react";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { InputField } from "./ui/input-field";
@@ -17,12 +17,17 @@ import { Textarea } from "./ui/textarea";
 import { Label } from "./ui/label";
 import PropertyMap from "./maps/PropertyMap";
 import { hasValidCoordinates } from "../lib/geocoding";
+import FavoriteHeartButton from "./FavoriteHeartButton";
+import { consultationService } from "../services/consultationService";
+import { ApiError } from "../services/api";
 
 export default function PropertyDetail({ property }: { property: PublicPropertyDetail }) {
   const { user } = useAuth();
   const messageId = useId();
   const [message, setMessage] = useState("");
-  const [reviewed, setReviewed] = useState(false);
+  const [isSubmittingContact, setIsSubmittingContact] = useState(false);
+  const [contactError, setContactError] = useState("");
+  const [contactSuccess, setContactSuccess] = useState(false);
   useEffect(() => { rememberProperty(property.id); }, [property.id]);
   const [openContact, setOpenContact] = useState(false);
   const [contactNombre, setContactNombre] = useState("");
@@ -44,8 +49,30 @@ export default function PropertyDetail({ property }: { property: PublicPropertyD
       setMessage("");
     }
     setOpenContact(open);
-    setReviewed(false);
+    setIsSubmittingContact(false);
+    setContactError("");
+    setContactSuccess(false);
     contactValidation.resetValidation();
+  };
+  const submitContact = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (isSubmittingContact || !contactValidation.validateForm(event.currentTarget)) return;
+    setIsSubmittingContact(true);
+    setContactError("");
+    try {
+      await consultationService.create(property.id, {
+        firstName: contactNombre.trim(),
+        lastName: contactApellido.trim(),
+        email: contactEmail.trim(),
+        phone: contactWhatsapp.trim(),
+        message: message.trim() || undefined,
+      });
+      setContactSuccess(true);
+    } catch (error) {
+      setContactError(error instanceof ApiError ? error.message : "No se pudo enviar la consulta. Intentá nuevamente.");
+    } finally {
+      setIsSubmittingContact(false);
+    }
   };
   const address = [property.location.street, property.location.number].filter(Boolean).join(" ");
   const details: { label: string; value: string | number | undefined }[] = [
@@ -84,6 +111,7 @@ export default function PropertyDetail({ property }: { property: PublicPropertyD
                   <span>{address && `${address}, `}{formatPublicLocation(property.location)}</span>
                 </p>
               </div>
+              <FavoriteHeartButton property={property} className="relative shrink-0" buttonClassName="rounded-full bg-muted hover:bg-muted/80 hover:scale-110" />
             </div>
           </div>
 
@@ -140,7 +168,7 @@ export default function PropertyDetail({ property }: { property: PublicPropertyD
           <Card>
             <CardHeader><CardTitle>Contacto</CardTitle></CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground">El contacto con el publicador todavía no está disponible.</p>
+              <p className="text-sm text-muted-foreground">Dejá tus datos para que el publicador pueda contactarte.</p>
               <Button className="w-full bg-accent hover:bg-accent/90" onClick={() => changeContactOpen(true)}>Ver formulario de contacto</Button>
             </CardContent>
           </Card>
@@ -151,27 +179,27 @@ export default function PropertyDetail({ property }: { property: PublicPropertyD
         <DialogContent className="max-h-[90dvh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Contactar al publicador</DialogTitle>
-            <DialogDescription>Vista previa del formulario. El envío de consultas todavía no está disponible; los datos no se guardan ni se envían.</DialogDescription>
+            <DialogDescription>Completá tus datos para recibir información sobre esta propiedad.</DialogDescription>
           </DialogHeader>
-          <form noValidate className="space-y-4" onSubmit={(event) => {
-            event.preventDefault();
-            setReviewed(contactValidation.validateForm(event.currentTarget));
-          }}>
+          {contactSuccess ? <div className="space-y-4">
+            <p role="status" className="text-sm text-muted-foreground">Tu consulta fue enviada correctamente.</p>
+            <DialogFooter><Button type="button" onClick={() => changeContactOpen(false)}>Cerrar</Button></DialogFooter>
+          </div> : <form noValidate className="space-y-4" onSubmit={submitContact}>
             {[
               { name: "nombre", label: "Nombre", value: contactNombre, setValue: setContactNombre, type: "text", autoComplete: "given-name" },
               { name: "apellido", label: "Apellido", value: contactApellido, setValue: setContactApellido, type: "text", autoComplete: "family-name" },
               { name: "email", label: "Correo electrónico", value: contactEmail, setValue: setContactEmail, type: "email", autoComplete: "email" },
               { name: "whatsapp", label: "WhatsApp / teléfono", value: contactWhatsapp, setValue: setContactWhatsapp, type: "tel", autoComplete: "tel" },
             ].map((field) => (
-              <InputField key={field.name} {...contactValidation.fieldProps(field.name)} label={field.label} type={field.type} autoComplete={field.autoComplete} required placeholder={field.label} value={field.value} onChange={(event) => { field.setValue(event.target.value); setReviewed(false); }} error={contactValidation.errors[field.name]} errorId={contactValidation.errorId(field.name)} />
+              <InputField key={field.name} {...contactValidation.fieldProps(field.name)} label={field.label} type={field.type} autoComplete={field.autoComplete} required placeholder={field.label} disabled={isSubmittingContact} value={field.value} onChange={(event) => { field.setValue(event.target.value); setContactError(""); }} error={contactValidation.errors[field.name]} errorId={contactValidation.errorId(field.name)} />
             ))}
             <div className="space-y-2">
               <Label htmlFor={messageId}>Mensaje (opcional)</Label>
-              <Textarea id={messageId} name="message" rows={3} value={message} onChange={(event) => { setMessage(event.target.value); setReviewed(false); }} placeholder="Ej.: Quisiera saber si aceptan mascotas o coordinar una visita." />
+              <Textarea id={messageId} name="message" rows={3} disabled={isSubmittingContact} value={message} onChange={(event) => { setMessage(event.target.value); setContactError(""); }} placeholder="Ej.: Quisiera saber si aceptan mascotas o coordinar una visita." />
             </div>
-            {reviewed && <p role="status" className="text-sm text-muted-foreground">Los datos están completos. El envío todavía no está disponible; no se envió ninguna consulta.</p>}
-            <DialogFooter><Button type="submit">Revisar consulta</Button></DialogFooter>
-          </form>
+            {contactError && <p role="alert" className="text-sm text-red-600">{contactError}</p>}
+            <DialogFooter><Button type="submit" disabled={isSubmittingContact}>{isSubmittingContact ? "Enviando..." : "Quiero que me contacten"}</Button></DialogFooter>
+          </form>}
         </DialogContent>
       </Dialog>
       <footer className="bg-muted py-6 px-4 mt-12">

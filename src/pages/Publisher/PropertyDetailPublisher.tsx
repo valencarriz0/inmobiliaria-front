@@ -24,9 +24,8 @@ import HeaderUser from "../../components/HeaderUser";
 import { useNavigate, useParams } from "react-router-dom";
 import { useProperty } from "../../hooks/use-property";
 import { publisherPropertyService } from "../../services/publisherPropertyService";
-import { MOCK_CURRENT_PUBLISHER_ID } from "../../data/mock/session";
 import { FieldError } from "../../components/ui/field-error";
-import type { Property } from "../../types/property";
+import type { PublisherProperty } from "../../types/publisher-property";
 import { OPERATION_TYPES, PUBLICATION_STATUSES } from "../../constants/property";
 import { formatCharacteristics, formatLocation, formatPrice } from "../../lib/formatters";
 import { mockConsultations, mockPropertyViews } from "../../data/mock/activity";
@@ -40,7 +39,7 @@ export default function PropertyDetailPublisher() {
 
   if (loading) return <p role="status" className="text-center py-10">Cargando propiedad...</p>;
   if (error) return <p role="alert" className="text-center py-10">{error}</p>;
-  if (!property || property.publicationStatus === "deleted" || property.publisherId !== MOCK_CURRENT_PUBLISHER_ID) {
+  if (!property || property.publicationStatus === "deleted") {
     return (
       <div className="text-center py-10 space-y-4">
         <p>Propiedad no disponible</p>
@@ -52,7 +51,7 @@ export default function PropertyDetailPublisher() {
   return <PublisherPropertyDetail key={property.id} property={property} refresh={refresh} />;
 }
 
-function PublisherPropertyDetail({ property, refresh }: { property: Property; refresh: () => void }) {
+function PublisherPropertyDetail({ property, refresh }: { property: PublisherProperty; refresh: () => void }) {
   const navigate = useNavigate();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [pauseOpen, setPauseOpen] = useState(false);

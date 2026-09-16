@@ -1,19 +1,26 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
-import type { Property } from "../types/property";
 import type { AuthResponse, AuthUser, LoginInput, RegisterInput, UpdateProfileInput } from "../types/user";
 import { ApiError } from "../services/api";
 import * as authService from "../services/authService";
 import { clearAuthToken, getAuthToken, setAuthToken } from "../services/authStorage";
 import * as userService from "../services/userService";
 import * as publisherApplicationService from "../services/publisherApplicationService";
+import { favoriteService } from "../services/favoriteService";
+import { publisherPropertyService } from "../services/publisherPropertyService";
 import type { PublicPublisherApplicationInput } from "../types/publisher-application";
-import { canFavoriteProperty } from "../lib/user-properties";
+import { canUseInterestedFeatures } from "../lib/user-properties";
+import { favoriteIdsFromResponse } from "../lib/favorites";
 import { AuthContext, type AuthDialog } from "./auth-context";
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [favorites, setFavorites] = useState<Record<string, string[]>>({});
+  const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
+  const [favoriteOwnerId, setFavoriteOwnerId] = useState<string | null>(null);
+  const [favoritesLoading, setFavoritesLoading] = useState(false);
+  const [favoritesError, setFavoritesError] = useState<string | null>(null);
+  const [pendingFavoriteIds, setPendingFavoriteIds] = useState<ReadonlySet<string>>(new Set());
+  const [ownedPropertyIds, setOwnedPropertyIds] = useState<ReadonlySet<string>>(new Set());
   const [authDialog, setAuthDialog] = useState<AuthDialog>(null);
 
   const refreshUser = useCallback(async () => {
@@ -46,6 +53,9 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
   const establishSession = useCallback((response: Pick<AuthResponse, "user" | "token">) => {
     setAuthToken(response.token);
+    setFavoriteIds([]);
+    setFavoriteOwnerId(null);
+    setOwnedPropertyIds(new Set());
     setUser(response.user);
     return response.user;
   }, []);
@@ -69,6 +79,10 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => {
     clearAuthToken();
     setUser(null);
+    setFavoriteIds([]);
+    setFavoriteOwnerId(null);
+    setFavoritesError(null);
+    setOwnedPropertyIds(new Set());
     setAuthDialog(null);
   }, []);
 
@@ -78,15 +92,72 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     return response.user;
   }, []);
 
-  const favoriteIds = useMemo(() => user ? favorites[user.id] ?? [] : [], [favorites, user]);
-  const toggleFavorite = useCallback((property: Pick<Property, "id" | "publisherId">) => {
-    if (!user || !canFavoriteProperty(user, property)) return;
-    setFavorites((previous) => {
-      const ids = previous[user.id] ?? [];
-      const next = ids.includes(property.id) ? ids.filter((id) => id !== property.id) : [...ids, property.id];
-      return { ...previous, [user.id]: next };
-    });
+  const refreshFavorites = useCallback(async () => {
+    if (!user || !canUseInterestedFeatures(user)) {
+      setFavoriteIds([]);
+      setFavoriteOwnerId(null);
+      setFavoritesError(null);
+      return;
+    }
+    setFavoritesLoading(true);
+    setFavoritesError(null);
+    try {
+      const { favorites } = await favoriteService.list();
+      const ids = favoriteIdsFromResponse(favorites);
+      setFavoriteIds(ids);
+      setFavoriteOwnerId(user.id);
+    } catch {
+      setFavoriteIds([]);
+      setFavoriteOwnerId(user.id);
+      setFavoritesError("No se pudieron cargar tus favoritos.");
+    } finally {
+      setFavoritesLoading(false);
+    }
   }, [user]);
+
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      if (!user || !canUseInterestedFeatures(user)) {
+        setFavoriteIds([]);
+        setFavoriteOwnerId(null);
+        setFavoritesError(null);
+        setOwnedPropertyIds(new Set());
+        return;
+      }
+      await refreshFavorites();
+      if (user.role !== "publisher") return;
+      try {
+        const { properties } = await publisherPropertyService.list();
+        if (active) setOwnedPropertyIds(new Set(properties.map((property) => property.id)));
+      } catch {
+        if (active) setOwnedPropertyIds(new Set());
+      }
+    };
+    void load();
+    return () => { active = false; };
+  }, [refreshFavorites, user]);
+
+  const visibleFavoriteIds = useMemo(() => user && favoriteOwnerId === user.id ? favoriteIds : [], [favoriteIds, favoriteOwnerId, user]);
+  const toggleFavorite = useCallback(async (propertyId: string) => {
+    if (!user || !canUseInterestedFeatures(user) || pendingFavoriteIds.has(propertyId)) return;
+    const wasFavorite = visibleFavoriteIds.includes(propertyId);
+    setPendingFavoriteIds((previous) => new Set(previous).add(propertyId));
+    setFavoriteIds((previous) => wasFavorite ? previous.filter((id) => id !== propertyId) : [...previous, propertyId]);
+    try {
+      if (wasFavorite) await favoriteService.remove(propertyId);
+      else await favoriteService.add(propertyId);
+    } catch (error) {
+      setFavoriteIds((previous) => wasFavorite ? [...previous, propertyId] : previous.filter((id) => id !== propertyId));
+      throw error;
+    } finally {
+      setPendingFavoriteIds((previous) => {
+        const next = new Set(previous);
+        next.delete(propertyId);
+        return next;
+      });
+    }
+  }, [pendingFavoriteIds, user, visibleFavoriteIds]);
 
   const value = useMemo(() => ({
     user,
@@ -98,12 +169,17 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     logout,
     refreshUser,
     updateProfile,
-    favoriteIds,
+    favoriteIds: visibleFavoriteIds,
+    favoritesLoading,
+    favoritesError,
+    pendingFavoriteIds,
+    ownedPropertyIds,
     toggleFavorite,
+    refreshFavorites,
     authDialog,
     setAuthDialog,
     openAuthDialog: (dialog: Exclude<AuthDialog, null>) => setAuthDialog(dialog),
-  }), [authDialog, favoriteIds, isLoading, login, logout, refreshUser, register, registerPublicPublisherApplication, toggleFavorite, updateProfile, user]);
+  }), [authDialog, favoritesError, favoritesLoading, isLoading, login, logout, ownedPropertyIds, pendingFavoriteIds, refreshFavorites, refreshUser, register, registerPublicPublisherApplication, toggleFavorite, updateProfile, user, visibleFavoriteIds]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

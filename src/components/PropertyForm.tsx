@@ -10,6 +10,7 @@ import { isOptionKey, validatePropertyForm } from "../lib/validation";
 import { getCities, getProvinces } from "../services/locationService";
 import type { City, Province } from "../types/location";
 import type { Property } from "../types/property";
+import type { EditablePropertyData } from "../types/property-input";
 import type { PropertyFormSubmission, PropertyFormValues } from "../types/property-form";
 import PropertyImages from "./PropertyImages";
 import LocationPicker from "./LocationPicker";
@@ -22,7 +23,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 
 interface PropertyFormProps {
   /** Mount after loading; use the property ID as key when switching properties. */
-  initialProperty?: Property;
+  initialProperty?: EditablePropertyData & Pick<Property, "images">;
   submitLabel: string;
   onSubmit: (input: PropertyFormSubmission) => Promise<void>;
   onCancel: () => void;

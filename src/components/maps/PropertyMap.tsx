@@ -33,10 +33,12 @@ export default function PropertyMap({ latitude, longitude, displayName, bounding
   if (!hasValidCoordinates(latitude, longitude)) return null;
   const position: [number, number] = [latitude as number, longitude as number];
   return (
-    <MapContainer center={position} zoom={15} scrollWheelZoom={false} className={`h-64 w-full rounded-lg ${className}`} aria-label={displayName ? `Mapa de ${displayName}` : "Mapa de ubicación"}>
-      <Viewport latitude={latitude} longitude={longitude} boundingBox={boundingBox} />
-      <TileLayer attribution={'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'} url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-      <Marker position={position} icon={markerIcon} />
-    </MapContainer>
+    <div className={`relative z-0 isolate h-64 w-full overflow-hidden rounded-lg ${className}`}>
+      <MapContainer center={position} zoom={15} scrollWheelZoom={false} className="h-full w-full" aria-label={displayName ? `Mapa de ${displayName}` : "Mapa de ubicación"}>
+        <Viewport latitude={latitude} longitude={longitude} boundingBox={boundingBox} />
+        <TileLayer attribution={'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'} url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        <Marker position={position} icon={markerIcon} />
+      </MapContainer>
+    </div>
   );
 }

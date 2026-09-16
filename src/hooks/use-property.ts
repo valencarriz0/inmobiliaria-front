@@ -2,15 +2,15 @@ import { useCallback, useEffect, useState } from "react";
 import { ApiError } from "../services/api.ts";
 import { getPublicPropertyById } from "../services/publicPropertyService.ts";
 import { publisherPropertyService } from "../services/publisherPropertyService.ts";
-import type { Property } from "../types/property.ts";
+import type { PublisherProperty } from "../types/publisher-property.ts";
 import type { PublicPropertyDetail } from "../types/public-property.ts";
 
 type PropertyScope = "public" | "publisher";
-type LoadedProperty = PublicPropertyDetail | Property;
+type LoadedProperty = PublicPropertyDetail | PublisherProperty;
 interface PropertyResult { id: string | undefined; scope: PropertyScope; revision: number; property: LoadedProperty | undefined; error: string | null; }
 interface PropertyHookResult<T> { property: T | undefined; loading: boolean; error: string | null; refresh: () => void; }
 
-export function useProperty(id: string | undefined, scope: "publisher"): PropertyHookResult<Property>;
+export function useProperty(id: string | undefined, scope: "publisher"): PropertyHookResult<PublisherProperty>;
 export function useProperty(id: string | undefined, scope?: "public"): PropertyHookResult<PublicPropertyDetail>;
 export function useProperty(id: string | undefined, scope: PropertyScope = "public") {
   const [result, setResult] = useState<PropertyResult>();

@@ -1,5 +1,4 @@
 import { createContext } from "react";
-import type { Property } from "../types/property";
 import type { AuthUser, LoginInput, RegisterInput, UpdateProfileInput } from "../types/user";
 import type { PublicPublisherApplicationInput, PublisherApplication } from "../types/publisher-application";
 
@@ -16,7 +15,12 @@ export interface AuthContextValue {
   refreshUser: () => Promise<AuthUser | null>;
   updateProfile: (data: UpdateProfileInput) => Promise<AuthUser>;
   favoriteIds: string[];
-  toggleFavorite: (property: Pick<Property, "id" | "publisherId">) => void;
+  favoritesLoading: boolean;
+  favoritesError: string | null;
+  pendingFavoriteIds: ReadonlySet<string>;
+  ownedPropertyIds: ReadonlySet<string>;
+  toggleFavorite: (propertyId: string) => Promise<void>;
+  refreshFavorites: () => Promise<void>;
   authDialog: AuthDialog;
   setAuthDialog: (dialog: AuthDialog) => void;
   openAuthDialog: (dialog: Exclude<AuthDialog, null>) => void;

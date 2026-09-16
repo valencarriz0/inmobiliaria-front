@@ -34,7 +34,7 @@ export function formatPublicCharacteristics(property: Pick<PublicPropertySummary
   return characteristics;
 }
 
-export function formatCharacteristics(property: Property): string[] {
+export function formatCharacteristics(property: Pick<Property, "bedrooms" | "rooms" | "bathrooms" | "totalArea" | "amenities">): string[] {
   const characteristics: string[] = [];
   if (property.bedrooms !== undefined) {
     characteristics.push(`${property.bedrooms} ${property.bedrooms === 1 ? "habitación" : "habitaciones"}`);

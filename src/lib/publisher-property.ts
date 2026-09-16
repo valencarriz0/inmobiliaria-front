@@ -10,7 +10,6 @@ export function mapPublisherProperty(dto: PublisherPropertyDto): PublisherProper
     ...property,
     services: property.services.filter((code): code is PublisherProperty["services"][number] => code in PROPERTY_SERVICES),
     amenities: property.amenities.filter((code): code is PublisherProperty["amenities"][number] => code in PROPERTY_AMENITIES),
-    publisherId: dto.publisherId,
     publicationStatus: dto.publicationStatus as PublisherProperty["publicationStatus"],
     updatedAt: dto.updatedAt,
     location: {

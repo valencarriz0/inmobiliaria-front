@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import type { PublicPropertySummary } from "../types/public-property";
 import { OPERATION_TYPES } from "../constants/property";
 import { formatPublicCharacteristics, formatPublicLocation, formatPrice } from "../lib/formatters";
+import FavoriteHeartButton from "./FavoriteHeartButton";
 
 type PropertyListProps = {
   properties: PublicPropertySummary[];
@@ -38,7 +39,7 @@ const PropertyList = ({ properties, loggedIn = false }: PropertyListProps) => {
             >
               {OPERATION_TYPES[property.operationType]}
             </span>
-
+            <FavoriteHeartButton property={property} />
           </div>
 
           <CardContent className="p-4 flex-1">

@@ -90,7 +90,7 @@ export default function AuthModals() {
             <>
               <DialogHeader>
                 <DialogTitle className="text-center text-xl font-bold">Guardá tus propiedades favoritas</DialogTitle>
-                <DialogDescription className="text-center">Necesitás iniciar sesión para guardar propiedades en Favoritos.</DialogDescription>
+                <DialogDescription className="text-center">Debés iniciar sesión para guardar propiedades en favoritos.</DialogDescription>
               </DialogHeader>
               <DialogFooter className="sm:justify-center">
                 <div className="flex w-full flex-col gap-3">

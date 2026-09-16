@@ -195,15 +195,15 @@ test("el visitante no acumula un estado de Favoritos y el contexto de permisos d
   assert.equal(canFavoriteProperty(authenticatedUser("publisher"), propertyFromAnotherPublisher), true);
 });
 
-test("el publicador puede guardar propiedades ajenas pero nunca propias, también al cambiar de rol", async () => {
+test("los datos mock sin UUID de publicador no se usan para inferir propiedad propia", async () => {
   const { canFavoriteProperty, isOwnProperty } = await import("../src/lib/user-properties.ts");
   const publisher = authenticatedUser("publisher");
   const interested = authenticatedUser("interested");
   for (const property of mockProperties) {
-    assert.equal(isOwnProperty(publisher, property), property.publisherId === 1);
-    assert.equal(canFavoriteProperty(publisher, property), property.publisherId !== 1);
+    assert.equal(isOwnProperty(publisher, property), false);
+    assert.equal(canFavoriteProperty(publisher, property), true);
   }
   const previouslySaved = mockProperties.filter(({ id }) => id === "1" || id === "4");
   assert.equal(previouslySaved.filter((property) => canFavoriteProperty(interested, property)).length, 2);
-  assert.deepEqual(previouslySaved.filter((property) => canFavoriteProperty(publisher, property)).map(({ id }) => id), ["4"]);
+  assert.deepEqual(previouslySaved.filter((property) => canFavoriteProperty(publisher, property)).map(({ id }) => id), ["1", "4"]);
 });

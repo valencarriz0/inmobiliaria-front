@@ -10,7 +10,7 @@ export default function Header({ page }: { page: string }) {
   if (user) return <HeaderUser />;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
+    <header className="sticky top-0 z-50 isolate w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
       <div className="container mx-auto flex h-16 items-center justify-between gap-2">
         <Link to="/" className="flex items-center gap-1 sm:gap-2">
           <Home className="h-5 w-5 sm:h-6 sm:w-6 text-primary shrink-0" />

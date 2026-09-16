@@ -1,10 +1,9 @@
 import type { Property } from "./property.ts";
 import type { PublicPropertyDetailDto } from "./public-property.ts";
 
-export type PublisherProperty = Property;
+export type PublisherProperty = Omit<Property, "publisherId">;
 export interface PublisherPropertyDto extends PublicPropertyDetailDto {
 	country?: string | null;
-	publisherId: number;
 	publicationStatus: string;
 	updatedAt: string;
 }

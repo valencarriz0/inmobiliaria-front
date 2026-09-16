@@ -1,5 +1,6 @@
 import { apiRequest } from "./api.ts";
 import { getAuthToken } from "./authStorage.ts";
+import type { AdminMetrics, AdminProperty, AdminUser, Pagination } from "../types/admin.ts";
 
 const options = () => ({ token: getAuthToken() });
 function query(values: Record<string, string | undefined>) {
@@ -9,16 +10,13 @@ function query(values: Record<string, string | undefined>) {
 }
 
 export const adminService = {
-  users: (filters: { query?: string; role?: string; status?: string } = {}) => apiRequest<{ users: unknown[] }>(`/admin/users${query(filters)}`, options()),
-  updateUser: (id: string, body: { firstName?: string; lastName?: string; phone?: string | null }) => apiRequest<{ user: unknown }>(`/admin/users/${id}`, { ...options(), method: "PATCH", body }),
-  disableUser: (id: string) => apiRequest<{ user: unknown }>(`/admin/users/${id}/disable`, { ...options(), method: "PATCH" }),
-  reactivateUser: (id: string) => apiRequest<{ user: unknown }>(`/admin/users/${id}/reactivate`, { ...options(), method: "PATCH" }),
-  properties: (filters: { status?: string; query?: string } = {}) => apiRequest<{ properties: unknown[] }>(`/admin/properties${query(filters)}`, options()),
-  property: (id: string) => apiRequest<{ property: unknown }>(`/admin/properties/${id}`, options()),
-  updateProperty: (id: string, body: unknown) => apiRequest<{ property: unknown }>(`/admin/properties/${id}`, { ...options(), method: "PATCH", body }),
-  pauseProperty: (id: string) => apiRequest<{ property: unknown }>(`/admin/properties/${id}/pause`, { ...options(), method: "PATCH" }),
-  reactivateProperty: (id: string) => apiRequest<{ property: unknown }>(`/admin/properties/${id}/reactivate`, { ...options(), method: "PATCH" }),
-  deleteProperty: (id: string) => apiRequest<{ property: unknown }>(`/admin/properties/${id}`, { ...options(), method: "DELETE" }),
-  propertyHistory: (id: string) => apiRequest<{ history: unknown[] }>(`/admin/properties/${id}/history`, options()),
-  metrics: () => apiRequest<unknown>("/admin/metrics", options()),
+  users: (filters: { q?: string; role?: string; status?: string; page?: string; limit?: string } = {}) => apiRequest<{ users: AdminUser[]; pagination: Pagination }>(`/admin/users${query(filters)}`, options()),
+  updateUser: (id: string, body: { firstName?: string; lastName?: string; phone?: string | null }) => apiRequest<{ user: AdminUser }>(`/admin/users/${id}`, { ...options(), method: "PATCH", body }),
+  disableUser: (id: string) => apiRequest<{ user: AdminUser }>(`/admin/users/${id}/disable`, { ...options(), method: "PATCH" }),
+  reactivateUser: (id: string) => apiRequest<{ user: AdminUser }>(`/admin/users/${id}/reactivate`, { ...options(), method: "PATCH" }),
+  properties: (filters: { status?: string; q?: string; publisherId?: string; page?: string; limit?: string } = {}) => apiRequest<{ properties: AdminProperty[]; pagination: Pagination }>(`/admin/properties${query(filters)}`, options()),
+  pauseProperty: (id: string) => apiRequest<{ property: AdminProperty }>(`/admin/properties/${id}/pause`, { ...options(), method: "PATCH" }),
+  reactivateProperty: (id: string) => apiRequest<{ property: AdminProperty }>(`/admin/properties/${id}/reactivate`, { ...options(), method: "PATCH" }),
+  deleteProperty: (id: string) => apiRequest<{ property: AdminProperty }>(`/admin/properties/${id}`, { ...options(), method: "DELETE" }),
+  metrics: () => apiRequest<AdminMetrics>("/admin/metrics", options()),
 };

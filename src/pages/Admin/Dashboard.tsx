@@ -10,6 +10,7 @@ import { publisherApplicationStatusLabels } from "../../lib/publisher-applicatio
 import { ApiError } from "../../services/api";
 import { approvePublisherApplication, getAdminPublisherApplications, rejectPublisherApplication } from "../../services/publisherApplicationService";
 import type { PublisherApplicationStatus, PublisherApplicationWithApplicant } from "../../types/publisher-application";
+import { AdminMetricsSection, AdminPropertiesSection, AdminUsersSection } from "./AdminSections";
 
 const statuses: PublisherApplicationStatus[] = ["pending", "approved", "rejected"];
 
@@ -18,6 +19,7 @@ function messageFrom(error: unknown) {
 }
 
 export default function AdminDashboard() {
+  const [section, setSection] = useState<"applications" | "users" | "properties" | "metrics">("applications");
   const [status, setStatus] = useState<PublisherApplicationStatus>("pending");
   const [applications, setApplications] = useState<PublisherApplicationWithApplicant[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -86,7 +88,9 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-background">
       <HeaderUser />
       <main className="container mx-auto max-w-6xl px-4 py-8 space-y-6">
-        <div className="space-y-2"><h1 className="text-3xl font-bold">Solicitudes de publicador</h1><p className="text-muted-foreground">Revisá y resolvé las solicitudes de habilitación para publicar propiedades.</p></div>
+        <div className="space-y-2"><h1 className="text-3xl font-bold">Administración</h1><p className="text-muted-foreground">Gestioná solicitudes, usuarios, publicaciones y métricas del sistema.</p></div>
+        <div className="flex flex-wrap gap-2">{[["applications", "Solicitudes"], ["users", "Usuarios"], ["properties", "Publicaciones"], ["metrics", "Métricas"]].map(([value, label]) => <Button key={value} variant={section === value ? "default" : "outline"} onClick={() => setSection(value as typeof section)}>{label}</Button>)}</div>
+        {section === "users" ? <AdminUsersSection /> : section === "properties" ? <AdminPropertiesSection /> : section === "metrics" ? <AdminMetricsSection /> : <>
         <div className="flex flex-wrap gap-2" aria-label="Filtrar solicitudes por estado">
           {statuses.map((value) => <Button key={value} variant={status === value ? "default" : "outline"} onClick={() => { setStatus(value); setNotice(""); }}>{publisherApplicationStatusLabels[value]}</Button>)}
         </div>
@@ -108,7 +112,7 @@ export default function AdminDashboard() {
               {application.status === "pending" && <div className="flex flex-wrap gap-2"><Button disabled={resolvingId === application.id} onClick={() => void approve(application)}>{resolvingId === application.id ? "Procesando..." : "Aprobar"}</Button><Button variant="outline" disabled={resolvingId === application.id} onClick={() => { setRejectingApplication(application); setRejectionReason(""); }}>Rechazar</Button></div>}
             </CardContent>
           </Card>)}
-        </div>}
+        </div>}</>}
       </main>
       <Dialog open={Boolean(rejectingApplication)} onOpenChange={(open) => { if (!open && !resolvingId) setRejectingApplication(null); }}>
         <DialogContent>

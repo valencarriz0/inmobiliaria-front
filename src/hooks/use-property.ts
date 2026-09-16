@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { ApiError } from "../services/api.ts";
 import { getPublicPropertyById } from "../services/publicPropertyService.ts";
-import { propertyService } from "../services/propertyService.ts";
+import { publisherPropertyService } from "../services/publisherPropertyService.ts";
 import type { Property } from "../types/property.ts";
 import type { PublicPropertyDetail } from "../types/public-property.ts";
 
@@ -20,7 +20,7 @@ export function useProperty(id: string | undefined, scope: PropertyScope = "publ
     const controller = new AbortController();
     async function load() {
       try {
-        const property = !id ? undefined : scope === "public" ? await getPublicPropertyById(id, controller.signal) : await propertyService.getPropertyById(id);
+        const property = !id ? undefined : scope === "public" ? await getPublicPropertyById(id, controller.signal) : await publisherPropertyService.detail(id);
         if (!controller.signal.aborted) setResult({ id, scope, revision, property, error: null });
       } catch (error) {
         if (!controller.signal.aborted) setResult({ id, scope, revision, property: undefined, error: error instanceof ApiError && error.status === 404 ? "Propiedad no encontrada." : "No se pudo cargar la propiedad." });

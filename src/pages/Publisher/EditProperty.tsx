@@ -3,7 +3,7 @@ import PropertyForm from "../../components/PropertyForm";
 import BotonVolver from "../../components/BotonVolver";
 import HeaderUser from "../../components/HeaderUser";
 import { useProperty } from "../../hooks/use-property";
-import { propertyService } from "../../services/propertyService";
+import { publisherPropertyService } from "../../services/publisherPropertyService";
 import { MOCK_CURRENT_PUBLISHER_ID } from "../../data/mock/session";
 import { Button } from "../../components/ui/button";
 
@@ -40,7 +40,7 @@ export default function EditProperty() {
             submitLabel="Guardar cambios"
             onCancel={() => navigate(`/detailPublisher/${property.id}`)}
             onSubmit={async (input) => {
-              const updated = await propertyService.updateProperty(property.id, input);
+              const updated = await publisherPropertyService.update(property.id, input);
               navigate(`/detailPublisher/${updated.id}`);
             }}
           />

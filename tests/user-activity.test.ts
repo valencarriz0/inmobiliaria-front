@@ -2,9 +2,21 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { recentPropertyIds, readRecentProperties, rememberProperty, RECENT_PROPERTIES_KEY } from "../src/lib/recent-properties.ts";
 import { filterPublisherProperties, propertyMetrics, publisherStatistics } from "../src/lib/publisher-properties.ts";
+import { mapPublisherProperty } from "../src/lib/publisher-property.ts";
 import { mockProperties } from "../src/data/mock/properties.ts";
 import { mockConsultations, mockPropertyViews, mockPublisherNotifications } from "../src/data/mock/activity.ts";
 import type { AuthUser, UserRole } from "../src/types/user.ts";
+import type { PublisherPropertyDto } from "../src/types/publisher-property.ts";
+
+const UUIDS = [
+  "550e8400-e29b-41d4-a716-446655440000",
+  "550e8400-e29b-41d4-a716-446655440001",
+  "550e8400-e29b-41d4-a716-446655440002",
+  "550e8400-e29b-41d4-a716-446655440003",
+  "550e8400-e29b-41d4-a716-446655440004",
+  "550e8400-e29b-41d4-a716-446655440005",
+  "550e8400-e29b-41d4-a716-446655440006",
+];
 
 function authenticatedUser(role: UserRole): AuthUser {
   return {
@@ -14,15 +26,16 @@ function authenticatedUser(role: UserRole): AuthUser {
 }
 
 test("vistas recientes conserva seis IDs únicos y antepone la última visita", () => {
-  const before = ["1", "2", "3", "4", "5", "6"];
-  assert.deepEqual(recentPropertyIds(["3", ...before]), ["3", "1", "2", "4", "5", "6"]);
-  assert.deepEqual(recentPropertyIds(["7", ...before]), ["7", "1", "2", "3", "4", "5"]);
-  assert.deepEqual(before, ["1", "2", "3", "4", "5", "6"]);
+  const before = UUIDS.slice(0, 6);
+  assert.deepEqual(recentPropertyIds([UUIDS[2], ...before]), [UUIDS[2], UUIDS[0], UUIDS[1], UUIDS[3], UUIDS[4], UUIDS[5]]);
+  assert.deepEqual(recentPropertyIds([UUIDS[6], ...before]), [UUIDS[6], ...UUIDS.slice(0, 5)]);
+  assert.deepEqual(before, UUIDS.slice(0, 6));
 });
 
 test("vistas recientes descarta datos de almacenamiento inválidos", () => {
   for (const value of [null, undefined, {}, "1", 12]) assert.deepEqual(recentPropertyIds(value), []);
-  assert.deepEqual(recentPropertyIds(["1", null, "", "   ", 2, {}, "1", "3"]), ["1", "3"]);
+  assert.deepEqual(recentPropertyIds(["1", "3", "", "abc", null, UUIDS[0], UUIDS[0]]), [UUIDS[0]]);
+  assert.deepEqual(recentPropertyIds([...UUIDS, "1"]), UUIDS.slice(0, 6));
 });
 
 test("vistas recientes sobrevive a lecturas repetidas y tolera almacenamiento corrupto o bloqueado", () => {
@@ -34,18 +47,34 @@ test("vistas recientes sobrevive a lecturas repetidas y tolera almacenamiento co
   } });
   try {
     assert.deepEqual(readRecentProperties(), []);
-    rememberProperty("1");
-    rememberProperty("2");
-    rememberProperty("1");
-    assert.deepEqual(readRecentProperties(), ["1", "2"]);
-    assert.deepEqual(readRecentProperties(), ["1", "2"]);
+    rememberProperty(UUIDS[0]);
+    rememberProperty(UUIDS[1]);
+    rememberProperty(UUIDS[0]);
+    assert.deepEqual(readRecentProperties(), [UUIDS[0], UUIDS[1]]);
+    assert.deepEqual(readRecentProperties(), [UUIDS[0], UUIDS[1]]);
     stored = "{invalido";
     assert.deepEqual(readRecentProperties(), []);
-    rememberProperty("3");
-    assert.deepEqual(readRecentProperties(), ["3"]);
+    rememberProperty(UUIDS[2]);
+    assert.deepEqual(readRecentProperties(), [UUIDS[2]]);
     Object.defineProperty(globalThis, "sessionStorage", { configurable: true, get() { throw new Error("Bloqueado"); } });
     assert.deepEqual(readRecentProperties(), []);
     assert.doesNotThrow(() => rememberProperty("1"));
+  } finally {
+    if (original) Object.defineProperty(globalThis, "sessionStorage", original);
+    else Reflect.deleteProperty(globalThis, "sessionStorage");
+  }
+});
+
+test("vistas recientes limpia IDs legacy del sessionStorage", () => {
+  const original = Object.getOwnPropertyDescriptor(globalThis, "sessionStorage");
+  let stored = JSON.stringify(["3", "4", UUIDS[0], "1"]);
+  Object.defineProperty(globalThis, "sessionStorage", { configurable: true, value: {
+    getItem: () => stored,
+    setItem: (_key: string, value: string) => { stored = value; },
+  } });
+  try {
+    assert.deepEqual(readRecentProperties(), [UUIDS[0]]);
+    assert.equal(stored, JSON.stringify([UUIDS[0]]));
   } finally {
     if (original) Object.defineProperty(globalThis, "sessionStorage", original);
     else Reflect.deleteProperty(globalThis, "sessionStorage");
@@ -67,6 +96,35 @@ test("búsqueda admite calle y altura y excluye eliminadas", () => {
   const property = { ...owned[0], location: { ...owned[0].location, street: "Av. Colón", number: "123" } };
   assert.equal(filterPublisherProperties([property], { query: "colon 123", status: "all" }).length, 1);
   assert.deepEqual(filterPublisherProperties([{ ...property, publicationStatus: "deleted" }], { query: "", status: "all" }), []);
+});
+
+test("el mapper del publicador normaliza ciudad, provincia y calle", () => {
+  const dto = {
+    ...owned[0],
+    city: { id: "city-1", name: "Villa María" },
+    province: { id: "province-1", name: "Córdoba" },
+    street: "Av. Colón",
+    streetNumber: "123",
+    country: "Argentina",
+    updatedAt: owned[0].updatedAt,
+  } as unknown as PublisherPropertyDto;
+  const property = mapPublisherProperty(dto);
+  assert.deepEqual(property.location, { city: "Villa María", province: "Córdoba", street: "Av. Colón", number: "123", country: "Argentina", cityId: "city-1", provinceId: "province-1" });
+  assert.equal(filterPublisherProperties([property], { query: "villa maria", status: "all" }).length, 1);
+  assert.equal(filterPublisherProperties([property], { query: "cordoba", status: "all" }).length, 1);
+  assert.equal(filterPublisherProperties([property], { query: "colon", status: "all" }).length, 1);
+});
+
+test("el mapper del publicador tolera ciudad y provincia nulas", () => {
+  const dto = {
+    ...owned[0], city: null, province: null, street: null, streetNumber: null, updatedAt: owned[0].updatedAt,
+  } as unknown as PublisherPropertyDto;
+  const property = mapPublisherProperty(dto);
+  assert.equal(property.location.city, "");
+  assert.equal(property.location.province, "");
+  assert.equal(property.location.street, "");
+  assert.equal(property.location.number, "");
+  assert.doesNotThrow(() => filterPublisherProperties([property], { query: "", status: "all" }));
 });
 
 test("las métricas coinciden con las consultas de ejemplo y usan cero para una nueva publicación", () => {

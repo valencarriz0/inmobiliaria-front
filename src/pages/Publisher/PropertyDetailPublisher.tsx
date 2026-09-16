@@ -23,7 +23,7 @@ import { Link } from "react-router";
 import HeaderUser from "../../components/HeaderUser";
 import { useNavigate, useParams } from "react-router-dom";
 import { useProperty } from "../../hooks/use-property";
-import { propertyService } from "../../services/propertyService";
+import { publisherPropertyService } from "../../services/publisherPropertyService";
 import { MOCK_CURRENT_PUBLISHER_ID } from "../../data/mock/session";
 import { FieldError } from "../../components/ui/field-error";
 import type { Property } from "../../types/property";
@@ -69,11 +69,11 @@ function PublisherPropertyDetail({ property, refresh }: { property: Property; re
     setActionError(undefined);
     try {
       if (action === "delete") {
-        await propertyService.softDeleteProperty(property.id);
+        await publisherPropertyService.remove(property.id);
         navigate("/dashboard");
       } else {
-        if (action === "pause") await propertyService.pauseProperty(property.id);
-        else await propertyService.reactivateProperty(property.id);
+        if (action === "pause") await publisherPropertyService.pause(property.id);
+        else await publisherPropertyService.reactivate(property.id);
         setPauseOpen(false);
         refresh();
       }

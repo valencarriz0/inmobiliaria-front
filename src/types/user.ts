@@ -10,6 +10,7 @@ export interface AuthUser {
   phone: string | null;
   role: UserRole;
   accountStatus: AccountStatus;
+  emailVerifiedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -50,3 +51,8 @@ export interface AuthResponse {
   user: AuthUser;
   token: string;
 }
+export interface RegisterResponse { user: AuthUser; verificationRequired: true; message: string; }
+export interface MessageResponse { message: string; }
+export interface ForgotPasswordInput { email: string; }
+export interface ResetPasswordInput { token: string; password: string; passwordConfirm: string; }
+export interface ChangePasswordInput { currentPassword: string; newPassword: string; newPasswordConfirm: string; }

@@ -5,12 +5,14 @@ export type ApiErrorDetails = Record<string, string>;
 export class ApiError extends Error {
   status: number;
   details?: ApiErrorDetails;
+  code?: string;
 
-  constructor(status: number, message: string, details?: ApiErrorDetails) {
+  constructor(status: number, message: string, details?: ApiErrorDetails, code?: string) {
     super(message);
     this.name = "ApiError";
     this.status = status;
     this.details = details;
+    this.code = code;
   }
 }
 
@@ -22,6 +24,7 @@ interface ApiRequestOptions extends Omit<RequestInit, "body"> {
 interface ErrorPayload {
   error?: unknown;
   details?: unknown;
+  code?: unknown;
 }
 
 function apiBaseUrl() {
@@ -67,7 +70,7 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
     const message = typeof errorPayload?.error === "string"
       ? errorPayload.error
       : "No se pudo completar la solicitud. Intentá nuevamente.";
-    throw new ApiError(response.status, message, safeDetails(errorPayload?.details));
+    throw new ApiError(response.status, message, safeDetails(errorPayload?.details), typeof errorPayload?.code === "string" ? errorPayload.code : undefined);
   }
   return payload as T;
 }

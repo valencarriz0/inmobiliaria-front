@@ -25,6 +25,7 @@ export default function PublisherRegistration({ mode }: { mode: "visitor" | "int
   const [applicationError, setApplicationError] = useState("");
   const [formError, setFormError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [publicSuccess, setPublicSuccess] = useState("");
   const upgrade = mode === "interested";
 
   const loadApplication = useCallback(async () => {
@@ -54,8 +55,8 @@ export default function PublisherRegistration({ mode }: { mode: "visitor" | "int
     setIsSubmitting(true);
     setFormError("");
     try {
-      await registerPublicPublisherApplication(publicPublisherApplicationInput(values));
-      navigate("/profile", { replace: true });
+      const response = await registerPublicPublisherApplication(publicPublisherApplicationInput(values));
+      setPublicSuccess(response.message);
       return true;
     } catch (error) {
       setFormError(messageFrom(error));
@@ -108,7 +109,7 @@ export default function PublisherRegistration({ mode }: { mode: "visitor" | "int
         {upgrade && isLoadingApplication ? <p role="status" className="text-center">Consultando el estado de tu solicitud...</p> : null}
         {upgrade && applicationError ? <div className="space-y-3 text-center"><p role="alert">{applicationError}</p><Button variant="outline" onClick={() => void loadApplication()}>Reintentar</Button></div> : null}
         {applicationStatus}
-        {!isLoadingApplication && !applicationError && !application && <Card className="rounded-2xl bg-gray-50 dark:bg-card min-w-0">
+        {publicSuccess ? <Card><CardContent className="space-y-4 py-6"><h2 className="text-xl font-semibold">Solicitud enviada</h2><p role="status">{publicSuccess} Verificá tu correo antes de iniciar sesión.</p><div className="flex gap-2"><Button asChild><Link to="/">Iniciar sesión</Link></Button><Button asChild variant="outline"><Link to="/">Ir al inicio</Link></Button></div></CardContent></Card> : !isLoadingApplication && !applicationError && !application && <Card className="rounded-2xl bg-gray-50 dark:bg-card min-w-0">
           <CardHeader><CardTitle className="text-2xl font-bold text-center">{upgrade ? "Datos del publicador" : "Registro de publicador"}</CardTitle></CardHeader>
           <CardContent>
             <UserForm key={upgrade ? "upgrade" : "register"} role="publisher" publisherFields initialUser={user ?? undefined}

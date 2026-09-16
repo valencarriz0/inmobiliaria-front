@@ -50,5 +50,6 @@ export interface PublicPublisherApplicationInput extends PublisherApplicationInp
 export interface PublicPublisherApplicationResponse {
   user: AuthUser;
   application: PublisherApplication;
-  token: string;
+  verificationRequired: true;
+  message: string;
 }

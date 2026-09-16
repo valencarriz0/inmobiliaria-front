@@ -18,6 +18,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import Favorites from "../pages/User/Favorites";
 import Consultations from "../pages/User/Consultations";
 import Statistics from "../pages/Publisher/Statistics";
+import VerifyEmail from "../pages/User/VerifyEmail";
+import ResetPassword from "../pages/User/ResetPassword";
 import { useAuth } from "../hooks/use-auth";
 import type { UserRole } from "../types/user";
 import { roleHome } from "../lib/auth-navigation";
@@ -58,6 +60,8 @@ function App() {
         <Route path="/detail/:id" element={<PropertyDetailPage />} />
         <Route path="/post" element={<PostPage />} />
         <Route path="/register" element={<PublisherRegistration mode="visitor" />} />
+        <Route path="/verificar-correo" element={<VerifyEmail />} />
+        <Route path="/restablecer-contrasena" element={<ResetPassword />} />
         <Route element={<RequireAuth />}>
           <Route path="/HomePageLogin" element={<HomePageLogin />} />
           <Route path="/detailLogin" element={<PropertyDetailLogin />} />

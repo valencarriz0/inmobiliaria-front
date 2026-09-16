@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import HeaderUser from "../../components/HeaderUser";
 import UserForm from "../../components/UserForm";
@@ -12,12 +13,16 @@ import type { PublisherApplication } from "../../types/publisher-application";
 import type { UserFormValues } from "../../types/user";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
+import { InputField } from "../../components/ui/input-field";
 
 const roleLabels = { interested: "Interesado", publisher: "Publicador", admin: "Administrador" } as const;
 const statusLabels = { active: "Activa", disabled: "Deshabilitada" } as const;
 
 export default function Profile() {
-  const { user, updateProfile, refreshUser } = useAuth();
+  const { user, updateProfile, refreshUser, changePassword, logout } = useAuth();
+  const navigate = useNavigate();
+  const [passwords, setPasswords] = useState({ currentPassword: "", newPassword: "", newPasswordConfirm: "" });
+  const [passwordMessage, setPasswordMessage] = useState(""); const [changingPassword, setChangingPassword] = useState(false);
   const [editing, setEditing] = useState(false);
   const [saved, setSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -71,6 +76,7 @@ export default function Profile() {
       setIsSaving(false);
     }
   }
+  async function savePassword(event: FormEvent<HTMLFormElement>) { event.preventDefault(); setChangingPassword(true); setPasswordMessage(""); try { await changePassword(passwords); logout(); navigate("/", { replace: true, state: { passwordChanged: true } }); } catch (error) { setPasswordMessage(error instanceof ApiError ? error.message : "No se pudo actualizar la contraseña. Intentá nuevamente."); } finally { setChangingPassword(false); } }
 
   const publisherApplicationCard = (user.role === "interested" || application?.status === "approved") && <Card className="rounded-2xl">
     <CardHeader><CardTitle>Publicar propiedades</CardTitle><CardDescription>Solicitá la habilitación para publicar desde esta cuenta.</CardDescription></CardHeader>
@@ -110,6 +116,7 @@ export default function Profile() {
             {saved && <p role="status" className="text-sm text-green-700">Perfil actualizado correctamente.</p>}
           </CardContent>
         </Card>
+        <Card className="rounded-2xl"><CardHeader><CardTitle>Seguridad</CardTitle><CardDescription>Cambiá tu contraseña sin modificar tus datos personales.</CardDescription></CardHeader><CardContent><form className="space-y-4" onSubmit={savePassword}>{([['currentPassword','Contraseña actual'],['newPassword','Nueva contraseña'],['newPasswordConfirm','Repetir nueva contraseña']] as const).map(([name,label]) => <InputField key={name} id={name} errorId={`${name}-error`} label={label} type="password" required value={passwords[name]} disabled={changingPassword} onChange={(e) => setPasswords({ ...passwords, [name]: e.target.value })}/>)}{passwordMessage && <p role={passwordMessage.includes("correctamente") ? "status" : "alert"}>{passwordMessage}</p>}<Button disabled={changingPassword}>{changingPassword ? "Actualizando..." : "Cambiar contraseña"}</Button></form></CardContent></Card>
         {publisherApplicationCard}
       </main>
     </div>

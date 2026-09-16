@@ -5,6 +5,7 @@ import { AUTH_TOKEN_KEY, clearAuthToken, getAuthToken, setAuthToken, type AuthSt
 import * as authService from "../src/services/authService.ts";
 import * as userService from "../src/services/userService.ts";
 import { COMMON_REGISTRATION_DESTINATION, publishingEntryRedirect, roleHome } from "../src/lib/auth-navigation.ts";
+import { isInternalPath } from "../src/lib/auth-flow.ts";
 
 const user = {
   id: "6f928915-a992-4b1d-bf1c-4f3b5bb6a909",
@@ -60,6 +61,13 @@ test("authStorage guarda, recupera y elimina sólo el token de autenticación", 
   clearAuthToken(storage);
   assert.equal(getAuthToken(storage), null);
   assert.equal(storage.getItem("recientes"), "[1,2]");
+});
+
+test("la ruta de retorno sólo admite ubicaciones internas", () => {
+  assert.equal(isInternalPath("/detail/123?categoria=venta"), true);
+  assert.equal(isInternalPath("//otro-sitio.example"), false);
+  assert.equal(isInternalPath("https://otro-sitio.example"), false);
+  assert.equal(isInternalPath(null), false);
 });
 
 test("register usa POST y envía únicamente los campos permitidos", async () => {

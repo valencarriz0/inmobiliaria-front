@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
-import type { AuthResponse, AuthUser, LoginInput, RegisterInput, UpdateProfileInput } from "../types/user";
+import type { AuthResponse, AuthUser, ChangePasswordInput, LoginInput, RegisterInput, UpdateProfileInput } from "../types/user";
 import { ApiError } from "../services/api";
 import * as authService from "../services/authService";
-import { clearAuthToken, getAuthToken, setAuthToken } from "../services/authStorage";
+import { AUTH_TOKEN_KEY, clearAuthToken, getAuthToken, setAuthToken } from "../services/authStorage";
 import * as userService from "../services/userService";
 import * as publisherApplicationService from "../services/publisherApplicationService";
 import { favoriteService } from "../services/favoriteService";
@@ -51,6 +51,26 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     return () => { active = false; };
   }, [refreshUser]);
 
+  useEffect(() => {
+    const synchronizeSession = (event: StorageEvent) => {
+      if (event.key !== AUTH_TOKEN_KEY || event.newValue === event.oldValue) return;
+      if (!event.newValue) {
+        setUser(null);
+        setFavoriteIds([]);
+        setFavoriteOwnerId(null);
+        setFavoritesError(null);
+        setOwnedPropertyIds(new Set());
+        return;
+      }
+      setFavoriteIds([]);
+      setFavoriteOwnerId(null);
+      setOwnedPropertyIds(new Set());
+      void refreshUser();
+    };
+    window.addEventListener("storage", synchronizeSession);
+    return () => window.removeEventListener("storage", synchronizeSession);
+  }, [refreshUser]);
+
   const establishSession = useCallback((response: Pick<AuthResponse, "user" | "token">) => {
     setAuthToken(response.token);
     setFavoriteIds([]);
@@ -66,15 +86,16 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   }, [establishSession]);
 
   const register = useCallback(async (data: RegisterInput) => {
-    const response = await authService.register(data);
-    return establishSession(response);
-  }, [establishSession]);
+    return authService.register(data);
+  }, []);
 
   const registerPublicPublisherApplication = useCallback(async (data: PublicPublisherApplicationInput) => {
     const response = await publisherApplicationService.createPublicPublisherApplication(data);
-    establishSession(response);
-    return response.application;
-  }, [establishSession]);
+    return { application: response.application, message: response.message };
+  }, []);
+
+  const verifyEmail = useCallback((token: string) => authService.verifyEmail(token), []);
+  const changePassword = useCallback((data: ChangePasswordInput) => authService.changePassword(data), []);
 
   const logout = useCallback(() => {
     clearAuthToken();
@@ -166,6 +187,8 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     login,
     register,
     registerPublicPublisherApplication,
+    verifyEmail,
+    changePassword,
     logout,
     refreshUser,
     updateProfile,
@@ -179,7 +202,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     authDialog,
     setAuthDialog,
     openAuthDialog: (dialog: Exclude<AuthDialog, null>) => setAuthDialog(dialog),
-  }), [authDialog, favoritesError, favoritesLoading, isLoading, login, logout, ownedPropertyIds, pendingFavoriteIds, refreshFavorites, refreshUser, register, registerPublicPublisherApplication, toggleFavorite, updateProfile, user, visibleFavoriteIds]);
+  }), [authDialog, changePassword, favoritesError, favoritesLoading, isLoading, login, logout, ownedPropertyIds, pendingFavoriteIds, refreshFavorites, refreshUser, register, registerPublicPublisherApplication, toggleFavorite, updateProfile, user, verifyEmail, visibleFavoriteIds]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

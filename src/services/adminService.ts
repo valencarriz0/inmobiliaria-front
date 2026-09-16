@@ -15,6 +15,7 @@ export const adminService = {
   disableUser: (id: string) => apiRequest<{ user: AdminUser }>(`/admin/users/${id}/disable`, { ...options(), method: "PATCH" }),
   reactivateUser: (id: string) => apiRequest<{ user: AdminUser }>(`/admin/users/${id}/reactivate`, { ...options(), method: "PATCH" }),
   properties: (filters: { status?: string; q?: string; publisherId?: string; page?: string; limit?: string } = {}) => apiRequest<{ properties: AdminProperty[]; pagination: Pagination }>(`/admin/properties${query(filters)}`, options()),
+  property: (id: string) => apiRequest<{ property: AdminProperty }>(`/admin/properties/${id}`, options()),
   updateProperty: (id: string, body: AdminPropertyUpdate) => apiRequest<{ property: AdminProperty }>(`/admin/properties/${id}`, { ...options(), method: "PATCH", body }),
   propertyHistory: (id: string) => apiRequest<{ history: PropertyHistoryEntry[] }>(`/admin/properties/${id}/history`, options()),
   pauseProperty: (id: string) => apiRequest<{ property: AdminProperty }>(`/admin/properties/${id}/pause`, { ...options(), method: "PATCH" }),

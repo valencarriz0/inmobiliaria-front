@@ -11,6 +11,9 @@ import EditProperty from "../pages/Publisher/EditProperty";
 import NewProperty from "../pages/Publisher/NewProperty";
 import Profile from "../pages/User/Profile";
 import AdminDashboard from "../pages/Admin/Dashboard";
+import AdminPropertyDetail from "../pages/Admin/PropertyDetail";
+import AdminUsersPage from "../pages/Admin/Users";
+import AdminApplicationsPage from "../pages/Admin/Applications";
 import Header from "../components/Header";
 import AuthModals from "../components/Modals/AuthModals";
 import { Button } from "../components/ui/button";
@@ -90,6 +93,9 @@ function App() {
           </Route>
           <Route element={<RequireRole roles={["admin"]} />}>
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/properties/:id" element={<AdminPropertyDetail />} />
+            <Route path="/admin/users" element={<AdminUsersPage />} />
+            <Route path="/admin/applications" element={<AdminApplicationsPage />} />
           </Route>
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,29 +1,28 @@
 import { useEffect, useState } from "react";
-import { propertyService } from "../services/propertyService.ts";
-import type { Property } from "../types/property.ts";
+import { publisherPropertyService } from "../services/publisherPropertyService.ts";
+import type { PublisherProperty } from "../types/publisher-property.ts";
 
 interface PublisherPropertiesResult {
-  publisherId: Property["publisherId"];
-  properties: Property[];
+  properties: PublisherProperty[];
   error: string | null;
 }
 
-export function usePublisherProperties(publisherId: Property["publisherId"]) {
+export function usePublisherProperties() {
   const [result, setResult] = useState<PublisherPropertiesResult>();
 
   useEffect(() => {
     let cancelled = false;
-    propertyService.getPropertiesByPublisher(publisherId).then(
+    publisherPropertyService.list().then(
       (properties) => {
-        if (!cancelled) setResult({ publisherId, properties, error: null });
+        if (!cancelled) setResult({ properties: properties.properties.filter((property) => property.publicationStatus !== "deleted"), error: null });
       },
       () => {
-        if (!cancelled) setResult({ publisherId, properties: [], error: "No se pudieron cargar tus propiedades." });
+        if (!cancelled) setResult({ properties: [], error: "No se pudieron cargar tus propiedades." });
       },
     );
     return () => { cancelled = true; };
-  }, [publisherId]);
+  }, []);
 
-  const current = result?.publisherId === publisherId ? result : undefined;
+  const current = result;
   return { properties: current?.properties ?? [], loading: !current, error: current?.error ?? null };
 }

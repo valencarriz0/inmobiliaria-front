@@ -3,12 +3,11 @@ import HeaderUser from "../../components/HeaderUser";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { usePublisherProperties } from "../../hooks/use-publisher-properties";
-import { MOCK_CURRENT_PUBLISHER_ID } from "../../data/mock/session";
 import { mockConsultations, mockPropertyViews } from "../../data/mock/activity";
 import { publisherStatistics } from "../../lib/publisher-properties";
 
 export default function Statistics() {
-  const { properties, loading, error } = usePublisherProperties(MOCK_CURRENT_PUBLISHER_ID);
+  const { properties, loading, error } = usePublisherProperties();
   const stats = publisherStatistics(properties, mockPropertyViews, mockConsultations);
   const metrics = [
     { label: "Publicaciones activas", value: stats.active },

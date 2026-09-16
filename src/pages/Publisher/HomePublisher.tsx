@@ -3,7 +3,6 @@ import HeaderUser from "../../components/HeaderUser";
 import { Link } from "react-router";
 import SearchBarPublisher from "../../components/SearchBarPublisher";
 import { usePublisherProperties } from "../../hooks/use-publisher-properties";
-import { MOCK_CURRENT_PUBLISHER_ID } from "../../data/mock/session";
 import { OPERATION_TYPES, PUBLICATION_STATUSES } from "../../constants/property";
 import { formatLocation } from "../../lib/formatters";
 import { Badge } from "../../components/ui/badge";
@@ -12,7 +11,7 @@ import { filterPublisherProperties, propertyMetrics, type PublisherFilters } fro
 import { mockConsultations, mockPropertyViews } from "../../data/mock/activity";
 
 export default function PublisherDashboard() {
-  const { properties, loading, error } = usePublisherProperties(MOCK_CURRENT_PUBLISHER_ID);
+  const { properties, loading, error } = usePublisherProperties();
   const [filters, setFilters] = useState<PublisherFilters>({ query: "", status: "all" });
   const filteredProperties = filterPublisherProperties(properties, filters);
   return (

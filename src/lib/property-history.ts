@@ -1,0 +1,5 @@
+import { formatPrice } from "./formatters.ts";
+import type { PropertyHistoryData, PropertyHistoryEntry, PropertyHistoryValue } from "../types/publisher-property.ts";
+export const actionLabels = { created: "Creada", updated: "Editada", paused: "Pausada", reactivated: "Reactivada", deleted: "Eliminada" } as const;
+export function displayHistoryValue(key: string, value: PropertyHistoryValue, data: PropertyHistoryData) { if (Array.isArray(value)) return "Actualizado"; if (value === null) return "Sin especificar"; if (typeof value === "boolean") return value ? "Sí" : "No"; if (["price", "expenses", "taxes", "commissions"].includes(key) && typeof value === "number" && typeof data.currency === "string") return formatPrice(value, data.currency as "ARS" | "USD"); return String(value); }
+export function historyChanges(entry: PropertyHistoryEntry) { const before = entry.previousData ?? {}; const after = entry.newData ?? {}; return Object.keys(after).filter((key) => before[key] !== after[key]).map((key) => ({ key, before: before[key], after: after[key] })); }

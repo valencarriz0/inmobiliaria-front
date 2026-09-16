@@ -31,6 +31,7 @@ import { formatCharacteristics, formatLocation, formatPrice } from "../../lib/fo
 import { getPublisherMetrics, type PublisherPropertyMetric } from "../../services/publisherMetricsService";
 import { hasValidCoordinates } from "../../lib/geocoding";
 import PropertyMap from "../../components/maps/PropertyMap";
+import PropertyChangeHistoryDialog from "../../components/PropertyChangeHistoryDialog";
 
 export default function PropertyDetailPublisher() {
   const { id } = useParams();
@@ -56,6 +57,7 @@ function PublisherPropertyDetail({ property, refresh }: { property: PublisherPro
   const [pauseOpen, setPauseOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [actionError, setActionError] = useState<string>();
+  const [historyOpen, setHistoryOpen] = useState(false);
   const inFlight = useRef(false);
 
   const [metrics, setMetrics] = useState<PublisherPropertyMetric>();
@@ -217,6 +219,7 @@ function PublisherPropertyDetail({ property, refresh }: { property: PublisherPro
                   </>
                 )}
               </Button>
+              <Button variant="outline" className="w-full" onClick={() => setHistoryOpen(true)} disabled={saving}>Historial de cambios</Button>
               <Button
                 variant="outline"
                 className="w-full flex items-center justify-center"
@@ -238,6 +241,7 @@ function PublisherPropertyDetail({ property, refresh }: { property: PublisherPro
           </Card>
         </aside>
       </main>
+      <PropertyChangeHistoryDialog propertyId={property.id} open={historyOpen} onOpenChange={setHistoryOpen} />
 
       {/* Modal Confirmación Eliminar */}
       <AlertDialog open={deleteOpen} onOpenChange={(open) => { if (!inFlight.current) setDeleteOpen(open); }}>

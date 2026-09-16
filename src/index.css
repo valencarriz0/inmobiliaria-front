@@ -3,6 +3,20 @@
 @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap");
 @custom-variant dark (&:is(.dark *));
 
+.property-map-marker {
+  align-items: center;
+  background: oklch(var(--primary));
+  border: 2px solid white;
+  border-radius: 9999px;
+  color: white;
+  display: flex;
+  font-size: 20px;
+  height: 30px;
+  justify-content: center;
+  line-height: 1;
+  width: 30px;
+}
+
 :root {
   --font-sans: "DM Sans", sans-serif;
   --font-grotesk: "Space Grotesk", sans-serif;

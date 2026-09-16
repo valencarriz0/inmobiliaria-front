@@ -31,6 +31,8 @@ import { OPERATION_TYPES, PUBLICATION_STATUSES } from "../../constants/property"
 import { formatCharacteristics, formatLocation, formatPrice } from "../../lib/formatters";
 import { mockConsultations, mockPropertyViews } from "../../data/mock/activity";
 import { propertyMetrics } from "../../lib/publisher-properties";
+import { hasValidCoordinates } from "../../lib/geocoding";
+import PropertyMap from "../../components/maps/PropertyMap";
 
 export default function PropertyDetailPublisher() {
   const { id } = useParams();
@@ -175,12 +177,13 @@ function PublisherPropertyDetail({ property, refresh }: { property: Property; re
           </Card>
 
           {/* Mapa */}
-          <Card className="h-56">
+          <Card>
             <CardHeader>
               <CardTitle>Ubicación</CardTitle>
             </CardHeader>
-            <CardContent className="flex items-center justify-center h-full bg-muted rounded-lg">
-              Mapa aquí
+            <CardContent className="space-y-2">
+              <PropertyMap latitude={property.latitude} longitude={property.longitude} displayName={formatLocation(property.location)} />
+              {!hasValidCoordinates(property.latitude, property.longitude) && <p className="rounded-lg bg-muted p-4 text-sm text-muted-foreground">La ubicación exacta todavía no está disponible.</p>}
             </CardContent>
           </Card>
 

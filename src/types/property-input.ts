@@ -4,7 +4,7 @@ export type EditablePropertyData = Pick<Property,
   | "title" | "description" | "operationType" | "propertyType" | "price" | "currency"
   | "location" | "totalArea" | "rooms" | "bedrooms" | "bathrooms" | "age"
   | "propertyCondition" | "services" | "amenities" | "acceptsPets" | "garage"
-  | "expenses" | "taxes" | "commissions"
+  | "expenses" | "taxes" | "commissions" | "latitude" | "longitude"
 >;
 
 export type PropertyImageInput =

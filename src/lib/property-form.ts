@@ -3,6 +3,7 @@ import { getPropertyCities } from "../constants/locations.ts";
 import type { Property } from "../types/property.ts";
 import type { EditablePropertyData } from "../types/property-input.ts";
 import type { PropertyFormSubmission, PropertyFormValues } from "../types/property-form.ts";
+import { hasValidCoordinates, invalidateConfirmedCoordinates } from "./geocoding.ts";
 import { validatePropertyForm } from "./validation.ts";
 
 export function createPropertyFormValues(property?: EditablePropertyData & Pick<Property, "images">): PropertyFormValues {
@@ -16,8 +17,13 @@ export function createPropertyFormValues(property?: EditablePropertyData & Pick<
     country: property?.location.country ?? "Argentina",
     province: property?.location.province ?? "",
     city: property?.location.city ?? "",
+    provinceId: property?.location.provinceId ?? "",
+    cityId: property?.location.cityId ?? "",
     street: property?.location.street ?? "",
     number: property?.location.number ?? "",
+    latitude: hasValidCoordinates(property?.latitude, property?.longitude) ? property.latitude ?? null : null,
+    longitude: hasValidCoordinates(property?.latitude, property?.longitude) ? property.longitude ?? null : null,
+    locationConfirmed: hasValidCoordinates(property?.latitude, property?.longitude),
     totalArea: property?.totalArea?.toString() ?? "",
     rooms: property?.rooms?.toString() ?? "",
     bedrooms: property?.bedrooms?.toString() ?? "",
@@ -36,11 +42,13 @@ export function createPropertyFormValues(property?: EditablePropertyData & Pick<
 }
 
 export function changePropertyProvince(values: PropertyFormValues, province: string): PropertyFormValues {
-  return {
+  return invalidateConfirmedCoordinates({
     ...values,
     province,
+    provinceId: "",
     city: getPropertyCities(province).includes(values.city) ? values.city : "",
-  };
+    cityId: "",
+  });
 }
 
 // Se llama solo después de que la validación compartida tiene éxito, por lo que no pueden filtrarse números vacíos o inválidos.
@@ -64,6 +72,8 @@ export function toPropertyInput(values: PropertyFormValues): PropertyFormSubmiss
         country: values.country,
         province: values.province,
         city: values.city,
+        provinceId: values.provinceId || undefined,
+        cityId: values.cityId || undefined,
         street: values.street.trim() || undefined,
         number: values.number.trim() || undefined,
       },
@@ -80,6 +90,8 @@ export function toPropertyInput(values: PropertyFormValues): PropertyFormSubmiss
       acceptsPets: values.acceptsPets === "" ? undefined : values.acceptsPets === "yes",
       services: [...values.services],
       amenities: [...values.amenities],
+      latitude: values.locationConfirmed && hasValidCoordinates(values.latitude, values.longitude) ? values.latitude : undefined,
+      longitude: values.locationConfirmed && hasValidCoordinates(values.latitude, values.longitude) ? values.longitude : undefined,
     },
     images: values.images.map((image) => ({ ...image })),
   };

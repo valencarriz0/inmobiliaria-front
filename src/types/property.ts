@@ -20,6 +20,8 @@ export interface PropertyLocation {
   country: string;
   province: string;
   city: string;
+  provinceId?: string;
+  cityId?: string;
   street?: string;
   number?: string;
 }
@@ -55,8 +57,8 @@ export interface Property {
   images: string[];
   publisherId: number;
   publicationStatus: PublicationStatus;
-  latitude?: number;
-  longitude?: number;
+  latitude?: number | null;
+  longitude?: number | null;
   /** ISO 8601 timestamps. */
   createdAt: string;
   updatedAt: string;

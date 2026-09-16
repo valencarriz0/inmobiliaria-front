@@ -99,6 +99,22 @@ test("la creación se recupera desde el mismo service y aparece en ambos listado
   assert.ok((await service.getPropertiesByPublisher(MOCK_CURRENT_PUBLISHER_ID)).some((property) => property.id === created.id));
 });
 
+test("crear y editar conserva coordenadas confirmadas válidas hasta el detalle", async () => {
+  const submission = input();
+  const coordinates = { latitude: -34.6037, longitude: -58.3816 };
+  const created = await service.createProperty({ ...submission, data: { ...submission.data, ...coordinates } }, MOCK_CURRENT_PUBLISHER_ID);
+  assert.deepEqual(await service.getPropertyById(created.id), created);
+  assert.equal(created.latitude, coordinates.latitude);
+  assert.equal(created.longitude, coordinates.longitude);
+
+  const updatedCoordinates = { latitude: -34.6118, longitude: -58.3960 };
+  const updated = await service.updateProperty(created.id, { ...submission, data: { ...submission.data, ...updatedCoordinates } });
+  assert.equal(updated.latitude, updatedCoordinates.latitude);
+  assert.equal(updated.longitude, updatedCoordinates.longitude);
+  assert.equal((await service.getPropertyById(updated.id))?.latitude, updatedCoordinates.latitude);
+  assert.equal((await service.getPropertyById(updated.id))?.longitude, updatedCoordinates.longitude);
+});
+
 test("create ignora metadatos inyectados fuera del tipo de entrada", async () => {
   const submission = input();
   const data = { ...submission.data, id: "injected", publisherId: 999, publicationStatus: "deleted", createdAt: "bad", updatedAt: "bad", latitude: 999 };

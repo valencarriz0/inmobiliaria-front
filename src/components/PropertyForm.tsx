@@ -1,15 +1,18 @@
-import { useRef, useState, type FormEvent, type ComponentProps } from "react";
+import { useEffect, useRef, useState, type FormEvent, type ComponentProps } from "react";
 import {
   CURRENCIES, OPERATION_TYPES, PROPERTY_TYPES, PROPERTY_CONDITIONS,
   PROPERTY_SERVICES, PROPERTY_AMENITIES,
 } from "../constants/property";
-import { PROPERTY_LOCATIONS, getPropertyCities } from "../constants/locations";
 import { useFormValidation } from "../hooks/use-form-validation";
-import { createPropertyFormValues, changePropertyProvince, toPropertyInput } from "../lib/property-form";
+import { createPropertyFormValues, toPropertyInput } from "../lib/property-form";
+import { invalidateConfirmedCoordinates } from "../lib/geocoding";
 import { isOptionKey, validatePropertyForm } from "../lib/validation";
+import { getCities, getProvinces } from "../services/locationService";
+import type { City, Province } from "../types/location";
 import type { Property } from "../types/property";
 import type { PropertyFormSubmission, PropertyFormValues } from "../types/property-form";
 import PropertyImages from "./PropertyImages";
+import LocationPicker from "./LocationPicker";
 import { Button } from "./ui/button";
 import { InputField } from "./ui/input-field";
 import { FieldError } from "./ui/field-error";
@@ -40,14 +43,39 @@ export default function PropertyForm({ initialProperty, submitLabel, onSubmit, o
   const [imageSelectionError, setImageSelectionError] = useState<string>();
   const [saving, setSaving] = useState(false);
   const [submitError, setSubmitError] = useState<string>();
+  const [provinces, setProvinces] = useState<Province[]>([]);
+  const [cities, setCities] = useState<City[]>([]);
+  const [locationsError, setLocationsError] = useState<string>();
+  const [loadingLocations, setLoadingLocations] = useState(true);
   const submitting = useRef(false);
   const { errors, fieldProps, errorId, validateForm, touch } = useFormValidation(() => {
     const errors = validatePropertyForm(values);
     return { ...errors, images: imageSelectionError ?? errors.images };
   });
 
+  useEffect(() => {
+    const controller = new AbortController();
+    getProvinces(controller.signal)
+      .then(({ provinces }) => setProvinces(provinces))
+      .catch(() => { if (!controller.signal.aborted) setLocationsError("No se pudieron cargar las provincias."); })
+      .finally(() => { if (!controller.signal.aborted) setLoadingLocations(false); });
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    if (!values.provinceId) { setCities([]); return; }
+    const controller = new AbortController();
+    setCities([]);
+    getCities(values.provinceId, controller.signal)
+      .then(({ cities }) => setCities(cities))
+      .catch(() => { if (!controller.signal.aborted) setLocationsError("No se pudieron cargar las localidades."); });
+    return () => controller.abort();
+  }, [values.provinceId]);
+
   function updateField<K extends keyof PropertyFormValues>(field: K, value: PropertyFormValues[K]) {
-    setValues((previous) => ({ ...previous, [field]: value }));
+    setValues((previous) => (field === "street" || field === "number")
+      ? invalidateConfirmedCoordinates({ ...previous, [field]: value })
+      : { ...previous, [field]: value });
   }
 
   function inputField(field: TextField, label: string, required = false, inputMode?: ComponentProps<"input">["inputMode"], placeholder?: string) {
@@ -134,12 +162,22 @@ export default function PropertyForm({ initialProperty, submitLabel, onSubmit, o
         <div className="md:col-span-2">
           {inputField("title", "Título", true, undefined, "Ejemplo: Casa familiar con jardín")}
         </div>
-        {selectField("province", "Provincia", values.province,
-          Object.keys(PROPERTY_LOCATIONS).map((value) => ({ value, label: value })),
-          (province) => setValues((previous) => changePropertyProvince(previous, province)), true)}
-        {selectField("city", "Localidad", values.city,
-          getPropertyCities(values.province).map((value) => ({ value, label: value })),
-          (value) => updateField("city", value), true, !values.province)}
+        {selectField("provinceId", "Provincia", values.provinceId,
+          provinces.map((province) => ({ value: province.id, label: province.name })),
+          (provinceId) => {
+            const province = provinces.find((item) => item.id === provinceId);
+            if (!province) return;
+            setValues((previous) => invalidateConfirmedCoordinates({ ...previous, provinceId, province: province.name, cityId: "", city: "" }));
+          }, true, loadingLocations)}
+        <FieldError id={errorId("province")}>{errors.province || locationsError}</FieldError>
+        {selectField("cityId", "Localidad", values.cityId,
+          cities.map((city) => ({ value: city.id, label: city.name })),
+          (cityId) => {
+            const city = cities.find((item) => item.id === cityId);
+            if (!city) return;
+            setValues((previous) => invalidateConfirmedCoordinates({ ...previous, cityId, city: city.name }));
+          }, true, !values.provinceId)}
+        <FieldError id={errorId("city")}>{errors.city}</FieldError>
         {inputField("street", "Calle", false, undefined, "Ejemplo: Av. Libertador")}
         {inputField("number", "Altura", false, "numeric", "Ejemplo: 1234")}
         {selectField("propertyType", "Tipo de inmueble", values.propertyType, optionList(PROPERTY_TYPES),
@@ -164,6 +202,10 @@ export default function PropertyForm({ initialProperty, submitLabel, onSubmit, o
         {inputField("taxes", `Impuestos${values.currency ? ` (${values.currency})` : ""}`, false, "decimal")}
         {inputField("commissions", `Comisiones${values.currency ? ` (${values.currency})` : ""} — importe`, false, "decimal")}
       </div>
+
+      <LocationPicker cityId={values.cityId} street={values.street} streetNumber={values.number} confirmed={values.locationConfirmed} onConfirm={(coordinates) => {
+        setValues((previous) => ({ ...previous, ...coordinates, locationConfirmed: true }));
+      }} />
 
       <fieldset>
         <legend className="text-sm font-medium mb-3">Servicios disponibles</legend>

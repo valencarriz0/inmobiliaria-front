@@ -21,8 +21,13 @@ export type PropertyFormValues = {
   country: Property["location"]["country"];
   province: Property["location"]["province"];
   city: Property["location"]["city"];
+  provinceId: string;
+  cityId: string;
   street: string;
   number: string;
+  latitude: number | null;
+  longitude: number | null;
+  locationConfirmed: boolean;
   images: PropertyFormImage[];
 };
 

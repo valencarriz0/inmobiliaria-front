@@ -102,8 +102,8 @@ export function validatePropertyForm(values: PropertyFormValues): PropertyFormEr
   if (!isOptionKey(OPERATION_TYPES, values.operationType)) errors.operationType = "Seleccioná una categoría válida.";
   if (!isOptionKey(PROPERTY_TYPES, values.propertyType)) errors.propertyType = "Seleccioná un tipo de inmueble válido.";
   if (!CURRENCIES.some((currency) => currency === values.currency)) errors.currency = "Seleccioná una moneda válida.";
-  if (!isOptionKey(PROPERTY_LOCATIONS, values.province)) errors.province = "Seleccioná una provincia del catálogo.";
-  if (!getPropertyCities(values.province).includes(values.city)) errors.city = "Seleccioná una localidad de la provincia elegida.";
+  if (!values.provinceId && !isOptionKey(PROPERTY_LOCATIONS, values.province)) errors.province = "Seleccioná una provincia válida.";
+  if (!values.cityId && !getPropertyCities(values.province).includes(values.city)) errors.city = "Seleccioná una localidad de la provincia elegida.";
   if (values.propertyCondition && !isOptionKey(PROPERTY_CONDITIONS, values.propertyCondition)) {
     errors.propertyCondition = "Seleccioná un estado del inmueble válido o dejalo sin especificar.";
   }

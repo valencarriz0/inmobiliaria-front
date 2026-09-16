@@ -16,6 +16,8 @@ import { useAuth } from "../hooks/use-auth";
 import { Textarea } from "./ui/textarea";
 import { Label } from "./ui/label";
 import FavoriteHeartButton from "./FavoriteHeartButton";
+import PropertyMap from "./maps/PropertyMap";
+import { hasValidCoordinates } from "../lib/geocoding";
 
 export default function PropertyDetail({ property }: { property: Property }) {
   const { user } = useAuth();
@@ -138,7 +140,8 @@ export default function PropertyDetail({ property }: { property: Property }) {
               {address && <p>{address}</p>}
               <p>{property.location.city}</p>
               <p>{property.location.province}, {property.location.country}</p>
-              <div className="flex items-center justify-center h-32 bg-muted rounded-lg text-muted-foreground">Mapa no disponible</div>
+              <PropertyMap latitude={property.latitude} longitude={property.longitude} displayName={formatLocation(property.location)} />
+              {!hasValidCoordinates(property.latitude, property.longitude) && <p className="rounded-lg bg-muted p-4 text-sm text-muted-foreground">La ubicación exacta todavía no está disponible.</p>}
             </CardContent>
           </Card>
           <Card>

@@ -71,10 +71,10 @@ export default function SearchBar({ initialValues, onSearch, onClear }: SearchBa
       <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-2 md:grid-cols-[1.6fr_1fr_1fr] lg:grid-cols-[2.2fr_1.4fr_1.5fr_1.15fr_1.3fr]">
         <PropertyLocationCombobox value={values}
           onChange={(location) => setValues((previous) => ({ ...previous, ...location }))}
-          onBlur={() => { validation.touch("province"); validation.touch("city"); }}
-          error={errors.province ?? errors.city} />
+          onBlur={() => { validation.touch("provinceId"); validation.touch("cityId"); }}
+          error={errors.provinceId ?? errors.cityId} />
         {selectField("operationType", "Categoría", Object.entries(OPERATION_TYPES), "Todas las categorías")}
-        {selectField("propertyType", "Tipo de inmueble", Object.entries(PROPERTY_TYPES), "Todos los tipos")}
+        {selectField("propertyType", "Tipo de inmueble", Object.entries(PROPERTY_TYPES).filter(([value]) => value !== "land"), "Todos los tipos")}
         <PropertyPriceFilter value={values}
           onChange={(price) => setValues((previous) => ({ ...previous, ...price }))}
           error={errors.currency ?? errors.minPrice ?? errors.maxPrice} />

@@ -1,38 +1,26 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { propertyService } from "../services/propertyService.ts";
-import type { Property } from "../types/property.ts";
+import { getPublicProperties } from "../services/publicPropertyService.ts";
+import type { PublicPropertyPagination, PublicPropertySummary } from "../types/public-property.ts";
 import type { PropertySearchFilters } from "../types/property-search.ts";
 
-interface PropertiesResult {
-  filters: PropertySearchFilters;
-  revision: number;
-  properties: Property[];
-  error: string | null;
-}
+interface PropertiesResult { query: PropertySearchFilters; revision: number; properties: PublicPropertySummary[]; pagination: PublicPropertyPagination; error: string | null; }
+const emptyPagination: PublicPropertyPagination = { page: 1, limit: 12, total: 0, totalPages: 0 };
 
 export function useProperties(filters: PropertySearchFilters = {}, enabled = true) {
-  const { operationType, propertyType, province, city, currency, minPrice, maxPrice } = filters;
-  const query = useMemo(() => ({ operationType, propertyType, province, city, currency, minPrice, maxPrice }),
-    [operationType, propertyType, province, city, currency, minPrice, maxPrice]);
+  const { operationType, propertyType, provinceId, cityId, currency, minPrice, maxPrice, sort, page, limit } = filters;
+  const query = useMemo(() => ({ operationType, propertyType, provinceId, cityId, currency, minPrice, maxPrice, page: page ?? 1, limit: limit ?? 12, sort: sort ?? "newest" }), [operationType, propertyType, provinceId, cityId, currency, minPrice, maxPrice, sort, page, limit]);
   const [result, setResult] = useState<PropertiesResult>();
   const [revision, setRevision] = useState(0);
   const refresh = useCallback(() => setRevision((value) => value + 1), []);
-
   useEffect(() => {
-    let cancelled = false;
     if (!enabled) return;
-    propertyService.getPublicProperties(query).then(
-      (properties) => {
-        if (!cancelled) setResult({ filters: query, revision, properties, error: null });
-      },
-      () => {
-        if (!cancelled) setResult({ filters: query, revision, properties: [], error: "No se pudieron cargar las propiedades." });
-      },
+    const controller = new AbortController();
+    getPublicProperties(query, controller.signal).then(
+      ({ properties, pagination }) => { if (!controller.signal.aborted) setResult({ query, revision, properties, pagination, error: null }); },
+      () => { if (!controller.signal.aborted) setResult({ query, revision, properties: [], pagination: emptyPagination, error: "No se pudieron cargar las propiedades." }); },
     );
-    return () => { cancelled = true; };
+    return () => controller.abort();
   }, [query, revision, enabled]);
-
-  // Do not flash the previous search while the new request is loading.
-  const current = enabled && result?.filters === query && result?.revision === revision ? result : undefined;
-  return { properties: current?.properties ?? [], loading: enabled && !current, error: current?.error ?? null, refresh };
+  const current = enabled && result?.query === query && result.revision === revision ? result : undefined;
+  return { properties: current?.properties ?? [], pagination: current?.pagination ?? emptyPagination, loading: enabled && !current, error: current?.error ?? null, refresh };
 }

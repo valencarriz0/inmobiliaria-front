@@ -8,18 +8,17 @@ import { validateEmail, validateName, validatePhone } from "../lib/validation";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "./ui/dialog";
 import { MapPin } from "lucide-react";
 import BotonVolver from "./BotonVolver";
-import type { Property } from "../types/property";
+import type { PublicPropertyDetail } from "../types/public-property";
 import { OPERATION_TYPES, PROPERTY_TYPES, PROPERTY_CONDITIONS, PROPERTY_SERVICES, PROPERTY_AMENITIES } from "../constants/property";
-import { formatArea, formatLocation, formatPrice } from "../lib/formatters";
+import { formatArea, formatPublicLocation, formatPrice } from "../lib/formatters";
 import { rememberProperty } from "../lib/recent-properties";
 import { useAuth } from "../hooks/use-auth";
 import { Textarea } from "./ui/textarea";
 import { Label } from "./ui/label";
-import FavoriteHeartButton from "./FavoriteHeartButton";
 import PropertyMap from "./maps/PropertyMap";
 import { hasValidCoordinates } from "../lib/geocoding";
 
-export default function PropertyDetail({ property }: { property: Property }) {
+export default function PropertyDetail({ property }: { property: PublicPropertyDetail }) {
   const { user } = useAuth();
   const messageId = useId();
   const [message, setMessage] = useState("");
@@ -82,15 +81,9 @@ export default function PropertyDetail({ property }: { property: Property }) {
                 </div>
                 <p className="flex items-start text-muted-foreground mt-1">
                   <MapPin className="h-4 w-4 mr-1 mt-1 shrink-0" aria-hidden="true" />
-                  <span>{address && `${address}, `}{formatLocation(property.location)}</span>
+                  <span>{address && `${address}, `}{formatPublicLocation(property.location)}</span>
                 </p>
               </div>
-              <FavoriteHeartButton
-                property={property}
-                className="rounded-full bg-background/70 hover:bg-background hover:scale-110 shrink-0"
-                buttonClassName="rounded-full bg-background/70 hover:bg-background hover:scale-110 shrink-0"
-                heartClassName="h-5 w-5"
-              />
             </div>
           </div>
 
@@ -115,7 +108,7 @@ export default function PropertyDetail({ property }: { property: Property }) {
             <section>
               <h2 className="text-xl font-semibold mb-2">Servicios</h2>
               <ul className="flex flex-wrap gap-2">
-                {property.services.map((service) => <li className="px-3 py-1 rounded-full bg-accent/10 text-accent" key={service}>{PROPERTY_SERVICES[service]}</li>)}
+                {property.services.map((service) => <li className="px-3 py-1 rounded-full bg-accent/10 text-accent" key={service}>{PROPERTY_SERVICES[service as keyof typeof PROPERTY_SERVICES] ?? service}</li>)}
               </ul>
             </section>
           )}
@@ -123,7 +116,7 @@ export default function PropertyDetail({ property }: { property: Property }) {
             <section>
               <h2 className="text-xl font-semibold mb-2">Comodidades</h2>
               <ul className="flex flex-wrap gap-2">
-                {property.amenities.map((amenity) => <li className="px-3 py-1 rounded-full bg-accent/10 text-accent" key={amenity}>{PROPERTY_AMENITIES[amenity]}</li>)}
+                {property.amenities.map((amenity) => <li className="px-3 py-1 rounded-full bg-accent/10 text-accent" key={amenity}>{PROPERTY_AMENITIES[amenity as keyof typeof PROPERTY_AMENITIES] ?? amenity}</li>)}
               </ul>
             </section>
           )}
@@ -139,8 +132,8 @@ export default function PropertyDetail({ property }: { property: Property }) {
             <CardContent className="space-y-2">
               {address && <p>{address}</p>}
               <p>{property.location.city}</p>
-              <p>{property.location.province}, {property.location.country}</p>
-              <PropertyMap latitude={property.latitude} longitude={property.longitude} displayName={formatLocation(property.location)} />
+              <p>{property.location.province}</p>
+              <PropertyMap latitude={property.latitude} longitude={property.longitude} displayName={formatPublicLocation(property.location)} />
               {!hasValidCoordinates(property.latitude, property.longitude) && <p className="rounded-lg bg-muted p-4 text-sm text-muted-foreground">La ubicación exacta todavía no está disponible.</p>}
             </CardContent>
           </Card>

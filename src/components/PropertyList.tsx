@@ -2,13 +2,12 @@ import { Card, CardContent, CardDescription, CardTitle } from "./ui/card.tsx";
 import { MapPin } from "lucide-react";
 import { Button } from "./ui/button.tsx";
 import { Link } from "react-router-dom";
-import type { Property } from "../types/property";
+import type { PublicPropertySummary } from "../types/public-property";
 import { OPERATION_TYPES } from "../constants/property";
-import { formatCharacteristics, formatLocation, formatPrice } from "../lib/formatters";
-import FavoriteHeartButton from "./FavoriteHeartButton";
+import { formatPublicCharacteristics, formatPublicLocation, formatPrice } from "../lib/formatters";
 
 type PropertyListProps = {
-  properties: Property[];
+  properties: PublicPropertySummary[];
   loggedIn?: boolean;
 };
 
@@ -21,11 +20,11 @@ const PropertyList = ({ properties, loggedIn = false }: PropertyListProps) => {
           className="overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col"
         >
           <div className="relative h-64 md:h-56 lg:h-64 w-full flex-shrink-0">
-            <img
+            {property.images[0] ? <img
               src={property.images[0]}
               alt={property.title}
               className="object-cover w-full h-full"
-            />
+            /> : <div className="flex h-full items-center justify-center text-sm text-muted-foreground">Sin imagen disponible</div>}
 
             {/* Categoría */}
             <span
@@ -40,12 +39,6 @@ const PropertyList = ({ properties, loggedIn = false }: PropertyListProps) => {
               {OPERATION_TYPES[property.operationType]}
             </span>
 
-            {/* Favorito */}
-            <FavoriteHeartButton
-              property={property}
-              className="absolute top-2 right-2 rounded-full bg-background/70 hover:bg-background hover:scale-110"
-              heartClassName="h-5 w-5"
-            />
           </div>
 
           <CardContent className="p-4 flex-1">
@@ -53,7 +46,7 @@ const PropertyList = ({ properties, loggedIn = false }: PropertyListProps) => {
               {property.title}
             </CardTitle>
             <CardDescription className="text-sm text-muted-foreground">
-              {formatCharacteristics(property).join(", ")}
+              {formatPublicCharacteristics(property).join(", ")}
             </CardDescription>
 
             <div className="flex flex-wrap items-center justify-between gap-2 mt-3 mb-4">
@@ -62,7 +55,7 @@ const PropertyList = ({ properties, loggedIn = false }: PropertyListProps) => {
               </span>
               <div className="flex items-center text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4 mr-1" />
-                {formatLocation(property.location)}
+                {formatPublicLocation(property.location)}
               </div>
             </div>
 

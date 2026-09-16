@@ -1,17 +1,19 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { MapPin, X } from "lucide-react";
-import { searchLocations } from "../services/locationService";
+import { getCities, getProvinces, searchLocations } from "../services/locationService";
 import type { LocationSearchResult } from "../types/location";
 import type { PropertySearchValues } from "../types/property-search";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { FieldError } from "./ui/field-error";
 
-type LocationValue = Pick<PropertySearchValues, "province" | "city">;
+type LocationValue = Pick<PropertySearchValues, "province" | "city" | "provinceId" | "cityId">;
 
 function locationLabel({ province, city }: LocationValue) { return city ? `${city}, ${province}` : province; }
 function searchResultValue(result: LocationSearchResult): LocationValue {
-  return result.type === "city" ? { province: result.provinceName, city: result.name } : { province: result.name, city: "" };
+  return result.type === "city"
+    ? { province: result.provinceName, city: result.name, provinceId: "", cityId: result.id }
+    : { province: result.name, city: "", provinceId: result.id, cityId: "" };
 }
 
 interface PropertyLocationComboboxProps { value: LocationValue; onChange: (value: LocationValue) => void; onBlur: () => void; error?: string; }
@@ -25,6 +27,23 @@ export default function PropertyLocationCombobox({ value, onChange, onBlur, erro
   const [matches, setMatches] = useState<LocationSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const active = matches[activeIndex];
+
+  useEffect(() => {
+    const controller = new AbortController();
+    if (value.provinceId && !value.province) {
+      getProvinces(controller.signal).then(({ provinces }) => {
+        const province = provinces.find((item) => item.id === value.provinceId);
+        if (province && !controller.signal.aborted) onChange({ ...value, province: province.name });
+      }).catch(() => undefined);
+    }
+    if (value.cityId && !value.city) {
+      getCities(undefined, controller.signal).then(({ cities }) => {
+        const city = cities.find((item) => item.id === value.cityId);
+        if (city && !controller.signal.aborted) onChange({ ...value, city: city.name, province: city.provinceName });
+      }).catch(() => undefined);
+    }
+    return () => controller.abort();
+  }, [onChange, value]);
 
   useEffect(() => {
     const text = query?.trim() ?? "";
@@ -61,14 +80,14 @@ export default function PropertyLocationCombobox({ value, onChange, onBlur, erro
         aria-activedescendant={open && active ? `${id}-option-${activeIndex}` : undefined} aria-invalid={Boolean(error)} aria-describedby={error ? `${id}-error` : undefined}
         placeholder="Ingresá provincia o localidad" value={query ?? locationLabel(value)} className="h-12 rounded-xl border-slate-200 bg-white pl-10 pr-9 text-sm shadow-none"
         onClick={() => { setOpen(true); setActiveIndex(0); }} onChange={(event) => {
-          const text = event.target.value; setQuery(text); setOpen(true); setActiveIndex(0); if (!text) onChange({ province: "", city: "" });
+          const text = event.target.value; setQuery(text); setOpen(true); setActiveIndex(0); if (!text) onChange({ province: "", city: "", provinceId: "", cityId: "" });
         }} onKeyDown={(event) => {
           if (event.key === "ArrowDown" || event.key === "ArrowUp") {
             event.preventDefault(); setOpen(true); setActiveIndex((index) => !open ? 0 : Math.max(0, Math.min(matches.length - 1, index + (event.key === "ArrowDown" ? 1 : -1))));
           } else if (event.key === "Enter" && open) { event.preventDefault(); if (active) choose(active); }
           else if (event.key === "Escape") { event.preventDefault(); setOpen(false); setQuery(null); }
         }} />
-      {(value.province || value.city || query) && <button type="button" aria-label="Limpiar ubicación" className="absolute right-1 top-1 flex size-10 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-accent" onClick={() => choose({ province: "", city: "" })}><X className="size-4" aria-hidden="true" /></button>}
+      {(value.province || value.city || query) && <button type="button" aria-label="Limpiar ubicación" className="absolute right-1 top-1 flex size-10 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-accent" onClick={() => choose({ province: "", city: "", provinceId: "", cityId: "" })}><X className="size-4" aria-hidden="true" /></button>}
     </div>
     {open && <div className="absolute inset-x-0 top-full z-50 mt-2 rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg">
       <ul id={`${id}-options`} role="listbox" aria-label="Provincias y localidades" className="max-h-64 overflow-y-auto overscroll-contain">

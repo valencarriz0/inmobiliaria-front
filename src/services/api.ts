@@ -1,4 +1,5 @@
 const DEFAULT_API_BASE_URL = "http://localhost:3000/api";
+let configuredApiBaseUrl: string | undefined;
 
 export type ApiErrorDetails = Record<string, string>;
 
@@ -28,7 +29,11 @@ interface ErrorPayload {
 }
 
 function apiBaseUrl() {
-  return (import.meta.env?.VITE_API_BASE_URL || DEFAULT_API_BASE_URL).replace(/\/$/, "");
+  return (configuredApiBaseUrl || import.meta.env?.VITE_API_BASE_URL || DEFAULT_API_BASE_URL).replace(/\/$/, "");
+}
+
+export function setApiBaseUrl(url?: string) {
+  configuredApiBaseUrl = url;
 }
 
 async function parseJson(response: Response): Promise<unknown> {

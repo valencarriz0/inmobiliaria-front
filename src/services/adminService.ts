@@ -1,6 +1,6 @@
 import { apiRequest } from "./api.ts";
 import { getAuthToken } from "./authStorage.ts";
-import type { AdminMetrics, AdminProperty, AdminUser, Pagination } from "../types/admin.ts";
+import type { AdminMetrics, AdminProperty, AdminPropertyUpdate, AdminUser, Pagination, PropertyHistoryEntry } from "../types/admin.ts";
 
 const options = () => ({ token: getAuthToken() });
 function query(values: Record<string, string | undefined>) {
@@ -15,6 +15,8 @@ export const adminService = {
   disableUser: (id: string) => apiRequest<{ user: AdminUser }>(`/admin/users/${id}/disable`, { ...options(), method: "PATCH" }),
   reactivateUser: (id: string) => apiRequest<{ user: AdminUser }>(`/admin/users/${id}/reactivate`, { ...options(), method: "PATCH" }),
   properties: (filters: { status?: string; q?: string; publisherId?: string; page?: string; limit?: string } = {}) => apiRequest<{ properties: AdminProperty[]; pagination: Pagination }>(`/admin/properties${query(filters)}`, options()),
+  updateProperty: (id: string, body: AdminPropertyUpdate) => apiRequest<{ property: AdminProperty }>(`/admin/properties/${id}`, { ...options(), method: "PATCH", body }),
+  propertyHistory: (id: string) => apiRequest<{ history: PropertyHistoryEntry[] }>(`/admin/properties/${id}/history`, options()),
   pauseProperty: (id: string) => apiRequest<{ property: AdminProperty }>(`/admin/properties/${id}/pause`, { ...options(), method: "PATCH" }),
   reactivateProperty: (id: string) => apiRequest<{ property: AdminProperty }>(`/admin/properties/${id}/reactivate`, { ...options(), method: "PATCH" }),
   deleteProperty: (id: string) => apiRequest<{ property: AdminProperty }>(`/admin/properties/${id}`, { ...options(), method: "DELETE" }),

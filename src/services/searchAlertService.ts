@@ -1,6 +1,6 @@
-import { getAuthToken } from "./authStorage";
-import { apiRequest } from "./api";
-import type { SearchAlert, SearchAlertInput } from "../types/search-alert";
+import { getAuthToken } from "./authStorage.ts";
+import { apiRequest } from "./api.ts";
+import type { SearchAlert, SearchAlertInput } from "../types/search-alert.ts";
 const options = () => ({ token: getAuthToken() });
 export const searchAlertService = {
   list: () => apiRequest<{ alerts: SearchAlert[] }>("/users/me/search-alerts", options()),

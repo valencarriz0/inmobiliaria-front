@@ -10,7 +10,8 @@ import { publisherApplicationStatusLabels } from "../../lib/publisher-applicatio
 import { ApiError } from "../../services/api";
 import { approvePublisherApplication, getAdminPublisherApplications, rejectPublisherApplication } from "../../services/publisherApplicationService";
 import type { PublisherApplicationStatus, PublisherApplicationWithApplicant } from "../../types/publisher-application";
-import { AdminMetricsSection, AdminPropertiesSection, AdminUsersSection } from "./AdminSections";
+import { AdminMetricsSection, AdminUsersSection } from "./AdminSections";
+import { AdminPropertiesSection } from "./AdminPropertiesSection";
 
 const statuses: PublisherApplicationStatus[] = ["pending", "approved", "rejected"];
 

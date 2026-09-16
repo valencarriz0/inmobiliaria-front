@@ -2,6 +2,7 @@ import { apiRequest } from "./api.ts";
 import { mapPublicPropertyDetail, mapPublicPropertySummary } from "../lib/public-property.ts";
 import type { PublicPropertyDetail, PublicPropertyDetailResponseDto, PublicPropertyListResponseDto, PublicPropertyListResult, PublicPropertyPagination, PublicPropertySort } from "../types/public-property.ts";
 import type { PropertySearchFilters } from "../types/property-search.ts";
+import { getAuthToken } from "./authStorage.ts";
 
 function queryParams(filters: PropertySearchFilters) {
   const params = new URLSearchParams();
@@ -32,6 +33,10 @@ export async function getPublicProperties(filters: PropertySearchFilters = {}, s
 export async function getPublicPropertyById(id: string, signal?: AbortSignal): Promise<PublicPropertyDetail> {
   const response = await apiRequest<PublicPropertyDetailResponseDto>(`/properties/${encodeURIComponent(id)}`, { signal });
   return mapPublicPropertyDetail(response.property);
+}
+
+export async function registerPublicPropertyView(id: string): Promise<void> {
+  await apiRequest<void>(`/properties/${encodeURIComponent(id)}/views`, { method: "POST", token: getAuthToken() });
 }
 
 export const PUBLIC_PROPERTY_SORTS: readonly PublicPropertySort[] = ["newest", "price_asc", "price_desc"];

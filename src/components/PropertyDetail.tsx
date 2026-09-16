@@ -1,5 +1,5 @@
 import PropertyGallery from "./PropertyGallery";
-import { useEffect, useId, useState, type FormEvent } from "react";
+import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { InputField } from "./ui/input-field";
@@ -20,6 +20,7 @@ import { hasValidCoordinates } from "../lib/geocoding";
 import FavoriteHeartButton from "./FavoriteHeartButton";
 import { consultationService } from "../services/consultationService";
 import { ApiError } from "../services/api";
+import { registerPublicPropertyView } from "../services/publicPropertyService";
 
 export default function PropertyDetail({ property }: { property: PublicPropertyDetail }) {
   const { user } = useAuth();
@@ -28,7 +29,13 @@ export default function PropertyDetail({ property }: { property: PublicPropertyD
   const [isSubmittingContact, setIsSubmittingContact] = useState(false);
   const [contactError, setContactError] = useState("");
   const [contactSuccess, setContactSuccess] = useState(false);
+  const viewRegistered = useRef(false);
   useEffect(() => { rememberProperty(property.id); }, [property.id]);
+  useEffect(() => {
+    if (viewRegistered.current) return;
+    viewRegistered.current = true;
+    void registerPublicPropertyView(property.id).catch(() => undefined);
+  }, [property.id]);
   const [openContact, setOpenContact] = useState(false);
   const [contactNombre, setContactNombre] = useState("");
   const [contactApellido, setContactApellido] = useState("");

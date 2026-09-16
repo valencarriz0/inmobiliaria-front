@@ -1,7 +1,7 @@
 import { afterEach, test } from "node:test";
 import assert from "node:assert/strict";
 import { ApiError } from "../src/services/api.ts";
-import { getPublicProperties, getPublicPropertyById } from "../src/services/publicPropertyService.ts";
+import { getPublicProperties, getPublicPropertyById, registerPublicPropertyView } from "../src/services/publicPropertyService.ts";
 import { mapPublicPropertyDetail, mapPublicPropertySummary } from "../src/lib/public-property.ts";
 
 const originalFetch = globalThis.fetch;
@@ -40,4 +40,15 @@ test("el detalle público propaga 404 y transforma errores de red", async () => 
   await assert.rejects(getPublicPropertyById(base.id), (error: unknown) => error instanceof ApiError && error.status === 404);
   globalThis.fetch = async () => { throw new Error("sin red"); };
   await assert.rejects(getPublicPropertyById(base.id), (error: unknown) => error instanceof ApiError && error.status === 0);
+});
+
+test("registrar una vista pública usa POST y tolera una respuesta 204", async () => {
+  let request: Request | undefined;
+  globalThis.fetch = async (input, init) => {
+    request = new Request(input, init);
+    return new Response(null, { status: 204 });
+  };
+  await registerPublicPropertyView(base.id);
+  assert.equal(request?.method, "POST");
+  assert.ok(request?.url.endsWith(`/properties/${base.id}/views`));
 });

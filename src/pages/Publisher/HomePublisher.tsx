@@ -6,14 +6,21 @@ import { usePublisherProperties } from "../../hooks/use-publisher-properties";
 import { OPERATION_TYPES, PUBLICATION_STATUSES } from "../../constants/property";
 import { formatLocation } from "../../lib/formatters";
 import { Badge } from "../../components/ui/badge";
-import { useState } from "react";
-import { filterPublisherProperties, propertyMetrics, type PublisherFilters } from "../../lib/publisher-properties";
-import { mockConsultations, mockPropertyViews } from "../../data/mock/activity";
+import { useEffect, useState } from "react";
+import { filterPublisherProperties, type PublisherFilters } from "../../lib/publisher-properties";
+import { getPublisherMetrics, type PublisherPropertyMetric } from "../../services/publisherMetricsService";
 
 export default function PublisherDashboard() {
   const { properties, loading, error } = usePublisherProperties();
   const [filters, setFilters] = useState<PublisherFilters>({ query: "", status: "all" });
+  const [metrics, setMetrics] = useState<PublisherPropertyMetric[]>([]);
+  useEffect(() => {
+    let active = true;
+    void getPublisherMetrics().then((result) => { if (active) setMetrics(result.properties); }).catch(() => { if (active) setMetrics([]); });
+    return () => { active = false; };
+  }, []);
   const filteredProperties = filterPublisherProperties(properties, filters);
+  const metricFor = (propertyId: string) => metrics.find((metric) => metric.propertyId === propertyId);
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <HeaderUser />
@@ -31,7 +38,6 @@ export default function PublisherDashboard() {
             </Button>
           </Link>
         </div>
-        <p className="text-sm text-muted-foreground mb-4">Las visitas y consultas que se muestran son datos de ejemplo.</p>
 
         {/* Listado de propiedades (tabla simple) */}
         <div className="border rounded-lg overflow-x-auto">
@@ -77,8 +83,8 @@ export default function PublisherDashboard() {
                       {OPERATION_TYPES[p.operationType]}
                     </span>
                   </td>
-                  <td className="p-3">{propertyMetrics(p.id, mockPropertyViews, mockConsultations).views}</td>
-                  <td className="p-3">{propertyMetrics(p.id, mockPropertyViews, mockConsultations).consultations}</td>
+                  <td className="p-3">{metricFor(p.id)?.views ?? 0}</td>
+                  <td className="p-3">{metricFor(p.id)?.consultations ?? 0}</td>
                   <td className="p-3">
                     {(() => {
                       const estado = PUBLICATION_STATUSES[p.publicationStatus];

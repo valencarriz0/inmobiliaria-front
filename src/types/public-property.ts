@@ -98,3 +98,18 @@ export interface PublicPropertyListResponseDto {
 }
 
 export interface PublicPropertyDetailResponseDto { property: PublicPropertyDetailDto; }
+
+export interface PropertyViewHistoryItemDto {
+  property: PublicPropertyDetailDto;
+  lastViewedAt: string;
+}
+
+export interface PropertyViewHistoryResponseDto {
+  history: PropertyViewHistoryItemDto[];
+  pagination: PublicPropertyPagination;
+}
+
+export interface PropertyViewHistoryItem {
+  property: PublicPropertyDetail;
+  lastViewedAt: string;
+}

@@ -7,6 +7,8 @@ import PropertyList from "./PropertyList";
 import SearchBar from "./SearchBar";
 import { Button } from "./ui/button";
 import RecentProperties from "./RecentProperties";
+import { searchAlertService } from "../services/searchAlertService";
+import { useState } from "react";
 
 const sortLabels: Record<PublicPropertySort, string> = { newest: "Más recientes", price_asc: "Precio: menor a mayor", price_desc: "Precio: mayor a menor" };
 
@@ -19,9 +21,16 @@ export default function PropertyCatalog({ loggedIn = false }: { loggedIn?: boole
   const clear = () => search({});
   const changePage = (page: number) => { if (filters) setSearchParams(serializePropertySearchFilters({ ...filters, page }, searchParams)); };
   const changeSort = (sort: PublicPropertySort) => { if (filters) setSearchParams(serializePropertySearchFilters({ ...filters, sort, page: 1 }, searchParams)); };
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
+  const saveAlert = async () => {
+    if (!filters) return;
+    try { await searchAlertService.create({ operationType: filters.operationType ?? null, propertyType: filters.propertyType ?? null, provinceId: filters.provinceId ?? null, cityId: filters.cityId ?? null, currency: filters.currency ?? null, minPrice: filters.minPrice ?? null, maxPrice: filters.maxPrice ?? null }); setAlertMessage("Alerta creada correctamente."); }
+    catch { setAlertMessage("No se pudo crear la alerta."); }
+  };
 
   return <>
     <SearchBar key={location.key} initialValues={readPropertySearchValues(searchParams)} onSearch={search} onClear={clear} />
+    {loggedIn && <div className="mb-4 text-center space-y-2"><Button variant="outline" onClick={() => void saveAlert()}>Crear alerta con esta búsqueda</Button>{alertMessage && <p role={alertMessage.includes("correctamente") ? "status" : "alert"}>{alertMessage}</p>}</div>}
     <section aria-labelledby="property-results-title" aria-busy={loading}>
       <h2 id="property-results-title" className="text-3xl font-bold mb-4 font-[family-name:var(--font-grotesk)] text-center">Propiedades disponibles</h2>
       {filters === undefined ? <p role="alert" className="text-center">La búsqueda tiene filtros inválidos. Revisá los campos indicados o limpiá los filtros.</p>

@@ -1,5 +1,5 @@
 import PropertyGallery from "../../components/PropertyGallery";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "../../components/ui/button";
 import {
   Card,
@@ -28,8 +28,7 @@ import { FieldError } from "../../components/ui/field-error";
 import type { PublisherProperty } from "../../types/publisher-property";
 import { OPERATION_TYPES, PUBLICATION_STATUSES } from "../../constants/property";
 import { formatCharacteristics, formatLocation, formatPrice } from "../../lib/formatters";
-import { mockConsultations, mockPropertyViews } from "../../data/mock/activity";
-import { propertyMetrics } from "../../lib/publisher-properties";
+import { getPublisherMetrics, type PublisherPropertyMetric } from "../../services/publisherMetricsService";
 import { hasValidCoordinates } from "../../lib/geocoding";
 import PropertyMap from "../../components/maps/PropertyMap";
 
@@ -59,7 +58,18 @@ function PublisherPropertyDetail({ property, refresh }: { property: PublisherPro
   const [actionError, setActionError] = useState<string>();
   const inFlight = useRef(false);
 
-  const { views, consultations: inquiries } = propertyMetrics(property.id, mockPropertyViews, mockConsultations);
+  const [metrics, setMetrics] = useState<PublisherPropertyMetric>();
+  useEffect(() => {
+    let active = true;
+    void getPublisherMetrics().then((result) => {
+      if (active) setMetrics(result.properties.find((item) => item.propertyId === property.id));
+    }).catch(() => {
+      if (active) setMetrics(undefined);
+    });
+    return () => { active = false; };
+  }, [property.id]);
+  const views = metrics?.views ?? 0;
+  const inquiries = metrics?.consultations ?? 0;
 
   const runAction = async (action: "pause" | "reactivate" | "delete") => {
     if (inFlight.current) return;

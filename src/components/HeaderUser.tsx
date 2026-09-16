@@ -19,6 +19,8 @@ export default function HeaderUser() {
     ...(canUseInterestedFeatures(user) ? [
       { label: "Favoritos", to: "/favorites" },
       { label: "Mis consultas", to: "/consultations" },
+      { label: "Propiedades vistas", to: "/view-history" },
+      { label: "Mis alertas", to: "/search-alerts" },
     ] : []),
     ...(user.role === "publisher" ? [
       { label: "Mis propiedades", to: "/dashboard" },

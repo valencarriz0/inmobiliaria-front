@@ -1,4 +1,5 @@
 import type { AuthUser, UserFormValues, UserRole } from "../types/user.ts";
+import type { PublicPublisherApplicationInput, PublisherApplicationInput } from "../types/publisher-application.ts";
 import { validateEmail, validateName, validatePassword, validatePasswordConfirmation, validatePhone } from "./validation.ts";
 
 export function createUserFormValues(user?: AuthUser): UserFormValues {
@@ -55,5 +56,26 @@ export function profileInput(values: UserFormValues) {
     firstName: values.firstName.trim(),
     lastName: values.lastName.trim(),
     phone: values.phone.trim() || null,
+  };
+}
+
+export function publisherApplicationInput(values: UserFormValues): PublisherApplicationInput {
+  const publisherType = values.publisherType === "agency" ? "agency" : "individual";
+  return {
+    publisherType,
+    taxId: values.taxId.replace(/\D/g, ""),
+    agencyName: publisherType === "agency" ? values.agencyName.trim() : null,
+    phone: values.phone.trim(),
+  };
+}
+
+export function publicPublisherApplicationInput(values: UserFormValues): PublicPublisherApplicationInput {
+  return {
+    ...publisherApplicationInput(values),
+    firstName: values.firstName.trim(),
+    lastName: values.lastName.trim(),
+    email: values.email.trim(),
+    password: values.password,
+    passwordConfirm: values.passwordConfirm,
   };
 }

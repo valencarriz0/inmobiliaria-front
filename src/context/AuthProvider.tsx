@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { Property } from "../types/property";
-import type { AuthUser, LoginInput, RegisterInput, UpdateProfileInput } from "../types/user";
+import type { AuthResponse, AuthUser, LoginInput, RegisterInput, UpdateProfileInput } from "../types/user";
 import { ApiError } from "../services/api";
 import * as authService from "../services/authService";
 import { clearAuthToken, getAuthToken, setAuthToken } from "../services/authStorage";
 import * as userService from "../services/userService";
+import * as publisherApplicationService from "../services/publisherApplicationService";
+import type { PublicPublisherApplicationInput } from "../types/publisher-application";
 import { canFavoriteProperty } from "../lib/user-properties";
 import { AuthContext, type AuthDialog } from "./auth-context";
 
@@ -42,19 +44,27 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     return () => { active = false; };
   }, [refreshUser]);
 
-  const login = useCallback(async (data: LoginInput) => {
-    const response = await authService.login(data);
+  const establishSession = useCallback((response: Pick<AuthResponse, "user" | "token">) => {
     setAuthToken(response.token);
     setUser(response.user);
     return response.user;
   }, []);
 
+  const login = useCallback(async (data: LoginInput) => {
+    const response = await authService.login(data);
+    return establishSession(response);
+  }, [establishSession]);
+
   const register = useCallback(async (data: RegisterInput) => {
     const response = await authService.register(data);
-    setAuthToken(response.token);
-    setUser(response.user);
-    return response.user;
-  }, []);
+    return establishSession(response);
+  }, [establishSession]);
+
+  const registerPublicPublisherApplication = useCallback(async (data: PublicPublisherApplicationInput) => {
+    const response = await publisherApplicationService.createPublicPublisherApplication(data);
+    establishSession(response);
+    return response.application;
+  }, [establishSession]);
 
   const logout = useCallback(() => {
     clearAuthToken();
@@ -84,6 +94,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     isLoading,
     login,
     register,
+    registerPublicPublisherApplication,
     logout,
     refreshUser,
     updateProfile,
@@ -92,7 +103,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     authDialog,
     setAuthDialog,
     openAuthDialog: (dialog: Exclude<AuthDialog, null>) => setAuthDialog(dialog),
-  }), [authDialog, favoriteIds, isLoading, login, logout, refreshUser, register, toggleFavorite, updateProfile, user]);
+  }), [authDialog, favoriteIds, isLoading, login, logout, refreshUser, register, registerPublicPublisherApplication, toggleFavorite, updateProfile, user]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

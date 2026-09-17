@@ -97,7 +97,7 @@ test("el registro común siempre termina en perfil", () => {
 
 test("ser interested no abre automáticamente el formulario de publicador", () => {
   assert.equal(publishingEntryRedirect("interested"), null);
-  assert.equal(roleHome("interested"), "/HomePageLogin");
+  assert.equal(roleHome("interested"), "/");
   assert.equal(publishingEntryRedirect("publisher"), "/dashboard");
   assert.equal(publishingEntryRedirect("admin"), "/profile");
 });

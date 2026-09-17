@@ -9,10 +9,9 @@ import FavoriteHeartButton from "./FavoriteHeartButton";
 
 type PropertyListProps = {
   properties: PublicPropertySummary[];
-  loggedIn?: boolean;
 };
 
-const PropertyList = ({ properties, loggedIn = false }: PropertyListProps) => {
+const PropertyList = ({ properties }: PropertyListProps) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {properties.map((property) => (
@@ -60,14 +59,7 @@ const PropertyList = ({ properties, loggedIn = false }: PropertyListProps) => {
               </div>
             </div>
 
-            {/*Enlace dinámico con el ID. Si está logueado, ir a detailLogin/:id */}
-            <Button asChild className="w-full bg-primary hover:bg-primary/90"><Link
-              to={
-                loggedIn
-                  ? `/detailLogin/${property.id}`
-                  : `/detail/${property.id}`
-              }
-            >
+            <Button asChild className="w-full bg-primary hover:bg-primary/90"><Link to={`/detail/${property.id}`}>
               Ver detalles
             </Link></Button>
           </CardContent>

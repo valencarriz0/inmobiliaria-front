@@ -1,8 +1,6 @@
-import { Routes, Route, Outlet, Navigate, Link } from "react-router-dom";
+import { Routes, Route, Outlet, Navigate, Link, useParams } from "react-router-dom";
 import HomePageWireframe from "../pages/InterestedUser/Sin Login/HomePage";
 import PropertyDetailPage from "../pages/InterestedUser/Sin Login/PropertyDetailPage";
-import HomePageLogin from "../pages/InterestedUser/Con Login/HomePageLogin";
-import PropertyDetailLogin from "../pages/InterestedUser/Con Login/PropertyDetailLogin";
 import PostPage from "../pages/Publisher/PostPage";
 import PublisherRegistration from "../pages/Publisher/Registration";
 import PublisherDashboard from "../pages/Publisher/HomePublisher";
@@ -57,20 +55,25 @@ function RequireRole({ roles }: { roles: UserRole[] }) {
   return roles.includes(user.role) ? <Outlet /> : <Navigate to={roleHome(user.role)} replace />;
 }
 
+function LegacyPropertyDetailRedirect() {
+  const { id } = useParams();
+  return <Navigate to={id ? `/detail/${id}` : "/detail"} replace />;
+}
+
 function App() {
   return (
     <Routes>
         <Route path="/" element={<HomePageWireframe />} />
         <Route path="/detail" element={<PropertyDetailPage />} />
         <Route path="/detail/:id" element={<PropertyDetailPage />} />
+        <Route path="/HomePageLogin" element={<Navigate to="/" replace />} />
+        <Route path="/detailLogin" element={<Navigate to="/detail" replace />} />
+        <Route path="/detailLogin/:id" element={<LegacyPropertyDetailRedirect />} />
         <Route path="/post" element={<PostPage />} />
         <Route path="/register" element={<PublisherRegistration mode="visitor" />} />
         <Route path="/verificar-correo" element={<VerifyEmail />} />
         <Route path="/restablecer-contrasena" element={<ResetPassword />} />
         <Route element={<RequireAuth />}>
-          <Route path="/HomePageLogin" element={<HomePageLogin />} />
-          <Route path="/detailLogin" element={<PropertyDetailLogin />} />
-          <Route path="/detailLogin/:id" element={<PropertyDetailLogin />} />
           <Route path="/profile" element={<Profile />} />
           <Route element={<RequireRole roles={["interested"]} />}>
             <Route path="/become-publisher" element={<PublisherRegistration mode="interested" />} />

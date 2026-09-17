@@ -17,7 +17,7 @@ test("notificaciones consulta, marca una y marca todas usando el servicio real",
 
 test("destinos de notificaciones usan rutas existentes sin mocks", () => {
   assert.equal(notificationDestination({ id: "1", type: "new_consultation", title: "", message: null, consultationId: null, publisherApplicationId: null, searchAlertId: null, propertyId: null, readAt: null, createdAt: "2026-01-01T00:00:00Z" }), "/publisher/consultations");
-  assert.equal(notificationDestination({ id: "2", type: "new_property_match", title: "", message: null, consultationId: null, publisherApplicationId: null, searchAlertId: null, propertyId: "property-1", readAt: null, createdAt: "2026-01-01T00:00:00Z" }), "/detailLogin/property-1");
+  assert.equal(notificationDestination({ id: "2", type: "new_property_match", title: "", message: null, consultationId: null, publisherApplicationId: null, searchAlertId: null, propertyId: "property-1", readAt: null, createdAt: "2026-01-01T00:00:00Z" }), "/detail/property-1");
 });
 
 test("historial traduce acciones, diferencia campos y formatea valores legibles", () => {

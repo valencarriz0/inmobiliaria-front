@@ -4,7 +4,7 @@ import { getPublicPropertyById } from "../services/publicPropertyService";
 import type { PublicPropertySummary } from "../types/public-property";
 import PropertyList from "./PropertyList";
 
-export default function RecentProperties({ loggedIn }: { loggedIn: boolean }) {
+export default function RecentProperties() {
   const [properties, setProperties] = useState<PublicPropertySummary[]>([]);
   useEffect(() => {
     const controller = new AbortController();
@@ -16,5 +16,5 @@ export default function RecentProperties({ loggedIn }: { loggedIn: boolean }) {
     return () => controller.abort();
   }, []);
   if (!properties.length) return null;
-  return <section aria-labelledby="recent-properties-title" className="mt-12"><h2 id="recent-properties-title" className="text-3xl font-bold mb-6 font-[family-name:var(--font-grotesk)] text-center">Vistas recientemente</h2><PropertyList properties={properties} loggedIn={loggedIn} /></section>;
+  return <section aria-labelledby="recent-properties-title" className="mt-12"><h2 id="recent-properties-title" className="text-3xl font-bold mb-6 font-[family-name:var(--font-grotesk)] text-center">Vistas recientemente</h2><PropertyList properties={properties} /></section>;
 }

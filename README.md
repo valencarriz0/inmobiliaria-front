@@ -1,103 +1,87 @@
-# Sistema Inmobiliario
+# InmuConnect - Frontend
 
-Frontend de un sistema web inmobiliario desarrollado como proyecto para la materia Desarrollo de Software.
+Aplicación web para buscar, publicar y administrar propiedades. Está desarrollada con React y se conecta al backend de InmuConnect mediante una API REST.
 
-El sistema busca facilitar la publicación y gestión de propiedades por parte de inmobiliarias y propietarios, y permitir que los usuarios interesados puedan buscar inmuebles utilizando distintos filtros y consultar su información.
+## Tecnologías
 
-Actualmente el proyecto se encuentra en desarrollo y trabaja con datos simulados, ya que todavía no está conectado a un backend.
-
-## Tecnologías utilizadas
-
-- React
-- TypeScript
+- React y TypeScript
 - Vite
 - React Router
-- Tailwind CSS
-- Radix UI
-- Lucide React
+- Tailwind CSS y Radix UI
+- React Leaflet y OpenStreetMap
 
-## Funcionalidades implementadas
+## Puesta en marcha
 
-Actualmente el frontend permite trabajar con las principales funcionalidades relacionadas con propiedades.
+Instalá las dependencias y levantá el proyecto:
 
-### Catálogo público
+```bash
+npm install
+npm run dev
+```
 
-El usuario puede consultar las propiedades disponibles sin necesidad de registrarse.
+Por defecto, el frontend busca la API en `http://localhost:3000/api`. Si el backend usa otra dirección, creá un archivo `.env` con:
 
-El buscador permite filtrar por:
+```env
+VITE_API_BASE_URL=http://localhost:3000/api
+```
 
-- categoría;
-- tipo de inmueble;
-- ubicación;
-- moneda;
-- rango de precio.
+## Funcionalidades
 
-Las categorías disponibles son Venta, Alquiler y Alquiler temporario.
+### Catálogo y detalle
 
-Los filtros pueden combinarse y la búsqueda se mantiene en la URL, por lo que puede conservarse al actualizar la página o utilizar los botones de navegación del navegador.
+El catálogo está disponible en `/` y el detalle de una propiedad en `/detail/:id`. Ambas pantallas se adaptan a la sesión activa: una persona visitante puede buscar y enviar consultas; una persona autenticada además puede usar favoritos, alertas e historial de vistas según su rol.
 
-Las propiedades pausadas o eliminadas no se muestran en el catálogo público.
+La búsqueda permite filtrar por operación, tipo de propiedad, ubicación, moneda y rango de precios. Los filtros, el orden y la página se conservan en la URL. Las propiedades pausadas o eliminadas no aparecen en el catálogo público.
 
-### Detalle de propiedades
+Las rutas anteriores `/HomePageLogin` y `/detailLogin/:id` siguen redirigiendo a las rutas actuales para no romper enlaces guardados.
 
-Cada propiedad cuenta con una vista de detalle donde se muestra la información disponible, entre ella:
+### Cuentas y perfiles
 
-- título y descripción;
-- categoría;
-- tipo de inmueble;
-- precio y moneda;
-- ubicación;
-- superficie;
-- ambientes;
-- dormitorios y baños, cuando corresponda;
-- antigüedad;
-- estado del inmueble;
-- servicios;
-- comodidades;
-- cochera;
-- aceptación de mascotas;
-- expensas, impuestos y comisiones;
-- galería de imágenes.
+Incluye registro, inicio de sesión, verificación de correo, recuperación de contraseña y edición de perfil. El acceso a cada sección se controla según el rol: interesado, publicador o administrador.
 
-Si una propiedad no existe o no está disponible públicamente, se muestra un mensaje informando la situación.
+### Interesados
 
-### Gestión de propiedades
+Las personas interesadas pueden guardar favoritos, enviar y consultar sus mensajes, revisar propiedades vistas y crear alertas de búsqueda.
 
-El publicador puede trabajar con sus propiedades mediante un CRUD simulado en el frontend.
+### Publicadores
 
-Actualmente se puede:
+Los publicadores pueden solicitar su habilitación, administrar sus propiedades, subir imágenes, pausar o reactivar publicaciones, consultar su historial de cambios y ver métricas de visitas y consultas.
 
-- crear una publicación;
-- editar una publicación existente;
-- pausar una publicación;
-- reactivar una publicación;
-- eliminarla de forma lógica.
+### Administración
 
-Las propiedades eliminadas dejan de mostrarse en los listados, pero se mantienen internamente en el store simulado.
+El panel de administración permite consultar métricas generales, administrar usuarios, revisar solicitudes de publicador y gestionar publicaciones.
 
-### Alta y edición
+## Comandos útiles
 
-Los formularios de alta y edición comparten los mismos campos y reglas de validación.
+```bash
+npm run typecheck
+npm run lint
+npm test
+npm run build
+```
 
-Las publicaciones permiten cargar entre 2 y 5 imágenes en formato JPEG/JPG, PNG o WebP, con un tamaño máximo de 5 MB por archivo nuevo.
-
-Los campos numéricos y opcionales son validados antes de confirmar la operación.
-
-## Organización del frontend
-
-El proyecto está dividido en distintas carpetas según su responsabilidad:
+## Organización
 
 ```text
 src/
-├── components/     Componentes reutilizables de interfaz
-├── constants/      Constantes utilizadas por el dominio
-├── data/mock/      Datos y store simulados
-├── hooks/          Hooks personalizados
-├── lib/            Validaciones, formateadores y utilidades
-├── pages/          Pantallas de la aplicación
-├── routes/         Configuración de rutas
-├── services/       Acceso y operaciones sobre los datos
-└── types/          Tipos e interfaces de TypeScript
+├── components/  Componentes reutilizables
+├── context/     Estado de autenticación
+├── hooks/       Hooks de datos y formularios
+├── lib/         Validaciones, mapeos y utilidades
+├── pages/       Pantallas organizadas por rol
+├── routes/      Rutas y controles de acceso
+├── services/    Comunicación con la API
+└── types/       Tipos de TypeScript
 
-tests/              Pruebas automatizadas
-docs/               Documentación complementaria
+tests/           Pruebas automatizadas
+docs/            Documentación funcional y técnica
+```
+
+## Documentación complementaria
+
+- [Catálogo público](docs/catalogo-publico.md)
+- [Gestión de propiedades](docs/gestion-propiedades-publicador.md)
+- [Consultas](docs/consultas.md)
+- [Interacciones y métricas](docs/interacciones-y-metricas.md)
+- [Administración](docs/administracion.md)
+- [Ubicación y mapas](docs/ubicacion-y-mapas.md)

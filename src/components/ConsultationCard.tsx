@@ -27,7 +27,7 @@ export default function ConsultationCard({ consultation, publisher = false }: { 
           </dl>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button asChild variant="outline" size="sm"><Link to={`${publisher ? "/detailPublisher" : "/detailLogin"}/${consultation.propertyId}`}>Ver propiedad</Link></Button>
+          <Button asChild variant="outline" size="sm"><Link to={`${publisher ? "/detailPublisher" : "/detail"}/${consultation.propertyId}`}>Ver propiedad</Link></Button>
           {publisher && <>
             <Button asChild variant="outline" size="sm"><a href={`mailto:${consultation.email}`}>Responder por correo</a></Button>
             {whatsapp && <Button asChild variant="outline" size="sm"><a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noreferrer">Responder por WhatsApp</a></Button>}

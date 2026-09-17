@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import HeaderUser from "../../components/HeaderUser";
+import BotonVolver from "../../components/BotonVolver";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { getPublisherMetrics, type PublisherMetrics } from "../../services/publisherMetricsService";
@@ -37,6 +38,7 @@ export default function Statistics() {
 
   return <div className="min-h-screen bg-background">
     <HeaderUser />
+    <BotonVolver fallbackTo="/dashboard" />
     <main className="container mx-auto px-4 py-8 space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-3xl font-bold">Estadísticas</h1>

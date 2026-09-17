@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import HeaderUser from "../../components/HeaderUser";
+import BotonVolver from "../../components/BotonVolver";
 import UserForm from "../../components/UserForm";
 import { useAuth } from "../../hooks/use-auth";
 import { profileInput } from "../../lib/user-form";
@@ -97,10 +98,10 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-background">
       <HeaderUser />
+      <BotonVolver fallbackTo={roleHome(user.role)} />
       <main className="container mx-auto max-w-4xl px-4 py-8 space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-3xl font-bold">Mi perfil</h1>
-          <Button asChild variant="outline"><Link to={roleHome(user.role)}>{user.role === "publisher" ? "Mis propiedades" : user.role === "admin" ? "Administración" : "Volver al catálogo"}</Link></Button>
         </div>
         <Card className="rounded-2xl bg-gray-50 dark:bg-card">
           <CardHeader><CardTitle>Datos personales</CardTitle></CardHeader>

@@ -42,10 +42,10 @@ export default function PropertyCatalog({ loggedIn = false }: { loggedIn?: boole
                   <p role="status" className="text-muted-foreground">{pagination.total} {pagination.total === 1 ? "propiedad encontrada" : "propiedades encontradas"}</p>
                   <label className="text-sm text-muted-foreground">Ordenar por <select aria-label="Ordenar propiedades" className="ml-2 rounded-md border bg-white p-2 text-foreground" value={filters.sort ?? "newest"} onChange={(event) => changeSort(event.target.value as PublicPropertySort)}>{(Object.keys(sortLabels) as PublicPropertySort[]).map((sort) => <option key={sort} value={sort}>{sortLabels[sort]}</option>)}</select></label>
                 </div>
-                <PropertyList properties={properties} loggedIn={loggedIn} />
+                <PropertyList properties={properties} />
                 {pagination.totalPages > 1 && <nav className="mt-8 flex items-center justify-center gap-3" aria-label="Paginación"><Button variant="outline" onClick={() => changePage(pagination.page - 1)} disabled={pagination.page <= 1}>Anterior</Button><span aria-current="page" className="text-sm text-muted-foreground">Página {pagination.page} de {pagination.totalPages}</span><Button variant="outline" onClick={() => changePage(pagination.page + 1)} disabled={pagination.page >= pagination.totalPages}>Siguiente</Button></nav>}
               </>}
     </section>
-    <RecentProperties loggedIn={loggedIn} />
+    <RecentProperties />
   </>;
 }

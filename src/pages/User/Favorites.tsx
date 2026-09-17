@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 import HeaderUser from "../../components/HeaderUser";
+import BotonVolver from "../../components/BotonVolver";
 import PropertyList from "../../components/PropertyList";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
@@ -51,6 +52,7 @@ export default function Favorites() {
 
   return <div className="min-h-screen bg-background">
     <HeaderUser />
+    <BotonVolver fallbackTo="/" />
     <main className="container mx-auto px-4 py-12 space-y-6">
       <div className="space-y-2">
         <h1 className="text-3xl font-bold">Mis propiedades favoritas</h1>
@@ -58,12 +60,12 @@ export default function Favorites() {
       </div>
       {loading ? <p role="status">Cargando favoritos...</p> : error ? <div className="space-y-3">
         <p role="alert">{error}</p><Button variant="outline" onClick={retryLoad}>Reintentar</Button>
-      </div> : properties.length > 0 ? <PropertyList properties={properties} loggedIn /> : <Card className="rounded-2xl">
+      </div> : properties.length > 0 ? <PropertyList properties={properties} /> : <Card className="rounded-2xl">
         <CardContent className="flex flex-col items-center gap-4 py-8 text-center">
           <Heart className="h-10 w-10 text-accent" aria-hidden="true" />
           <h2 className="text-xl font-semibold">{favoriteIds.length ? "Tus favoritos no están disponibles por el momento" : "Todavía no guardaste propiedades"}</h2>
           <p className="text-muted-foreground">Explorá el catálogo y guardá las que más te interesen.</p>
-          <Button asChild><Link to="/HomePageLogin">Explorar propiedades</Link></Button>
+          <Button asChild><Link to="/">Explorar propiedades</Link></Button>
         </CardContent>
       </Card>}
     </main>

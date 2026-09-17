@@ -2,7 +2,13 @@ import { Button } from "./ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const BotonVolver = ({ to }: { to?: string }) => {
+type BotonVolverProps = {
+  to?: string;
+  /** Destino contextual cuando la página se abre sin historial de navegación. */
+  fallbackTo?: string;
+};
+
+const BotonVolver = ({ to, fallbackTo = "/" }: BotonVolverProps) => {
   const navigate = useNavigate();
 
   return (
@@ -13,7 +19,7 @@ const BotonVolver = ({ to }: { to?: string }) => {
         onClick={() => {
           if (to) navigate(to);
           else if (window.history.state?.idx > 0) navigate(-1);
-          else navigate("/");
+          else navigate(fallbackTo);
         }}
         className="inline-flex items-center gap-2 text-sm px-2 py-1 rounded-md w-auto bg-transparent hover:text-black hover:bg-[#F2F6F8]"
       >

@@ -24,7 +24,7 @@ export default function HeaderUser() {
 
   const links = [
     { label: "Perfil", to: "/profile" },
-    { label: "Catálogo", to: "/HomePageLogin" },
+    { label: "Catálogo", to: "/" },
 
     ...(canUseInterestedFeatures(user)
       ? [

@@ -79,6 +79,8 @@ docs/            Documentación funcional y técnica
 
 ## Documentación complementaria
 
+Los scripts y la documentación de la base de datos están centralizados en el repositorio del backend, dentro de `inmuConnect-back/database/`.
+
 - [Catálogo público](docs/catalogo-publico.md)
 - [Gestión de propiedades](docs/gestion-propiedades-publicador.md)
 - [Consultas](docs/consultas.md)

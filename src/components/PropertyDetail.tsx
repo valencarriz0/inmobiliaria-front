@@ -5,8 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { InputField } from "./ui/input-field";
 import { useFormValidation } from "../hooks/use-form-validation";
 import { validateEmail, validateName, validatePhone } from "../lib/validation";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "./ui/dialog";
-import { MapPin } from "lucide-react";
+import { Building2, CircleCheck, Mail, MapPin, Navigation, Phone, Send, UserRound } from "lucide-react";
 import BotonVolver from "./BotonVolver";
 import type { PublicPropertyDetail } from "../types/public-property";
 import { OPERATION_TYPES, PROPERTY_TYPES, PROPERTY_CONDITIONS, PROPERTY_SERVICES, PROPERTY_AMENITIES } from "../constants/property";
@@ -36,31 +35,23 @@ export default function PropertyDetail({ property }: { property: PublicPropertyD
     viewRegistered.current = true;
     void registerPublicPropertyView(property.id).catch(() => undefined);
   }, [property.id]);
-  const [openContact, setOpenContact] = useState(false);
-  const [contactNombre, setContactNombre] = useState("");
-  const [contactApellido, setContactApellido] = useState("");
-  const [contactEmail, setContactEmail] = useState("");
-  const [contactWhatsapp, setContactWhatsapp] = useState("");
+  const [contactNombre, setContactNombre] = useState(() => user?.firstName ?? "");
+  const [contactApellido, setContactApellido] = useState(() => user?.lastName ?? "");
+  const [contactEmail, setContactEmail] = useState(() => user?.email ?? "");
+  const [contactWhatsapp, setContactWhatsapp] = useState(() => user?.phone ?? "");
   const contactValidation = useFormValidation(() => ({
     nombre: validateName(contactNombre, "nombre"),
     apellido: validateName(contactApellido, "apellido"),
     email: validateEmail(contactEmail),
     whatsapp: validatePhone(contactWhatsapp),
   }));
-  const changeContactOpen = (open: boolean) => {
-    if (open) {
-      setContactNombre(user?.firstName ?? "");
-      setContactApellido(user?.lastName ?? "");
-      setContactEmail(user?.email ?? "");
-      setContactWhatsapp(user?.phone ?? "");
-      setMessage("");
-    }
-    setOpenContact(open);
-    setIsSubmittingContact(false);
-    setContactError("");
-    setContactSuccess(false);
-    contactValidation.resetValidation();
-  };
+  useEffect(() => {
+    if (!user) return;
+    setContactNombre((current) => current || user.firstName);
+    setContactApellido((current) => current || user.lastName);
+    setContactEmail((current) => current || user.email);
+    setContactWhatsapp((current) => current || user.phone || "");
+  }, [user]);
   const submitContact = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (isSubmittingContact || !contactValidation.validateForm(event.currentTarget)) return;
@@ -82,6 +73,17 @@ export default function PropertyDetail({ property }: { property: PublicPropertyD
     }
   };
   const address = [property.location.street, property.location.number].filter(Boolean).join(" ");
+  const locationName = formatPublicLocation(property.location);
+  const fullAddress = [address, locationName].filter(Boolean).join(", ");
+  const publisher = property.publisher;
+  const publisherName = publisher?.agencyName
+    || [publisher?.firstName, publisher?.lastName].filter(Boolean).join(" ")
+    || "Publicador de la propiedad";
+  const publisherKind = publisher?.publisherType === "agency" ? "Inmobiliaria"
+    : publisher?.publisherType === "individual" ? "Propietario particular" : "Publicador verificado";
+  const directionsUrl = hasValidCoordinates(property.latitude, property.longitude)
+    ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${property.latitude},${property.longitude}`)}`
+    : undefined;
   const details: { label: string; value: string | number | undefined }[] = [
     { label: "Categoría", value: OPERATION_TYPES[property.operationType] },
     { label: "Tipo de inmueble", value: PROPERTY_TYPES[property.propertyType] },
@@ -113,10 +115,10 @@ export default function PropertyDetail({ property }: { property: PublicPropertyD
                       : property.operationType === "sale" ? "bg-[#58b5e0]" : "bg-accent"
                   }`}>{OPERATION_TYPES[property.operationType]}</span>
                 </div>
-                <p className="flex items-start text-muted-foreground mt-1">
+                {/* <p className="flex items-start text-muted-foreground mt-1">
                   <MapPin className="h-4 w-4 mr-1 mt-1 shrink-0" aria-hidden="true" />
                   <span>{address && `${address}, `}{formatPublicLocation(property.location)}</span>
-                </p>
+                </p> */}
               </div>
               <FavoriteHeartButton property={property} className="relative shrink-0" buttonClassName="rounded-full bg-muted hover:bg-muted/80 hover:scale-110" />
             </div>
@@ -162,53 +164,147 @@ export default function PropertyDetail({ property }: { property: PublicPropertyD
         </div>
 
         <aside className="space-y-6">
-          <Card>
-            <CardHeader><CardTitle>Ubicación</CardTitle></CardHeader>
-            <CardContent className="space-y-2">
-              {address && <p>{address}</p>}
-              <p>{property.location.city}</p>
-              <p>{property.location.province}</p>
-              <PropertyMap latitude={property.latitude} longitude={property.longitude} displayName={formatPublicLocation(property.location)} />
-              {!hasValidCoordinates(property.latitude, property.longitude) && <p className="rounded-lg bg-muted p-4 text-sm text-muted-foreground">La ubicación exacta todavía no está disponible.</p>}
+          <Card className="gap-0 overflow-hidden bg-background py-0 shadow-md">
+           {/* <CardHeader className="border-b px-5 py-4">
+              {/* <CardTitle className="text-lg">Ubicación</CardTitle>
+            </CardHeader>*/}
+            {hasValidCoordinates(property.latitude, property.longitude) ? (
+              <PropertyMap
+                latitude={property.latitude}
+                longitude={property.longitude}
+                displayName={locationName}
+                className="h-[21rem] rounded-none"
+              />
+            ) : (
+              <div className="grid h-56 place-items-center bg-muted px-6 text-center">
+                <div>
+                  <MapPin className="mx-auto mb-3 size-8 text-accent" aria-hidden="true" />
+                  <p className="text-sm text-muted-foreground">La ubicación exacta todavía no está disponible.</p>
+                </div>
+              </div>
+            )}
+            <CardContent className="flex items-center gap-3 px-5 py-4">
+              <span className="grid size-10 shrink-0 place-items-center rounded-full bg-accent/10 text-accent">
+                <Navigation className="size-5" aria-hidden="true" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Dirección</p>
+                <p className="break-words text-sm font-semibold">{fullAddress || "Ubicación informada por el publicador"}</p>
+              </div>
+              {directionsUrl && (
+                <a href={directionsUrl} target="_blank" rel="noreferrer" className="shrink-0 text-sm font-semibold text-accent hover:underline">
+                  Cómo llegar
+                </a>
+              )}
             </CardContent>
           </Card>
-          <Card>
-            <CardHeader><CardTitle>Contacto</CardTitle></CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground">Dejá tus datos para que el publicador pueda contactarte.</p>
-              <Button className="w-full bg-accent hover:bg-accent/90" onClick={() => changeContactOpen(true)}>Ver formulario de contacto</Button>
+
+          <Card className="gap-0 bg-background py-0 shadow-sm">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-4">
+                <span className="grid size-10 shrink-0 place-items-center rounded-full bg-accent/10 text-accent">
+                  {publisher?.publisherType === "agency"
+                    ? <Building2 className="size-5" aria-hidden="true" />
+                    : <UserRound className="size-5" aria-hidden="true" />}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Publicado por</p>
+                  <h2 className="break-words text-sm font-semibold">{publisherName}</h2>
+                  <p className="text-sm text-muted-foreground">{publisherKind}</p>
+                </div>
+              </div>
+              {(publisher?.email || publisher?.phone) && (
+                <div className="mt-4 space-y-2 border-t pt-4 text-sm">
+                  {publisher.email && (
+                    <a href={`mailto:${publisher.email}`} className="flex items-center gap-2 break-all text-muted-foreground transition hover:text-accent">
+                      <Mail className="size-4 shrink-0" aria-hidden="true" />{publisher.email}
+                    </a>
+                  )}
+                  {publisher.phone && (
+                    <a href={`tel:${publisher.phone}`} className="flex items-center gap-2 text-muted-foreground transition hover:text-accent">
+                      <Phone className="size-4 shrink-0" aria-hidden="true" />{publisher.phone}
+                    </a>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="gap-0 border-accent/20 bg-accent/5 py-0 shadow-md">
+            <CardHeader className="px-5 pb-3 pt-5">
+              <CardTitle className="text-xl">Solicitá más información</CardTitle>
+              <p className="text-sm text-muted-foreground">Completá tus datos y el publicador podrá responder tu consulta.</p>
+            </CardHeader>
+            <CardContent className="px-5 pb-5">
+              {contactSuccess ? (
+                <div role="status" className="rounded-xl border border-accent/20 bg-background p-5 text-center">
+                  <CircleCheck className="mx-auto mb-3 size-10 text-accent" aria-hidden="true" />
+                  <p className="font-semibold">Consulta enviada</p>
+                  <p className="mt-1 text-sm text-muted-foreground">Tus datos fueron enviados correctamente al publicador.</p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="mt-4 rounded-full"
+                    onClick={() => {
+                      setContactSuccess(false);
+                      setMessage("");
+                      contactValidation.resetValidation();
+                    }}
+                  >
+                    Enviar otra consulta
+                  </Button>
+                </div>
+              ) : (
+                <form noValidate className="space-y-4" onSubmit={submitContact}>
+                  {[
+                    { name: "nombre", label: "Nombre", placeholder: "Tu nombre", value: contactNombre, setValue: setContactNombre, type: "text", autoComplete: "given-name" },
+                    { name: "apellido", label: "Apellido", placeholder: "Tu apellido", value: contactApellido, setValue: setContactApellido, type: "text", autoComplete: "family-name" },
+                    { name: "email", label: "Correo electrónico", placeholder: "nombre@correo.com", value: contactEmail, setValue: setContactEmail, type: "email", autoComplete: "email" },
+                    { name: "whatsapp", label: "WhatsApp / teléfono", placeholder: "+54 9 351 555 0000", value: contactWhatsapp, setValue: setContactWhatsapp, type: "tel", autoComplete: "tel" },
+                  ].map((field) => (
+                    <InputField
+                      key={field.name}
+                      {...contactValidation.fieldProps(field.name)}
+                      label={field.label}
+                      type={field.type}
+                      autoComplete={field.autoComplete}
+                      required
+                      placeholder={field.placeholder}
+                      disabled={isSubmittingContact}
+                      value={field.value}
+                      className="h-11 rounded-xl border-border bg-background px-4"
+                      onChange={(event) => { field.setValue(event.target.value); setContactError(""); }}
+                      error={contactValidation.errors[field.name]}
+                      errorId={contactValidation.errorId(field.name)}
+                    />
+                  ))}
+                  <div className="space-y-2">
+                    <Label htmlFor={messageId}>Mensaje (opcional)</Label>
+                    <Textarea
+                      id={messageId}
+                      name="message"
+                      rows={4}
+                      disabled={isSubmittingContact}
+                      value={message}
+                      className="min-h-28 resize-y rounded-xl border-border bg-background px-4 py-3"
+                      onChange={(event) => { setMessage(event.target.value); setContactError(""); }}
+                      placeholder="Hola, quisiera recibir más información sobre esta propiedad."
+                    />
+                  </div>
+                  <p className="text-xs leading-relaxed text-muted-foreground">
+                    Al enviar este formulario, tus datos se compartirán con el publicador únicamente para responder esta consulta.
+                  </p>
+                  {contactError && <p role="alert" className="text-sm text-destructive">{contactError}</p>}
+                  <Button type="submit" disabled={isSubmittingContact} className="h-11 w-full rounded-full bg-accent text-accent-foreground hover:bg-accent/90">
+                    <Send className="size-4" aria-hidden="true" />
+                    {isSubmittingContact ? "Enviando..." : "Enviar consulta"}
+                  </Button>
+                </form>
+              )}
             </CardContent>
           </Card>
         </aside>
       </main>
-
-      <Dialog open={openContact} onOpenChange={changeContactOpen}>
-        <DialogContent className="max-h-[90dvh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Contactar al publicador</DialogTitle>
-            <DialogDescription>Completá tus datos para recibir información sobre esta propiedad.</DialogDescription>
-          </DialogHeader>
-          {contactSuccess ? <div className="space-y-4">
-            <p role="status" className="text-sm text-muted-foreground">Tu consulta fue enviada correctamente.</p>
-            <DialogFooter><Button type="button" onClick={() => changeContactOpen(false)}>Cerrar</Button></DialogFooter>
-          </div> : <form noValidate className="space-y-4" onSubmit={submitContact}>
-            {[
-              { name: "nombre", label: "Nombre", value: contactNombre, setValue: setContactNombre, type: "text", autoComplete: "given-name" },
-              { name: "apellido", label: "Apellido", value: contactApellido, setValue: setContactApellido, type: "text", autoComplete: "family-name" },
-              { name: "email", label: "Correo electrónico", value: contactEmail, setValue: setContactEmail, type: "email", autoComplete: "email" },
-              { name: "whatsapp", label: "WhatsApp / teléfono", value: contactWhatsapp, setValue: setContactWhatsapp, type: "tel", autoComplete: "tel" },
-            ].map((field) => (
-              <InputField key={field.name} {...contactValidation.fieldProps(field.name)} label={field.label} type={field.type} autoComplete={field.autoComplete} required placeholder={field.label} disabled={isSubmittingContact} value={field.value} onChange={(event) => { field.setValue(event.target.value); setContactError(""); }} error={contactValidation.errors[field.name]} errorId={contactValidation.errorId(field.name)} />
-            ))}
-            <div className="space-y-2">
-              <Label htmlFor={messageId}>Mensaje (opcional)</Label>
-              <Textarea id={messageId} name="message" rows={3} disabled={isSubmittingContact} value={message} onChange={(event) => { setMessage(event.target.value); setContactError(""); }} placeholder="Ej.: Quisiera saber si aceptan mascotas o coordinar una visita." />
-            </div>
-            {contactError && <p role="alert" className="text-sm text-red-600">{contactError}</p>}
-            <DialogFooter><Button type="submit" disabled={isSubmittingContact}>{isSubmittingContact ? "Enviando..." : "Quiero que me contacten"}</Button></DialogFooter>
-          </form>}
-        </DialogContent>
-      </Dialog>
       <footer className="bg-muted py-6 px-4 mt-12">
         <div className="container mx-auto text-center text-muted-foreground text-sm">© 2025 Nombre y Logo. Todos los derechos reservados.</div>
       </footer>

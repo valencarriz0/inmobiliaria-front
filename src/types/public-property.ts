@@ -38,9 +38,19 @@ export interface PublicPropertySummary {
   createdAt: string;
 }
 
+export interface PublicPropertyPublisher {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  publisherType?: "individual" | "agency";
+  agencyName?: string;
+}
+
 export interface PublicPropertyDetail extends PublicPropertySummary {
   services: string[];
   amenities: string[];
+  publisher?: PublicPropertyPublisher;
 }
 
 export interface PublicPropertyPagination {
@@ -90,6 +100,14 @@ export interface PublicPropertySummaryDto extends PublicPropertyLocationDto {
 export interface PublicPropertyDetailDto extends PublicPropertySummaryDto {
   services: { id: string; code: string; name: string }[];
   amenities: { id: string; code: string; name: string }[];
+  publisher?: {
+    firstName?: string | null;
+    lastName?: string | null;
+    email?: string | null;
+    phone?: string | null;
+    publisherType?: string | null;
+    agencyName?: string | null;
+  } | null;
 }
 
 export interface PublicPropertyListResponseDto {

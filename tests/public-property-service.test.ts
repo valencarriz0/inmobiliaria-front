@@ -35,6 +35,18 @@ test("detalle conserva servicios y amenities desde el DTO", () => {
   assert.deepEqual(property.services, ["water"]); assert.deepEqual(property.amenities, ["balcony"]);
 });
 
+test("detalle conserva solamente los datos públicos disponibles del publicador", () => {
+  const property = mapPublicPropertyDetail({
+    ...base,
+    services: [],
+    amenities: [],
+    publisher: { firstName: " Ana ", lastName: "Publica", email: null, phone: "+54 351 555-0100", publisherType: "agency", agencyName: " Centro S.A. " },
+  });
+  assert.deepEqual(property.publisher, {
+    firstName: "Ana", lastName: "Publica", email: undefined, phone: "+54 351 555-0100", publisherType: "agency", agencyName: "Centro S.A.",
+  });
+});
+
 test("el detalle público propaga 404 y transforma errores de red", async () => {
   globalThis.fetch = async () => json({ error: "Propiedad no encontrada." }, 404);
   await assert.rejects(getPublicPropertyById(base.id), (error: unknown) => error instanceof ApiError && error.status === 404);

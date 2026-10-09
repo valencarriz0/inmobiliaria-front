@@ -1,6 +1,6 @@
 import { ApiError } from "../services/api.ts";
 import type { Currency, OperationType, PropertyCondition } from "../types/property.ts";
-import type { PublicPropertyDetail, PublicPropertyDetailDto, PublicPropertySummary, PublicPropertySummaryDto, PublicPropertyType } from "../types/public-property.ts";
+import type { PublicPropertyDetail, PublicPropertyDetailDto, PublicPropertyPublisher, PublicPropertySummary, PublicPropertySummaryDto, PublicPropertyType } from "../types/public-property.ts";
 
 const operations = new Set<OperationType>(["sale", "rent", "temporary_rent"]);
 const propertyTypes = new Set<PublicPropertyType>(["house", "apartment", "commercial"]);
@@ -26,6 +26,23 @@ function coordinates(latitude: unknown, longitude: unknown) {
   return { latitude: lat, longitude: lng };
 }
 
+function optionalText(value: unknown) {
+  return typeof value === "string" && value.trim() ? value.trim() : undefined;
+}
+
+function mapPublisher(dto: PublicPropertyDetailDto["publisher"]): PublicPropertyPublisher | undefined {
+  if (!dto || typeof dto !== "object") return undefined;
+  const publisher: PublicPropertyPublisher = {
+    firstName: optionalText(dto.firstName),
+    lastName: optionalText(dto.lastName),
+    email: optionalText(dto.email),
+    phone: optionalText(dto.phone),
+    publisherType: dto.publisherType === "individual" || dto.publisherType === "agency" ? dto.publisherType : undefined,
+    agencyName: optionalText(dto.agencyName),
+  };
+  return Object.values(publisher).some(Boolean) ? publisher : undefined;
+}
+
 function mapSummary(dto: PublicPropertySummaryDto): PublicPropertySummary {
   if (!dto || typeof dto !== "object" || !operations.has(dto.operationType as OperationType) || !propertyTypes.has(dto.propertyType as PublicPropertyType) || !currencies.has(dto.currency as Currency)) {
     throw new ApiError(0, "La respuesta de una propiedad es inválida.");
@@ -46,5 +63,11 @@ function mapSummary(dto: PublicPropertySummaryDto): PublicPropertySummary {
 export function mapPublicPropertySummary(dto: PublicPropertySummaryDto): PublicPropertySummary { return mapSummary(dto); }
 export function mapPublicPropertyDetail(dto: PublicPropertyDetailDto): PublicPropertyDetail {
   const summary = mapSummary(dto);
-  return { ...summary, services: Array.isArray(dto.services) ? dto.services.map((service) => service.code).filter((code): code is string => typeof code === "string") : [], amenities: Array.isArray(dto.amenities) ? dto.amenities.map((amenity) => amenity.code).filter((code): code is string => typeof code === "string") : [] };
+  const publisher = mapPublisher(dto.publisher);
+  return {
+    ...summary,
+    services: Array.isArray(dto.services) ? dto.services.map((service) => service.code).filter((code): code is string => typeof code === "string") : [],
+    amenities: Array.isArray(dto.amenities) ? dto.amenities.map((amenity) => amenity.code).filter((code): code is string => typeof code === "string") : [],
+    ...(publisher ? { publisher } : {}),
+  };
 }

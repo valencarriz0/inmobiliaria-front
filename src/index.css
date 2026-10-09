@@ -4,17 +4,51 @@
 @custom-variant dark (&:is(.dark *));
 
 .property-map-marker {
-  align-items: center;
-  background: oklch(var(--primary));
-  border: 2px solid white;
-  border-radius: 9999px;
-  color: white;
-  display: flex;
-  font-size: 20px;
+  background: transparent;
+  border: 0;
+}
+
+.property-map-marker > span {
+  background: var(--accent);
+  border: 3px solid white;
+  border-radius: 50% 50% 50% 0;
+  box-shadow: 0 5px 14px rgb(15 23 42 / 0.28);
+  display: block;
   height: 30px;
-  justify-content: center;
-  line-height: 1;
+  position: relative;
+  transform: rotate(-45deg);
   width: 30px;
+}
+
+.property-map-marker > span::after {
+  background: white;
+  border-radius: 9999px;
+  content: "";
+  height: 8px;
+  left: 8px;
+  position: absolute;
+  top: 8px;
+  width: 8px;
+}
+
+.property-map .leaflet-tile-pane {
+  filter: grayscale(0.9) saturate(0.4) brightness(1.06) contrast(0.9);
+}
+
+.property-map .leaflet-control-zoom {
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 12px rgb(15 23 42 / 0.14);
+}
+
+.property-map .leaflet-control-zoom a {
+  background: var(--background);
+  border-color: var(--border);
+  color: var(--foreground);
+}
+
+.property-map .leaflet-control-zoom a:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
 }
 
 :root {

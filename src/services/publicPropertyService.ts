@@ -31,7 +31,7 @@ export async function getPublicProperties(filters: PropertySearchFilters = {}, s
 }
 
 export async function getPublicPropertyById(id: string, signal?: AbortSignal): Promise<PublicPropertyDetail> {
-  const response = await apiRequest<PublicPropertyDetailResponseDto>(`/properties/${encodeURIComponent(id)}`, { signal });
+  const response = await apiRequest<PublicPropertyDetailResponseDto>(`/properties/${encodeURIComponent(id)}`, { signal, token: getAuthToken() });
   return mapPublicPropertyDetail(response.property);
 }
 

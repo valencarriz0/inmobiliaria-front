@@ -54,7 +54,7 @@ export default function PropertyDetail({ property }: { property: PublicPropertyD
   }, [user]);
   const submitContact = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (isSubmittingContact || !contactValidation.validateForm(event.currentTarget)) return;
+    if (!property.canConsult || isSubmittingContact || !contactValidation.validateForm(event.currentTarget)) return;
     setIsSubmittingContact(true);
     setContactError("");
     try {
@@ -76,10 +76,12 @@ export default function PropertyDetail({ property }: { property: PublicPropertyD
   const locationName = formatPublicLocation(property.location);
   const fullAddress = [address, locationName].filter(Boolean).join(", ");
   const publisher = property.publisher;
+  const publisherContactName = [publisher?.firstName, publisher?.lastName].filter(Boolean).join(" ");
   const publisherName = publisher?.agencyName
-    || [publisher?.firstName, publisher?.lastName].filter(Boolean).join(" ")
+    || publisherContactName
     || "Publicador de la propiedad";
-  const publisherKind = publisher?.publisherType === "agency" ? "Inmobiliaria"
+  const publisherKind = publisher?.publisherType === "agency"
+    ? ["Inmobiliaria", publisherContactName].filter(Boolean).join(" · ")
     : publisher?.publisherType === "individual" ? "Propietario particular" : "Publicador verificado";
   const directionsUrl = hasValidCoordinates(property.latitude, property.longitude)
     ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${property.latitude},${property.longitude}`)}`
@@ -233,10 +235,22 @@ export default function PropertyDetail({ property }: { property: PublicPropertyD
           <Card className="gap-0 border-accent/20 bg-accent/5 py-0 shadow-md">
             <CardHeader className="px-5 pb-3 pt-5">
               <CardTitle className="text-xl">Solicitá más información</CardTitle>
-              <p className="text-sm text-muted-foreground">Completá tus datos y el publicador podrá responder tu consulta.</p>
+              <p className="text-sm text-muted-foreground">
+                {property.canConsult
+                  ? "Completá tus datos y el publicador podrá responder tu consulta."
+                  : "No podés realizar consultas sobre una propiedad publicada por vos."}
+              </p>
             </CardHeader>
             <CardContent className="px-5 pb-5">
-              {contactSuccess ? (
+              {!property.canConsult ? (
+                <div role="status" className="rounded-xl border border-accent/20 bg-background p-5 text-center">
+                  <p className="font-semibold">Esta es tu propiedad</p>
+                  <p className="mt-1 text-sm text-muted-foreground">El envío de consultas está deshabilitado para propiedades propias.</p>
+                  <Button type="button" disabled className="mt-4 h-11 w-full rounded-full">
+                    Enviar consulta
+                  </Button>
+                </div>
+              ) : contactSuccess ? (
                 <div role="status" className="rounded-xl border border-accent/20 bg-background p-5 text-center">
                   <CircleCheck className="mx-auto mb-3 size-10 text-accent" aria-hidden="true" />
                   <p className="font-semibold">Consulta enviada</p>
@@ -295,7 +309,7 @@ export default function PropertyDetail({ property }: { property: PublicPropertyD
                     Al enviar este formulario, tus datos se compartirán con el publicador únicamente para responder esta consulta.
                   </p>
                   {contactError && <p role="alert" className="text-sm text-destructive">{contactError}</p>}
-                  <Button type="submit" disabled={isSubmittingContact} className="h-11 w-full rounded-full bg-accent text-accent-foreground hover:bg-accent/90">
+                  <Button type="submit" disabled={isSubmittingContact} className="h-11 w-full cursor-pointer rounded-full bg-accent text-accent-foreground hover:bg-accent/90">
                     <Send className="size-4" aria-hidden="true" />
                     {isSubmittingContact ? "Enviando..." : "Enviar consulta"}
                   </Button>

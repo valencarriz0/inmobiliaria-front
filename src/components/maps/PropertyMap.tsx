@@ -37,7 +37,7 @@ export default function PropertyMap({ latitude, longitude, displayName, bounding
   const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${position[0]},${position[1]}`)}`;
   return (
     <div className={cn("property-map relative z-0 isolate h-64 w-full overflow-hidden rounded-lg", className)}>
-      <MapContainer center={position} zoom={15} scrollWheelZoom={false} className="h-full w-full" aria-label={displayName ? `Mapa de ${displayName}` : "Mapa de ubicación"}>
+      <MapContainer center={position} zoom={15} scrollWheelZoom className="h-full w-full" aria-label={displayName ? `Mapa de ${displayName}` : "Mapa de ubicación"}>
         <Viewport latitude={latitude} longitude={longitude} boundingBox={boundingBox} />
         <TileLayer attribution={'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'} url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <Marker position={position} icon={markerIcon} />

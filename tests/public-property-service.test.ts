@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { ApiError } from "../src/services/api.ts";
 import { getPublicProperties, getPublicPropertyById, registerPublicPropertyView } from "../src/services/publicPropertyService.ts";
 import { mapPublicPropertyDetail, mapPublicPropertySummary } from "../src/lib/public-property.ts";
+import { AUTH_TOKEN_KEY, type AuthStorage } from "../src/services/authStorage.ts";
 
 const originalFetch = globalThis.fetch;
 afterEach(() => { globalThis.fetch = originalFetch; });
@@ -14,6 +15,19 @@ const base = {
   latitude: "-31.4201", longitude: "-64.1888", images: ["https://example.test/one.jpg", "https://example.test/two.jpg"], createdAt: "2026-01-01T00:00:00.000Z",
 };
 function json(body: unknown, status = 200) { return new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } }); }
+function storage(token: string): AuthStorage {
+  return { getItem: (key) => key === AUTH_TOKEN_KEY ? token : null, setItem: () => undefined, removeItem: () => undefined };
+}
+async function withSessionToken(token: string, run: () => Promise<void>) {
+  const original = Object.getOwnPropertyDescriptor(globalThis, "sessionStorage");
+  Object.defineProperty(globalThis, "sessionStorage", { configurable: true, value: storage(token) });
+  try {
+    await run();
+  } finally {
+    if (original) Object.defineProperty(globalThis, "sessionStorage", original);
+    else Reflect.deleteProperty(globalThis, "sessionStorage");
+  }
+}
 
 test("listado público usa filtros reales, paginación y no envía token", async () => {
   let request: Request | undefined;
@@ -32,7 +46,27 @@ test("mapper normaliza decimales, conserva imágenes y no inventa campos privado
 
 test("detalle conserva servicios y amenities desde el DTO", () => {
   const property = mapPublicPropertyDetail({ ...base, services: [{ id: "1", code: "water", name: "Agua" }], amenities: [{ id: "2", code: "balcony", name: "Balcón" }] });
-  assert.deepEqual(property.services, ["water"]); assert.deepEqual(property.amenities, ["balcony"]);
+  assert.deepEqual(property.services, ["water"]); assert.deepEqual(property.amenities, ["balcony"]); assert.equal(property.canConsult, true);
+});
+
+test("detalle conserva la restricción para consultar una propiedad propia", () => {
+  const property = mapPublicPropertyDetail({ ...base, services: [], amenities: [], canConsult: false });
+  assert.equal(property.canConsult, false);
+});
+
+test("detalle autenticado envía el token para que el backend identifique una propiedad propia", async () => {
+  await withSessionToken("jwt", async () => {
+    let request: Request | undefined;
+    globalThis.fetch = async (input, init) => {
+      request = new Request(input, init);
+      return json({ property: { ...base, services: [], amenities: [], canConsult: false } });
+    };
+
+    const property = await getPublicPropertyById(base.id);
+
+    assert.equal(request?.headers.get("authorization"), "Bearer jwt");
+    assert.equal(property.canConsult, false);
+  });
 });
 
 test("detalle conserva solamente los datos públicos disponibles del publicador", () => {

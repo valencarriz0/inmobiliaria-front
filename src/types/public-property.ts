@@ -50,6 +50,7 @@ export interface PublicPropertyPublisher {
 export interface PublicPropertyDetail extends PublicPropertySummary {
   services: string[];
   amenities: string[];
+  canConsult: boolean;
   publisher?: PublicPropertyPublisher;
 }
 
@@ -100,6 +101,7 @@ export interface PublicPropertySummaryDto extends PublicPropertyLocationDto {
 export interface PublicPropertyDetailDto extends PublicPropertySummaryDto {
   services: { id: string; code: string; name: string }[];
   amenities: { id: string; code: string; name: string }[];
+  canConsult?: boolean;
   publisher?: {
     firstName?: string | null;
     lastName?: string | null;

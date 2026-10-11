@@ -17,7 +17,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../../components/ui/alert-dialog";
-import { MapPin, Pause, Play, Pencil, Trash } from "lucide-react";
+import { ArrowRight, MapPin, Pause, Play, Pencil, Trash, Navigation } from "lucide-react";
 import BotonVolver from "../../components/BotonVolver";
 import { Link } from "react-router";
 import HeaderUser from "../../components/HeaderUser";
@@ -72,6 +72,12 @@ function PublisherPropertyDetail({ property, refresh }: { property: PublisherPro
   }, [property.id]);
   const views = metrics?.views ?? 0;
   const inquiries = metrics?.consultations ?? 0;
+  const totalInteractions = views + inquiries;
+  const viewsShare = totalInteractions > 0 ? Math.round((views / totalInteractions) * 100) : 0;
+  const inquiriesShare = totalInteractions > 0 ? 100 - viewsShare : 0;
+  const consultationRate = views > 0 ? Math.round((inquiries / views) * 100) : 0;
+  const publicationStatus = PUBLICATION_STATUSES[property.publicationStatus as keyof typeof PUBLICATION_STATUSES]
+    ?? "Sin estado";
 
   const runAction = async (action: "pause" | "reactivate" | "delete") => {
     if (inFlight.current) return;
@@ -101,6 +107,15 @@ function PublisherPropertyDetail({ property, refresh }: { property: PublisherPro
     if (property.publicationStatus === "active") setPauseOpen(true);
     else void runAction("reactivate");
   };
+
+  const locationName = formatLocation(property.location);
+  const fullAddress = [
+    property.location.street,
+    property.location.number,
+    property.location.city,
+    property.location.province,
+    property.location.country,
+  ].filter((part): part is string => typeof part === "string" && part.trim().length > 0).join(", ");
 
   return (
     <div className="min-h-screen bg-background">
@@ -167,34 +182,113 @@ function PublisherPropertyDetail({ property, refresh }: { property: PublisherPro
         {/* Sidebar derecha */}
         <aside className="space-y-6">
           {/* Estadísticas */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Estadísticas</CardTitle>
+          <Card className="gap-0 overflow-hidden rounded-2xl border-border/80 bg-background py-0 shadow-md">
+            <CardHeader className="flex flex-row items-center justify-between gap-4 px-5 py-5">
+              <div>
+                <CardTitle className="text-lg">Actividad de la publicación</CardTitle>
+                <p className="mt-1 text-sm text-muted-foreground">Interacciones registradas</p>
+              </div>
+              <Link
+                to="/statistics"
+                className="group inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-accent transition-colors hover:text-primary"
+              >
+                Ver estadísticas
+                <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+              </Link>
             </CardHeader>
-            <CardContent className="flex justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Estado</p>
-                <p className="font-semibold">{PUBLICATION_STATUSES[property.publicationStatus]}</p>
+            <CardContent className="px-5 pb-5">
+              <div
+                className="flex h-3 overflow-hidden rounded-full bg-muted"
+                role="img"
+                aria-label={totalInteractions > 0
+                  ? `${views} vistas y ${inquiries} consultas registradas`
+                  : "Sin interacciones registradas"}
+              >
+                {totalInteractions > 0 && (
+                  <>
+                    <span
+                      className="h-full bg-primary"
+                      style={{ width: `${viewsShare}%` }}
+                    />
+                    <span
+                      className="h-full bg-accent/45"
+                      style={{ width: `${inquiriesShare}%` }}
+                    />
+                  </>
+                )}
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Vistas</p>
-                <p className="font-semibold">{views}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Consultas</p>
-                <p className="font-semibold">{inquiries}</p>
+
+              <div className="mt-5 grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
+                <div className="flex min-w-0 items-center justify-between gap-2">
+                  <span className="flex items-center gap-2 text-muted-foreground">
+                    <span className="size-2.5 shrink-0 rounded-full bg-primary" aria-hidden="true" />
+                    Vistas
+                  </span>
+                  <span className="font-semibold tabular-nums">{views}</span>
+                </div>
+                <div className="flex min-w-0 items-center justify-between gap-2">
+                  <span className="flex items-center gap-2 text-muted-foreground">
+                    <span className="size-2.5 shrink-0 rounded-full bg-accent/45" aria-hidden="true" />
+                    Consultas
+                  </span>
+                  <span className="font-semibold tabular-nums">{inquiries}</span>
+                </div>
+                <div className="flex min-w-0 items-center justify-between gap-2">
+                  <span className="flex items-center gap-2 text-muted-foreground">
+                    <span className="size-2.5 shrink-0 rounded-full bg-muted-foreground" aria-hidden="true" />
+                    Estado
+                  </span>
+                  <span className="truncate font-semibold">{publicationStatus}</span>
+                </div>
+                <div className="flex min-w-0 items-center justify-between gap-2">
+                  <span className="flex items-center gap-2 text-muted-foreground">
+                    <span className="size-2.5 shrink-0 rounded-full bg-accent" aria-hidden="true" />
+                    Tasa de consulta
+                  </span>
+                  <span className="font-semibold tabular-nums">{consultationRate}%</span>
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Mapa */}
-          <Card>
+          {/* Mapa 
+         <Card>
             <CardHeader>
               <CardTitle>Ubicación</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               <PropertyMap latitude={property.latitude} longitude={property.longitude} displayName={formatLocation(property.location)} />
               {!hasValidCoordinates(property.latitude, property.longitude) && <p className="rounded-lg bg-muted p-4 text-sm text-muted-foreground">La ubicación exacta todavía no está disponible.</p>}
+            </CardContent>
+          </Card> */}
+
+          <Card className="gap-0 overflow-hidden bg-background py-0 shadow-md">
+           {/* <CardHeader className="border-b px-5 py-4">
+              {/* <CardTitle className="text-lg">Ubicación</CardTitle>
+            </CardHeader>*/}
+            {hasValidCoordinates(property.latitude, property.longitude) ? (
+              <PropertyMap
+                latitude={property.latitude}
+                longitude={property.longitude}
+                displayName={locationName}
+                className="h-[21rem] rounded-none"
+              />
+            ) : (
+              <div className="grid h-56 place-items-center bg-muted px-6 text-center">
+                <div>
+                  <MapPin className="mx-auto mb-3 size-8 text-accent" aria-hidden="true" />
+                  <p className="text-sm text-muted-foreground">La ubicación exacta todavía no está disponible.</p>
+                </div>
+              </div>
+            )}
+            <CardContent className="flex items-center gap-3 px-5 py-4">
+              <span className="grid size-10 shrink-0 place-items-center rounded-full bg-accent/10 text-accent">
+                <Navigation className="size-5" aria-hidden="true" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Dirección</p>
+                <p className="break-words text-sm font-semibold">{fullAddress || "Ubicación informada por el publicador"}</p>
+              </div>
             </CardContent>
           </Card>
 

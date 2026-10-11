@@ -68,6 +68,7 @@ export function mapPublicPropertyDetail(dto: PublicPropertyDetailDto): PublicPro
     ...summary,
     services: Array.isArray(dto.services) ? dto.services.map((service) => service.code).filter((code): code is string => typeof code === "string") : [],
     amenities: Array.isArray(dto.amenities) ? dto.amenities.map((amenity) => amenity.code).filter((code): code is string => typeof code === "string") : [],
+    canConsult: dto.canConsult !== false,
     ...(publisher ? { publisher } : {}),
   };
 }

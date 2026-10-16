@@ -20,7 +20,7 @@ function InputField({ label, error, errorId, className, id, ...props }: InputFie
       <Input
         {...props}
         id={id}
-        className={cn("bg-white dark:bg-input/30", className)}
+        className={cn("bg-background dark:bg-input/30", className)}
         aria-invalid={Boolean(error)}
         aria-describedby={[...new Set([props["aria-describedby"], error ? errorId : undefined].filter(Boolean))].join(" ") || undefined}
       />

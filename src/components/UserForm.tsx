@@ -51,7 +51,7 @@ export default function UserForm({ role, initialUser, withPassword = false, read
           <legend className="text-sm font-medium">Tipo de publicador <span aria-hidden="true">*</span></legend>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {([["individual", "Propietario particular"], ["agency", "Inmobiliaria"]] as const).map(([value, label]) => (
-              <Label key={value} className={`flex cursor-pointer items-center gap-2 rounded-lg border p-3 ${values.publisherType === value ? "border-accent bg-accent/10 text-accent" : "bg-white dark:bg-input/30"}`}>
+              <Label key={value} className={`flex cursor-pointer items-center gap-2 rounded-lg border p-3 ${values.publisherType === value ? "border-primary bg-tertiary text-tertiary-foreground" : "bg-background dark:bg-input/30"}`}>
                 <input {...fieldProps("publisherType")} id={`${fieldProps("publisherType").id}-${value}`}
                   type="radio" required value={value} checked={values.publisherType === value} className="accent-accent"
                   onChange={() => setValues({ ...values, publisherType: value, agencyName: value === "individual" ? "" : values.agencyName })} />
@@ -79,7 +79,7 @@ export default function UserForm({ role, initialUser, withPassword = false, read
         {onCancel && <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>}
         <Button type="submit" className="flex-1" disabled={isSubmitting}>{isSubmitting ? "Procesando..." : submitLabel}</Button>
       </div>
-      {formError && <p role="alert" className="text-sm text-red-600">{formError}</p>}
+      {formError && <p role="alert" className="text-sm text-destructive">{formError}</p>}
     </form>
   );
 }

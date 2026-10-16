@@ -38,10 +38,10 @@ export default function Publish() {
 
             {/* Icono grande visual */}
             <div className="flex items-center justify-center">
-              <Home className="h-24 w-24 text-accent" />
+              <Home className="h-24 w-24 fill-primary text-foreground" />
             </div>
 
-            <Button asChild className="w-full min-h-12 h-auto whitespace-normal text-lg bg-accent hover:bg-accent/90">
+            <Button asChild className="h-auto min-h-12 w-full whitespace-normal bg-primary text-lg text-primary-foreground hover:bg-primary/90">
               <Link to={registrationPath}>
                 {user ? "Quiero publicar propiedades" : "Regístrate ahora y comienza"}
               </Link>

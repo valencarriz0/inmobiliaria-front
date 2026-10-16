@@ -122,7 +122,7 @@ function ActivityChart({ activity }: { activity: PublisherActivityDay[] }) {
 
 function Trend({ direction, label }: { direction: "up" | "down" | "stable" | "unavailable"; label: string }) {
   const Icon = direction === "up" ? ArrowUp : direction === "down" ? ArrowDown : Minus;
-  const color = direction === "up" ? "text-primary" : direction === "down" ? "text-secondary" : "text-muted-foreground";
+  const color = direction === "up" ? "text-foreground" : direction === "down" ? "text-foreground" : "text-muted-foreground";
   return <p className={`mt-2 flex min-h-5 items-center gap-1.5 text-xs ${color}`}>
     <Icon className="size-3.5 shrink-0" aria-hidden="true" />
     <span>{label}</span>
@@ -143,7 +143,7 @@ function Metric({
   return <div className="min-w-0 px-5 py-5 first:pl-0 last:pr-0 sm:border-l sm:border-border sm:first:border-l-0 sm:first:pl-0">
     <div className="flex items-center justify-between gap-2">
       <p className="text-sm font-medium text-muted-foreground">{title}</p>
-      <Icon className="size-4 shrink-0 text-accent" aria-hidden="true" />
+      <Icon className="size-4 shrink-0 text-foreground" aria-hidden="true" />
     </div>
     <p className="mt-3 text-3xl font-semibold tracking-tight tabular-nums">{value}</p>
     <Trend direction={comparison.direction} label={comparison.label} />
@@ -327,7 +327,7 @@ export default function Statistics() {
                   >
                     {property.image ? <img src={property.image} alt="" className="size-16 shrink-0 rounded-lg object-cover" /> : <span className="grid size-16 shrink-0 place-items-center rounded-lg bg-muted text-muted-foreground"><House className="size-6" aria-hidden="true" /></span>}
                     <span className="min-w-0">
-                      <span className="block truncate font-semibold group-hover:text-primary">{property.title}</span>
+                      <span className="block truncate font-semibold group-hover:text-foreground">{property.title}</span>
                       <span className="mt-1 flex items-center gap-1 text-sm text-muted-foreground"><MapPin className="size-3.5 shrink-0" aria-hidden="true" /><span className="truncate">{location}</span></span>
                     </span>
                   </Link>

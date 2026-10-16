@@ -46,7 +46,7 @@ export default function PropertyMap({ latitude, longitude, displayName, bounding
         href={directionsUrl}
         target="_blank"
         rel="noreferrer"
-        className="absolute right-3 top-3 z-[500] grid size-10 place-items-center rounded-full border border-border bg-background text-accent shadow-md transition hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="absolute right-3 top-3 z-[500] grid size-10 place-items-center rounded-full border border-border bg-background text-foreground shadow-md transition hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         aria-label="Abrir ubicación en Google Maps"
         title="Abrir ubicación en Google Maps"
       >

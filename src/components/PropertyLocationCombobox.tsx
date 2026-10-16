@@ -78,7 +78,7 @@ export default function PropertyLocationCombobox({ value, onChange, onBlur, erro
       <MapPin className="pointer-events-none absolute left-3.5 top-4 size-4 text-muted-foreground" aria-hidden="true" />
       <Input ref={inputRef} id={id} role="combobox" autoComplete="off" aria-autocomplete="list" aria-expanded={open} aria-controls={`${id}-options`}
         aria-activedescendant={open && active ? `${id}-option-${activeIndex}` : undefined} aria-invalid={Boolean(error)} aria-describedby={error ? `${id}-error` : undefined}
-        placeholder="Ingresá provincia o localidad" value={query ?? locationLabel(value)} className="h-12 rounded-xl border-slate-200 bg-white pl-10 pr-9 text-sm shadow-none"
+        placeholder="Ingresá provincia o localidad" value={query ?? locationLabel(value)} className="h-12 rounded-xl border-border bg-background pl-10 pr-9 text-sm shadow-none"
         onClick={() => { setOpen(true); setActiveIndex(0); }} onChange={(event) => {
           const text = event.target.value; setQuery(text); setOpen(true); setActiveIndex(0); if (!text) onChange({ province: "", city: "", provinceId: "", cityId: "" });
         }} onKeyDown={(event) => {
@@ -89,9 +89,9 @@ export default function PropertyLocationCombobox({ value, onChange, onBlur, erro
         }} />
       {(value.province || value.city || query) && <button type="button" aria-label="Limpiar ubicación" className="absolute right-1 top-1 flex size-10 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-accent" onClick={() => choose({ province: "", city: "", provinceId: "", cityId: "" })}><X className="size-4" aria-hidden="true" /></button>}
     </div>
-    {open && <div className="absolute inset-x-0 top-full z-50 mt-2 rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg">
+    {open && <div className="absolute inset-x-0 top-full z-50 mt-2 rounded-xl border border-border bg-background p-1.5 shadow-lg">
       <ul id={`${id}-options`} role="listbox" aria-label="Provincias y localidades" className="max-h-64 overflow-y-auto overscroll-contain">
-        {matches.map((result, index) => <li key={`${result.type}-${result.id}`} id={`${id}-option-${index}`} role="option" aria-selected={index === activeIndex} className={`cursor-pointer rounded-lg px-3 py-2.5 text-sm ${index === activeIndex ? "bg-accent/10 text-accent" : "hover:bg-muted"}`} onPointerDown={(event) => event.preventDefault()} onClick={() => choose(result)}>
+        {matches.map((result, index) => <li key={`${result.type}-${result.id}`} id={`${id}-option-${index}`} role="option" aria-selected={index === activeIndex} className={`cursor-pointer rounded-lg px-3 py-2.5 text-sm ${index === activeIndex ? "bg-accent/10 text-foreground" : "hover:bg-muted"}`} onPointerDown={(event) => event.preventDefault()} onClick={() => choose(result)}>
           <span className="block font-medium">{result.name}</span><span className="block text-xs text-muted-foreground">{result.type === "city" ? `Localidad · ${result.provinceName}` : "Provincia"}</span>
         </li>)}
       </ul>

@@ -110,7 +110,7 @@ export default function AuthModals() {
 
   return (
     <>
-      <Button size="sm" className="bg-accent hover:bg-accent/90 px-2 text-xs sm:px-3 sm:text-sm" onClick={() => changeDialog("login")}>Acceder</Button>
+      <Button size="sm" className="bg-primary px-2 text-xs text-primary-foreground hover:bg-primary/90 sm:px-3 sm:text-sm" onClick={() => changeDialog("login")}>Acceder</Button>
       <Dialog open={passwordChanged || authDialog !== null} onOpenChange={(open) => { if (!open) { setPasswordChanged(false); changeDialog(null); } }}>
         <DialogContent className="sm:max-w-md max-h-[90dvh] overflow-y-auto">
           {passwordChanged ? <><DialogHeader><DialogTitle>Contraseña modificada correctamente</DialogTitle><DialogDescription>Por seguridad, iniciá sesión nuevamente con tu nueva contraseña.</DialogDescription></DialogHeader><DialogFooter><Button onClick={() => { setPasswordChanged(false); changeDialog("login"); }}>Iniciar sesión</Button></DialogFooter></> : authDialog === "favorite" ? (
@@ -122,7 +122,7 @@ export default function AuthModals() {
               <DialogFooter className="sm:justify-center">
                 <div className="flex w-full flex-col gap-3">
                   <div className="flex flex-wrap justify-center gap-2">
-                    <Button type="button" className="bg-accent hover:bg-accent/90" onClick={() => changeDialog("login")}>Iniciar sesión</Button>
+                    <Button type="button" className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => changeDialog("login")}>Iniciar sesión</Button>
                     <Button type="button" variant="outline" onClick={() => changeDialog(null)}>Cancelar</Button>
                   </div>
                   <Button type="button" variant="link" className="h-auto p-0 text-xs" onClick={() => changeDialog("register")}>¿No tenés cuenta? Registrate</Button>
@@ -131,7 +131,7 @@ export default function AuthModals() {
             </>
           ) : authDialog === "verification" ? <>
             <DialogHeader><DialogTitle className="text-center text-xl font-bold">Revisá tu correo</DialogTitle><DialogDescription className="text-center">Te enviamos un enlace para verificar tu cuenta.</DialogDescription></DialogHeader>
-            {notice && <p role="status" className="text-sm text-muted-foreground">{notice}</p>}{formError && <p role="alert" className="text-sm text-red-600">{formError}</p>}
+            {notice && <p role="status" className="text-sm text-muted-foreground">{notice}</p>}{formError && <p role="alert" className="text-sm text-destructive">{formError}</p>}
             <DialogFooter className="sm:justify-center"><Button type="button" onClick={() => void resend()} disabled={isSubmitting}>Reenviar correo de verificación</Button><Button type="button" variant="outline" onClick={() => changeDialog("login")}>Iniciar sesión</Button></DialogFooter>
           </> : authDialog === "forgot-password" ? <>
             <DialogHeader><DialogTitle className="text-center text-xl font-bold">Restablecer contraseña</DialogTitle><DialogDescription className="text-center">Te enviaremos un enlace para restablecer tu contraseña.</DialogDescription></DialogHeader>
@@ -150,10 +150,10 @@ export default function AuthModals() {
                   <InputField {...validation.fieldProps("password")} label="Contraseña" type="password" autoComplete="current-password" required disabled={isSubmitting} value={loginValues.password} onChange={(event) => { setLoginValues({ ...loginValues, password: event.target.value }); setFormError(""); }} error={validation.errors.password} errorId={validation.errorId("password")} />
                   <div className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
                     <Button type="button" variant="link" className="p-0 h-auto text-xs" onClick={() => changeDialog("forgot-password")}>Olvidé mi contraseña</Button>
-                    <p>¿No estás registrado? <Button type="button" variant="link" className="p-0 h-auto text-xs text-primary" onClick={() => changeDialog("register")}>Registrate aquí</Button></p>
+                    <p>¿No estás registrado? <Button type="button" variant="link" className="p-0 h-auto text-xs text-foreground" onClick={() => changeDialog("register")}>Registrate aquí</Button></p>
                   </div>
                   {notice && <p role="status" className="text-sm text-muted-foreground">{notice}</p>}
-                  {formError && <p role="alert" className="text-sm text-red-600">{formError}</p>}
+                  {formError && <p role="alert" className="text-sm text-destructive">{formError}</p>}
                   {formError && formError === "Tu correo todavía no fue verificado." && <Button type="button" variant="outline" onClick={() => void resend()} disabled={isSubmitting}>Reenviar correo de verificación</Button>}
                   <Button type="submit" className="w-full" disabled={isSubmitting}>{isSubmitting ? "Ingresando..." : "Iniciar sesión"}</Button>
                 </form>
@@ -161,7 +161,7 @@ export default function AuthModals() {
                 <UserForm role="interested" withPassword submitLabel="Crear cuenta" onSubmit={submitRegister} isSubmitting={isSubmitting} formError={formError} serverErrors={serverErrors} />
                 <div className="text-center text-sm space-y-2">
                   <Button variant="link" className="h-auto p-0" onClick={() => changeDialog("login")}>Ya tengo cuenta: iniciar sesión</Button>
-                  <p><Link className="text-primary underline underline-offset-4" to="/register" onClick={() => changeDialog(null)}>Quiero registrarme para publicar</Link></p>
+                  <p><Link className="text-foreground underline underline-offset-4" to="/register" onClick={() => changeDialog(null)}>Quiero registrarme para publicar</Link></p>
                 </div>
               </> : null}
             </>

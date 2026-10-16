@@ -54,7 +54,7 @@ export default function SearchBar({ initialValues, onSearch, onClear }: SearchBa
         const value = selection === "all" ? "" : selection;
         setValues((previous) => ({ ...previous, [field]: value }));
       }}>
-        <SelectTrigger {...fieldProps(field)} className="h-12 w-full rounded-xl border-slate-200 bg-white px-3.5 text-foreground shadow-none data-[size=default]:h-12">
+        <SelectTrigger {...fieldProps(field)} className="h-12 w-full rounded-xl border-border bg-background px-3.5 text-foreground shadow-none data-[size=default]:h-12">
           <SelectValue placeholder={label}>{options.find(([value]) => value === values[field])?.[1] ?? label}</SelectValue>
         </SelectTrigger>
         <SelectContent>
@@ -67,7 +67,7 @@ export default function SearchBar({ initialValues, onSearch, onClear }: SearchBa
   );
 
   return (
-    <form aria-label="Buscar propiedades" noValidate onSubmit={handleSearch} className="mx-auto mb-12 max-w-6xl rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_4px_20px_rgba(15,23,42,0.06)] sm:p-5 lg:p-6">
+    <form aria-label="Buscar propiedades" noValidate onSubmit={handleSearch} className="mx-auto mb-12 max-w-6xl rounded-2xl border border-border/80 bg-background p-4 shadow-[0_4px_20px_rgba(23,23,23,0.06)] sm:p-5 lg:p-6">
       <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-2 md:grid-cols-[1.6fr_1fr_1fr] lg:grid-cols-[2.2fr_1.4fr_1.5fr_1.15fr_1.3fr]">
         <PropertyLocationCombobox value={values}
           onChange={(location) => setValues((previous) => ({ ...previous, ...location }))}
@@ -79,10 +79,10 @@ export default function SearchBar({ initialValues, onSearch, onClear }: SearchBa
           onChange={(price) => setValues((previous) => ({ ...previous, ...price }))}
           error={errors.currency ?? errors.minPrice ?? errors.maxPrice} />
         <div className="flex min-w-0 flex-col gap-2 sm:col-span-2 lg:col-span-1">
-          <Button className="h-12 w-full rounded-xl bg-accent px-3 font-semibold text-white hover:bg-accent/90" type="submit">
+          <Button className="h-12 w-full rounded-xl bg-primary px-3 font-semibold text-primary-foreground hover:bg-primary/90" type="submit">
             <Search className="h-4 w-4" aria-hidden="true" /> Buscar
           </Button>
-          <Button variant="outline" className="h-9 w-full rounded-xl border-slate-200 bg-white px-3 text-foreground shadow-none hover:bg-slate-50 hover:text-foreground" type="button" onClick={clear}>Limpiar filtros</Button>
+          <Button variant="outline" className="h-9 w-full rounded-xl border-border bg-background px-3 text-foreground shadow-none hover:bg-muted hover:text-foreground" type="button" onClick={clear}>Limpiar filtros</Button>
         </div>
       </div>
     </form>

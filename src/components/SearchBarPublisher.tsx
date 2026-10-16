@@ -8,7 +8,7 @@ import type { PublisherFilters } from "../lib/publisher-properties";
 export default function SearchBarPublisher({ filters, onChange }: { filters: PublisherFilters; onChange: (filters: PublisherFilters) => void }) {
   const id = useId();
   return (
-    <form role="search" aria-label="Buscar mis propiedades" onSubmit={(event) => event.preventDefault()} className="mx-auto mb-8 p-6 border rounded-lg shadow-lg bg-white dark:bg-card">
+    <form role="search" aria-label="Buscar mis propiedades" onSubmit={(event) => event.preventDefault()} className="mx-auto mb-8 rounded-lg border bg-background p-6 shadow-lg dark:bg-card">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_200px]">
         <div className="space-y-2 min-w-0">
           <Label htmlFor={`${id}-query`}>Buscar por título o ubicación</Label>

@@ -60,9 +60,9 @@ export default function PropertyImages({ images, onChange, onSelectionError, fie
       </p>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {images.map((image, index) => (
-          <div key={image.id} className="relative h-48 rounded-lg border border-border bg-white">
+          <div key={image.id} className="relative h-48 rounded-lg border border-border bg-background">
             <ImagePreview image={image} index={index} />
-            <span className="absolute bottom-0 inset-x-0 rounded-b-lg bg-black/70 p-2 text-sm text-white truncate">
+            <span className="absolute bottom-0 inset-x-0 rounded-b-lg bg-[#171717]/70 p-2 text-sm text-white truncate">
               {index === 0 ? "Principal · " : ""}{image.kind === "new" ? image.file.name : `Imagen ${index + 1}`}
             </span>
             <Button

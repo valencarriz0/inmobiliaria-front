@@ -82,7 +82,7 @@ export default function PublisherRegistration({ mode }: { mode: "visitor" | "int
     }
   }
 
-  const applicationStatus = application && <Card className="rounded-2xl bg-gray-50 dark:bg-card">
+  const applicationStatus = application && <Card className="rounded-2xl bg-muted dark:bg-card">
     <CardHeader><CardTitle>Solicitud {publisherApplicationStatusLabels[application.status]}</CardTitle></CardHeader>
     <CardContent className="space-y-4">
       {application.status === "pending" && <p>Tu solicitud está pendiente de revisión.</p>}
@@ -103,13 +103,13 @@ export default function PublisherRegistration({ mode }: { mode: "visitor" | "int
       </div>
       <main className="flex-1 container mx-auto max-w-3xl px-4 py-8 space-y-8">
         <div className="text-center space-y-4">
-          <h1 className="text-3xl lg:text-4xl font-bold text-primary">{upgrade ? "Quiero publicar propiedades" : "Registro de publicadores"}</h1>
+          <h1 className="text-3xl lg:text-4xl font-bold text-foreground">{upgrade ? "Quiero publicar propiedades" : "Registro de publicadores"}</h1>
           <p className="text-muted-foreground text-lg">Completá los datos para solicitar la habilitación como publicador.</p>
         </div>
         {upgrade && isLoadingApplication ? <p role="status" className="text-center">Consultando el estado de tu solicitud...</p> : null}
         {upgrade && applicationError ? <div className="space-y-3 text-center"><p role="alert">{applicationError}</p><Button variant="outline" onClick={() => void loadApplication()}>Reintentar</Button></div> : null}
         {applicationStatus}
-        {publicSuccess ? <Card><CardContent className="space-y-4 py-6"><h2 className="text-xl font-semibold">Solicitud enviada</h2><p role="status">{publicSuccess} Verificá tu correo antes de iniciar sesión.</p><div className="flex gap-2"><Button asChild><Link to="/">Iniciar sesión</Link></Button><Button asChild variant="outline"><Link to="/">Ir al inicio</Link></Button></div></CardContent></Card> : !isLoadingApplication && !applicationError && !application && <Card className="rounded-2xl bg-gray-50 dark:bg-card min-w-0">
+        {publicSuccess ? <Card><CardContent className="space-y-4 py-6"><h2 className="text-xl font-semibold">Solicitud enviada</h2><p role="status">{publicSuccess} Verificá tu correo antes de iniciar sesión.</p><div className="flex gap-2"><Button asChild><Link to="/">Iniciar sesión</Link></Button><Button asChild variant="outline"><Link to="/">Ir al inicio</Link></Button></div></CardContent></Card> : !isLoadingApplication && !applicationError && !application && <Card className="rounded-2xl bg-muted dark:bg-card min-w-0">
           <CardHeader><CardTitle className="text-2xl font-bold text-center">{upgrade ? "Datos del publicador" : "Registro de publicador"}</CardTitle></CardHeader>
           <CardContent>
             <UserForm key={upgrade ? "upgrade" : "register"} role="publisher" publisherFields initialUser={user ?? undefined}

@@ -59,7 +59,7 @@ export default function PropertyPriceFilter({ value, onChange, error }: Property
         aria-haspopup="dialog" aria-expanded={open} aria-controls={`${id}-panel`}
         aria-invalid={Boolean(error)} aria-describedby={error ? `${id}-error` : undefined}
         onClick={() => setOpen(!open)} title={priceLabel(value)}
-        className="h-12 w-full justify-between gap-2 rounded-xl border-slate-200 bg-white px-3.5 font-normal text-foreground shadow-none hover:bg-slate-50 hover:text-foreground">
+        className="h-12 w-full justify-between gap-2 rounded-xl border-border bg-background px-3.5 font-normal text-foreground shadow-none hover:bg-muted hover:text-foreground">
         <span className="truncate">{priceLabel(value)}</span><ChevronDown className="size-4 shrink-0 opacity-50" aria-hidden="true" />
       </Button>
       {open && <PricePanel id={`${id}-panel`} value={value} onApply={(next) => { onChange(next); close(); }} />}
@@ -88,7 +88,7 @@ function PricePanel({ id, value, onApply }: { id: string; value: PriceValue; onA
 
   return (
     <div id={id} ref={panelRef} role="dialog" aria-label="Filtrar por precio"
-      className="absolute left-0 top-full z-50 mt-2 w-[min(20rem,calc(100vw-4rem))] rounded-2xl border border-slate-200 bg-white p-5 shadow-lg lg:left-auto lg:right-0"
+      className="absolute left-0 top-full z-50 mt-2 w-[min(20rem,calc(100vw-4rem))] rounded-2xl border border-border bg-background p-5 shadow-lg lg:left-auto lg:right-0"
       onKeyDown={(event) => {
         if (event.key === "Enter" && event.target instanceof HTMLInputElement) { event.preventDefault(); apply(); }
       }}>
@@ -96,9 +96,9 @@ function PricePanel({ id, value, onApply }: { id: string; value: PriceValue; onA
         <legend className="mb-2 text-sm font-medium">Moneda</legend>
         <div className="grid grid-cols-2 gap-2">
           {CURRENCIES.map((currency) => (
-            <label key={currency} className={`flex cursor-pointer items-center justify-center gap-2 rounded-lg border p-2.5 text-sm ${draft.currency === currency ? "border-accent bg-accent/10 text-accent" : "border-slate-200"}`}>
+            <label key={currency} className={`flex cursor-pointer items-center justify-center gap-2 rounded-lg border p-2.5 text-sm ${draft.currency === currency ? "border-primary bg-tertiary text-tertiary-foreground" : "border-border"}`}>
               <input type="radio" name={`${id}-currency`} value={currency} checked={draft.currency === currency}
-                className="accent-accent" aria-invalid={Boolean(errors.currency)} aria-describedby={errors.currency ? `${id}-currency-error` : undefined}
+                className="accent-primary" aria-invalid={Boolean(errors.currency)} aria-describedby={errors.currency ? `${id}-currency-error` : undefined}
                 onChange={() => setDraft({ ...draft, currency })} />
               {currency}
             </label>
@@ -109,15 +109,15 @@ function PricePanel({ id, value, onApply }: { id: string; value: PriceValue; onA
       <div className="grid grid-cols-2 gap-3">
         {([["minPrice", "Desde"], ["maxPrice", "Hasta"]] as const).map(([field, label]) => (
           <InputField key={field} id={`${id}-${field}`} name={field} label={label} value={draft[field]}
-            inputMode="decimal" placeholder="Sin límite" className="h-11 rounded-lg border-slate-200"
+            inputMode="decimal" placeholder="Sin límite" className="h-11 rounded-lg border-border"
             onChange={(event) => setDraft({ ...draft, [field]: event.target.value })}
             error={errors[field]} errorId={`${id}-${field}-error`} />
         ))}
       </div>
       <p className="mt-3 text-xs leading-relaxed text-muted-foreground">Seleccioná una moneda para filtrar por precio. Ingresá importes sin separador de miles.</p>
       <div className="mt-4 grid grid-cols-2 gap-2">
-        <Button type="button" className="h-10 rounded-lg bg-accent text-white hover:bg-accent/90" onClick={apply}>Aplicar</Button>
-        <Button type="button" variant="outline" className="h-10 rounded-lg border-slate-200 bg-white text-foreground hover:bg-slate-50 hover:text-foreground" onClick={() => onApply({ currency: "", minPrice: "", maxPrice: "" })}>Limpiar</Button>
+        <Button type="button" className="h-10 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90" onClick={apply}>Aplicar</Button>
+        <Button type="button" variant="outline" className="h-10 rounded-lg border-border bg-background text-foreground hover:bg-muted hover:text-foreground" onClick={() => onApply({ currency: "", minPrice: "", maxPrice: "" })}>Limpiar</Button>
       </div>
     </div>
   );

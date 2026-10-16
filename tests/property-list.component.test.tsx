@@ -42,7 +42,12 @@ describe("PropertyList", () => {
     );
 
     expect(screen.queryByText("Ver detalles")).toBeNull();
-    expect(screen.getByRole("button", { name: `Guardar en favoritos: ${property.title}` })).toBeTruthy();
+    const favoriteButton = screen.getByRole("button", { name: `Guardar en favoritos: ${property.title}` });
+    expect(favoriteButton).toBeTruthy();
+
+    await userEvent.setup().click(favoriteButton);
+
+    expect(screen.queryByText("Detalle abierto")).toBeNull();
 
     await userEvent.setup().click(screen.getByRole("link", { name: `Ver detalle de ${property.title}` }));
 

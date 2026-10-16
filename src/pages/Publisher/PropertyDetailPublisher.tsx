@@ -132,12 +132,12 @@ function PublisherPropertyDetail({ property, refresh }: { property: PublisherPro
               <div className="flex items-center gap-3">
                 <h1 className="text-3xl font-bold mb-1">{property.title}</h1>
                 <span
-                  className={`px-3 py-1 text-xs font-semibold rounded-full text-white ${
+                  className={`px-3 py-1 text-xs font-semibold rounded-full text-primary-foreground ${
                     property.operationType === "rent"
-                      ? "bg-[#477ce0]"
+                      ? "bg-primary"
                       : property.operationType === "sale"
-                      ? "bg-[#58b5e0]"
-                      : "bg-accent"
+                      ? "bg-secondary"
+                      : "bg-tertiary"
                   }`}
                 >
                   {OPERATION_TYPES[property.operationType]}
@@ -159,13 +159,13 @@ function PublisherPropertyDetail({ property, refresh }: { property: PublisherPro
               {formatCharacteristics(property).map((char, idx) => (
                 <span
                   key={idx}
-                  className="px-3 py-1 rounded-full bg-accent/10 text-accent"
+                  className="rounded-full bg-tertiary px-3 py-1 text-tertiary-foreground"
                 >
                   {char.trim()}
                 </span>
               ))}
             </div>
-            <span className="text-3xl font-bold text-accent">
+            <span className="text-3xl font-bold text-foreground">
               {formatPrice(property.price, property.currency)}
             </span>
           </div>
@@ -190,7 +190,7 @@ function PublisherPropertyDetail({ property, refresh }: { property: PublisherPro
               </div>
               <Link
                 to="/statistics"
-                className="group inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-accent transition-colors hover:text-primary"
+                className="group inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-foreground transition-colors hover:text-foreground"
               >
                 Ver estadísticas
                 <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
@@ -276,13 +276,13 @@ function PublisherPropertyDetail({ property, refresh }: { property: PublisherPro
             ) : (
               <div className="grid h-56 place-items-center bg-muted px-6 text-center">
                 <div>
-                  <MapPin className="mx-auto mb-3 size-8 text-accent" aria-hidden="true" />
+                  <MapPin className="mx-auto mb-3 size-8 text-foreground" aria-hidden="true" />
                   <p className="text-sm text-muted-foreground">La ubicación exacta todavía no está disponible.</p>
                 </div>
               </div>
             )}
             <CardContent className="flex items-center gap-3 px-5 py-4">
-              <span className="grid size-10 shrink-0 place-items-center rounded-full bg-accent/10 text-accent">
+              <span className="grid size-10 shrink-0 place-items-center rounded-full bg-accent/10 text-foreground">
                 <Navigation className="size-5" aria-hidden="true" />
               </span>
               <div className="min-w-0 flex-1">
@@ -352,7 +352,7 @@ function PublisherPropertyDetail({ property, refresh }: { property: PublisherPro
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               disabled={saving}
               onClick={(event) => { event.preventDefault(); void runAction("delete"); }}
             >
@@ -376,7 +376,7 @@ function PublisherPropertyDetail({ property, refresh }: { property: PublisherPro
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction
-              className="bg-yellow-600 hover:bg-yellow-700"
+              className="bg-secondary text-secondary-foreground hover:bg-secondary/90"
               disabled={saving}
               onClick={(event) => { event.preventDefault(); void runAction("pause"); }}
             >

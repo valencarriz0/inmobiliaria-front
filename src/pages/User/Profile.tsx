@@ -103,7 +103,7 @@ export default function Profile() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-3xl font-bold">Mi perfil</h1>
         </div>
-        <Card className="rounded-2xl bg-gray-50 dark:bg-card">
+        <Card className="rounded-2xl bg-muted dark:bg-card">
           <CardHeader><CardTitle>Datos personales</CardTitle></CardHeader>
           <CardContent className="space-y-6">
             {editing ? <UserForm key={user.updatedAt} role={user.role} initialUser={user} readOnlyEmail submitLabel="Guardar cambios"
@@ -114,7 +114,7 @@ export default function Profile() {
               </dl>
               <Button variant="outline" onClick={() => { setSaved(false); setEditing(true); }}>Editar perfil</Button>
             </>}
-            {saved && <p role="status" className="text-sm text-green-700">Perfil actualizado correctamente.</p>}
+            {saved && <p role="status" className="text-sm text-foreground">Perfil actualizado correctamente.</p>}
           </CardContent>
         </Card>
         <Card className="rounded-2xl"><CardHeader><CardTitle>Seguridad</CardTitle><CardDescription>Cambiá tu contraseña sin modificar tus datos personales.</CardDescription></CardHeader><CardContent><form className="space-y-4" onSubmit={savePassword}>{([['currentPassword','Contraseña actual'],['newPassword','Nueva contraseña'],['newPasswordConfirm','Repetir nueva contraseña']] as const).map(([name,label]) => <InputField key={name} id={name} errorId={`${name}-error`} label={label} type="password" required value={passwords[name]} disabled={changingPassword} onChange={(e) => setPasswords({ ...passwords, [name]: e.target.value })}/>)}{passwordMessage && <p role={passwordMessage.includes("correctamente") ? "status" : "alert"}>{passwordMessage}</p>}<Button disabled={changingPassword}>{changingPassword ? "Actualizando..." : "Cambiar contraseña"}</Button></form></CardContent></Card>

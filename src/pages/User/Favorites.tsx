@@ -62,7 +62,7 @@ export default function Favorites() {
         <p role="alert">{error}</p><Button variant="outline" onClick={retryLoad}>Reintentar</Button>
       </div> : properties.length > 0 ? <PropertyList properties={properties} /> : <Card className="rounded-2xl">
         <CardContent className="flex flex-col items-center gap-4 py-8 text-center">
-          <Heart className="h-10 w-10 text-accent" aria-hidden="true" />
+          <Heart className="h-10 w-10 fill-primary text-foreground" aria-hidden="true" />
           <h2 className="text-xl font-semibold">{favoriteIds.length ? "Tus favoritos no están disponibles por el momento" : "Todavía no guardaste propiedades"}</h2>
           <p className="text-muted-foreground">Explorá el catálogo y guardá las que más te interesen.</p>
           <Button asChild><Link to="/">Explorar propiedades</Link></Button>

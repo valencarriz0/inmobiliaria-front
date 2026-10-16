@@ -112,9 +112,9 @@ export default function PropertyDetail({ property }: { property: PublicPropertyD
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-3">
                   <h1 className="text-3xl font-bold mb-1 break-words">{property.title}</h1>
-                  <span className={`px-3 py-1 text-xs font-semibold rounded-full text-white ${
-                    property.operationType === "rent" ? "bg-[#477ce0]"
-                      : property.operationType === "sale" ? "bg-[#58b5e0]" : "bg-accent"
+                  <span className={`px-3 py-1 text-xs font-semibold rounded-full text-primary-foreground ${
+                    property.operationType === "rent" ? "bg-primary"
+                      : property.operationType === "sale" ? "bg-secondary" : "bg-tertiary"
                   }`}>{OPERATION_TYPES[property.operationType]}</span>
                 </div>
                 {/* <p className="flex items-start text-muted-foreground mt-1">
@@ -122,13 +122,18 @@ export default function PropertyDetail({ property }: { property: PublicPropertyD
                   <span>{address && `${address}, `}{formatPublicLocation(property.location)}</span>
                 </p> */}
               </div>
-              <FavoriteHeartButton property={property} className="relative shrink-0" buttonClassName="rounded-full bg-muted hover:bg-muted/80 hover:scale-110" />
+              <FavoriteHeartButton
+                property={property}
+                className="relative shrink-0 self-start"
+                buttonClassName="h-12 w-12 rounded-none border-0 bg-transparent p-0 shadow-none transition-transform hover:scale-110 hover:bg-transparent"
+                heartClassName="h-10 w-10"
+              />
             </div>
           </div>
 
           <PropertyGallery property={property} />
 
-          <p className="text-3xl font-bold text-accent border-b pb-4 break-words">
+          <p className="text-3xl font-bold text-foreground border-b pb-4 break-words">
             {formatPrice(property.price, property.currency)}
           </p>
           <section>
@@ -147,7 +152,7 @@ export default function PropertyDetail({ property }: { property: PublicPropertyD
             <section>
               <h2 className="text-xl font-semibold mb-2">Servicios</h2>
               <ul className="flex flex-wrap gap-2">
-                {property.services.map((service) => <li className="px-3 py-1 rounded-full bg-accent/10 text-accent" key={service}>{PROPERTY_SERVICES[service as keyof typeof PROPERTY_SERVICES] ?? service}</li>)}
+                {property.services.map((service) => <li className="rounded-full bg-tertiary px-3 py-1 text-tertiary-foreground" key={service}>{PROPERTY_SERVICES[service as keyof typeof PROPERTY_SERVICES] ?? service}</li>)}
               </ul>
             </section>
           )}
@@ -155,7 +160,7 @@ export default function PropertyDetail({ property }: { property: PublicPropertyD
             <section>
               <h2 className="text-xl font-semibold mb-2">Comodidades</h2>
               <ul className="flex flex-wrap gap-2">
-                {property.amenities.map((amenity) => <li className="px-3 py-1 rounded-full bg-accent/10 text-accent" key={amenity}>{PROPERTY_AMENITIES[amenity as keyof typeof PROPERTY_AMENITIES] ?? amenity}</li>)}
+                {property.amenities.map((amenity) => <li className="rounded-full bg-tertiary px-3 py-1 text-tertiary-foreground" key={amenity}>{PROPERTY_AMENITIES[amenity as keyof typeof PROPERTY_AMENITIES] ?? amenity}</li>)}
               </ul>
             </section>
           )}
@@ -180,13 +185,13 @@ export default function PropertyDetail({ property }: { property: PublicPropertyD
             ) : (
               <div className="grid h-56 place-items-center bg-muted px-6 text-center">
                 <div>
-                  <MapPin className="mx-auto mb-3 size-8 text-accent" aria-hidden="true" />
+                  <MapPin className="mx-auto mb-3 size-8 text-foreground" aria-hidden="true" />
                   <p className="text-sm text-muted-foreground">La ubicación exacta todavía no está disponible.</p>
                 </div>
               </div>
             )}
             <CardContent className="flex items-center gap-3 px-5 py-4">
-              <span className="grid size-10 shrink-0 place-items-center rounded-full bg-accent/10 text-accent">
+              <span className="grid size-10 shrink-0 place-items-center rounded-full bg-accent/10 text-foreground">
                 <Navigation className="size-5" aria-hidden="true" />
               </span>
               <div className="min-w-0 flex-1">
@@ -194,7 +199,7 @@ export default function PropertyDetail({ property }: { property: PublicPropertyD
                 <p className="break-words text-sm font-semibold">{fullAddress || "Ubicación informada por el publicador"}</p>
               </div>
               {directionsUrl && (
-                <a href={directionsUrl} target="_blank" rel="noreferrer" className="shrink-0 text-sm font-semibold text-accent hover:underline">
+                <a href={directionsUrl} target="_blank" rel="noreferrer" className="shrink-0 text-sm font-semibold text-foreground hover:underline">
                   Cómo llegar
                 </a>
               )}
@@ -204,7 +209,7 @@ export default function PropertyDetail({ property }: { property: PublicPropertyD
           <Card className="gap-0 bg-background py-0 shadow-sm">
             <CardContent className="p-5">
               <div className="flex items-center gap-4">
-                <span className="grid size-10 shrink-0 place-items-center rounded-full bg-accent/10 text-accent">
+                <span className="grid size-10 shrink-0 place-items-center rounded-full bg-accent/10 text-foreground">
                   {publisher?.publisherType === "agency"
                     ? <Building2 className="size-5" aria-hidden="true" />
                     : <UserRound className="size-5" aria-hidden="true" />}
@@ -218,12 +223,12 @@ export default function PropertyDetail({ property }: { property: PublicPropertyD
               {(publisher?.email || publisher?.phone) && (
                 <div className="mt-4 space-y-2 border-t pt-4 text-sm">
                   {publisher.email && (
-                    <a href={`mailto:${publisher.email}`} className="flex items-center gap-2 break-all text-muted-foreground transition hover:text-accent">
+                    <a href={`mailto:${publisher.email}`} className="flex items-center gap-2 break-all text-muted-foreground transition hover:text-foreground">
                       <Mail className="size-4 shrink-0" aria-hidden="true" />{publisher.email}
                     </a>
                   )}
                   {publisher.phone && (
-                    <a href={`tel:${publisher.phone}`} className="flex items-center gap-2 text-muted-foreground transition hover:text-accent">
+                    <a href={`tel:${publisher.phone}`} className="flex items-center gap-2 text-muted-foreground transition hover:text-foreground">
                       <Phone className="size-4 shrink-0" aria-hidden="true" />{publisher.phone}
                     </a>
                   )}
@@ -252,7 +257,7 @@ export default function PropertyDetail({ property }: { property: PublicPropertyD
                 </div>
               ) : contactSuccess ? (
                 <div role="status" className="rounded-xl border border-accent/20 bg-background p-5 text-center">
-                  <CircleCheck className="mx-auto mb-3 size-10 text-accent" aria-hidden="true" />
+                  <CircleCheck className="mx-auto mb-3 size-10 text-foreground" aria-hidden="true" />
                   <p className="font-semibold">Consulta enviada</p>
                   <p className="mt-1 text-sm text-muted-foreground">Tus datos fueron enviados correctamente al publicador.</p>
                   <Button
@@ -309,7 +314,7 @@ export default function PropertyDetail({ property }: { property: PublicPropertyD
                     Al enviar este formulario, tus datos se compartirán con el publicador únicamente para responder esta consulta.
                   </p>
                   {contactError && <p role="alert" className="text-sm text-destructive">{contactError}</p>}
-                  <Button type="submit" disabled={isSubmittingContact} className="h-11 w-full cursor-pointer rounded-full bg-accent text-accent-foreground hover:bg-accent/90">
+                  <Button type="submit" disabled={isSubmittingContact} className="h-11 w-full cursor-pointer rounded-full bg-primary text-primary-foreground hover:bg-primary/90">
                     <Send className="size-4" aria-hidden="true" />
                     {isSubmittingContact ? "Enviando..." : "Enviar consulta"}
                   </Button>

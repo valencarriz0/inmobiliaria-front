@@ -31,13 +31,13 @@ export default function LocationPicker({ cityId, street, streetNumber, confirmed
 
   const selectedCoordinates = selected && coordinatesFromMatch(selected);
   return (
-    <section className="space-y-3 rounded-lg border border-slate-200 bg-slate-50 p-4" aria-label="Ubicación en el mapa">
+    <section className="space-y-3 rounded-lg border border-border bg-muted p-4" aria-label="Ubicación en el mapa">
       <div><h3 className="text-sm font-medium">Ubicación en el mapa</h3><p className="text-sm text-muted-foreground">Buscá la dirección y confirmá el resultado que corresponda.</p></div>
       <Button type="button" variant="outline" onClick={searchAddress} disabled={!canGeocode || loading}>{loading ? "Buscando ubicación..." : "Buscar ubicación"}</Button>
       {!canGeocode && <p className="text-sm text-muted-foreground">Seleccioná una localidad e ingresá una calle para buscar la ubicación.</p>}
       <FieldError>{error}</FieldError>
       {matches.length > 0 && <div className="space-y-2" role="radiogroup" aria-label="Resultados de ubicación">
-        {matches.map((match, index) => <label key={`${match.latitude}-${match.longitude}-${index}`} className="flex cursor-pointer items-start gap-2 rounded-md border bg-white p-3">
+        {matches.map((match, index) => <label key={`${match.latitude}-${match.longitude}-${index}`} className="flex cursor-pointer items-start gap-2 rounded-md border bg-background p-3">
           <input type="radio" name="geocoding-match" checked={selected === match} onChange={() => setSelected(match)} />
           <span className="text-sm">{match.displayName}</span>
         </label>)}
@@ -46,7 +46,7 @@ export default function LocationPicker({ cityId, street, streetNumber, confirmed
         <PropertyMap latitude={selected.latitude} longitude={selected.longitude} displayName={selected.displayName} boundingBox={selected.boundingBox} />
         <Button type="button" onClick={() => onConfirm(selectedCoordinates)}>Confirmar ubicación</Button>
       </div>}
-      {confirmed && <p role="status" className="text-sm font-medium text-emerald-700">Ubicación confirmada</p>}
+      {confirmed && <p role="status" className="text-sm font-medium text-foreground">Ubicación confirmada</p>}
     </section>
   );
 }

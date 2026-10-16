@@ -21,7 +21,7 @@ const BotonVolver = ({ to, fallbackTo = "/" }: BotonVolverProps) => {
           else if (window.history.state?.idx > 0) navigate(-1);
           else navigate(fallbackTo);
         }}
-        className="inline-flex items-center gap-2 text-sm px-2 py-1 rounded-md w-auto bg-transparent hover:text-black hover:bg-[#F2F6F8]"
+        className="inline-flex items-center gap-2 text-sm px-2 py-1 rounded-md w-auto bg-transparent hover:text-foreground hover:bg-muted"
       >
         <ArrowLeft className="h-4 w-4" />
         <span className="whitespace-nowrap">Volver</span>

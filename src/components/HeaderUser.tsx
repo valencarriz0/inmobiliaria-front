@@ -59,8 +59,8 @@ export default function HeaderUser() {
     <header className="sticky top-0 z-50 isolate w-full border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between gap-2">
         <Link to={home} className="flex items-center gap-1 sm:gap-2">
-          <Home className="h-5 w-5 shrink-0 text-primary sm:h-6 sm:w-6" />
-          <span className="text-base font-bold text-primary sm:text-xl">
+          <Home className="h-5 w-5 shrink-0 text-foreground sm:h-6 sm:w-6" />
+          <span className="text-base font-bold text-foreground sm:text-xl">
             InmuConnect
           </span>
         </Link>
@@ -143,7 +143,7 @@ export default function HeaderUser() {
               <DropdownMenuSeparator />
 
               <DropdownMenuItem
-                className="text-red-600"
+                className="text-destructive"
                 onSelect={() => {
                   logout();
                   navigate("/", { replace: true });

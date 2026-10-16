@@ -52,7 +52,7 @@ export default function FavoriteHeartButton({
       }}
       className={buttonClassName}
     >
-      <Heart className={`h-5 w-5 ${isFavorite ? "fill-accent stroke-accent" : "fill-none stroke-black"} ${heartClassName ?? ""}`} />
+      <Heart className={`h-5 w-5 ${isFavorite ? "fill-primary stroke-none" : "fill-none stroke-foreground"} ${heartClassName ?? ""}`} />
     </Button>
     {error && <p role="alert" className="absolute right-0 top-full z-10 mt-2 w-56 rounded-md bg-destructive px-3 py-2 text-xs text-destructive-foreground shadow">{error}</p>}
   </div>;

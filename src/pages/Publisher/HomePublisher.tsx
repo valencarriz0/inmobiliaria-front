@@ -33,7 +33,7 @@ export default function PublisherDashboard() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
           <h2 className="text-2xl font-bold">Mis propiedades</h2>
           <Link to="/newProperty">
-            <Button className="bg-primary text-white hover:bg-primary/90">
+            <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
               Publicar Nueva Propiedad
             </Button>
           </Link>
@@ -72,12 +72,12 @@ export default function PublisherDashboard() {
                   <td className="p-3">{formatLocation(p.location)}</td>
                   <td className="p-3">
                     <span
-                      className={`px-2 py-1 text-xs font-semibold rounded-full text-white ${
+                      className={`px-2 py-1 text-xs font-semibold rounded-full text-primary-foreground ${
                         p.operationType === "rent"
-                          ? "bg-[#477ce0]"
+                          ? "bg-primary"
                           : p.operationType === "sale"
-                          ? "bg-[#58b5e0]"
-                          : "bg-accent"
+                          ? "bg-secondary"
+                          : "bg-tertiary"
                       }`}
                     >
                       {OPERATION_TYPES[p.operationType]}
@@ -90,13 +90,13 @@ export default function PublisherDashboard() {
                       const estado = PUBLICATION_STATUSES[p.publicationStatus];
                       if (p.publicationStatus === "active") {
                         return (
-                          <Badge className="border-green-500 text-green-600 bg-white rounded-full">
+                          <Badge className="rounded-full border-primary bg-tertiary text-tertiary-foreground">
                             {estado}
                           </Badge>
                         );
                       }
                       return (
-                        <Badge className="border-amber-500 text-amber-700 bg-white rounded-full">
+                        <Badge className="rounded-full border-muted-foreground bg-muted text-foreground">
                           {estado}
                         </Badge>
                       );

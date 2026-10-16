@@ -123,7 +123,7 @@ export default function PropertyForm({ initialProperty, submitLabel, onSubmit, o
           }}
           disabled={disabled}
         >
-          <SelectTrigger {...fieldProps(field)} aria-required={required} className="bg-white w-full">
+          <SelectTrigger {...fieldProps(field)} aria-required={required} className="w-full bg-background">
             <SelectValue placeholder="Seleccioná una opción" />
           </SelectTrigger>
           <SelectContent>
@@ -264,7 +264,7 @@ export default function PropertyForm({ initialProperty, submitLabel, onSubmit, o
           rows={5}
           value={values.description}
           onChange={(event) => updateField("description", event.target.value)}
-          className="bg-white"
+          className="bg-background"
         />
         <FieldError id={errorId("description")}>{errors.description}</FieldError>
       </div>

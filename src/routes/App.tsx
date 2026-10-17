@@ -18,7 +18,6 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import Favorites from "../pages/User/Favorites";
 import Consultations from "../pages/User/Consultations";
-import Statistics from "../pages/Publisher/Statistics";
 import VerifyEmail from "../pages/User/VerifyEmail";
 import ResetPassword from "../pages/User/ResetPassword";
 import { useAuth } from "../hooks/use-auth";
@@ -85,8 +84,8 @@ function App() {
             <Route path="/search-alerts" element={<SearchAlerts />} />
           </Route>
           <Route element={<RequireRole roles={["publisher"]} />}>
-            <Route path="/statistics" element={<Statistics />} />
-            <Route path="/publisher/consultations" element={<Consultations publisher />} />
+            <Route path="/statistics" element={<Navigate to="/dashboard?tab=stats" replace />} />
+            <Route path="/publisher/consultations" element={<Navigate to="/dashboard?tab=consultations" replace />} />
             <Route path="/dashboard" element={<PublisherDashboard />} />
             <Route path="/detailPublisher" element={<PropertyDetailPublisher />} />
             <Route path="/detailPublisher/:id" element={<PropertyDetailPublisher />} />

@@ -189,7 +189,7 @@ function PublisherPropertyDetail({ property, refresh }: { property: PublisherPro
                 <p className="mt-1 text-sm text-muted-foreground">Interacciones registradas</p>
               </div>
               <Link
-                to="/statistics"
+                to="/dashboard?tab=stats"
                 className="group inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-foreground transition-colors hover:text-foreground"
               >
                 Ver estadísticas

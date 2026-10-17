@@ -39,7 +39,7 @@ export const mockPropertyViews: Readonly<Record<string, number>> = { "1": 120, "
 export const mockPublisherNotifications = [
   ...mockConsultations.map((consultation) => ({
     id: consultation.id, publisherId: consultation.publisherId, createdAt: consultation.createdAt,
-    title: `Nueva consulta sobre ${consultation.propertyTitle}`, to: "/publisher/consultations",
+    title: `Nueva consulta sobre ${consultation.propertyTitle}`, to: "/dashboard?tab=consultations",
   })),
   { id: "profile-approved", publisherId: 1, createdAt: "2026-09-09T09:00:00-03:00", title: "Tu perfil de publicador fue aprobado.", to: "/profile" },
   { id: "profile-rejected", publisherId: 1, createdAt: "2026-09-07T09:00:00-03:00", title: "Tu solicitud anterior para publicar fue rechazada.", to: "/profile" },

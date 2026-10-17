@@ -39,10 +39,10 @@ export default function HeaderUser() {
       ? [
           { label: "Mis propiedades", to: "/dashboard" },
           { label: "Publicar nueva propiedad", to: "/newProperty" },
-          { label: "Estadísticas", to: "/statistics" },
+          { label: "Estadísticas", to: "/dashboard?tab=stats" },
           {
             label: "Consultas recibidas",
-            to: "/publisher/consultations",
+            to: "/dashboard?tab=consultations",
           },
         ]
       : user.role === "admin"

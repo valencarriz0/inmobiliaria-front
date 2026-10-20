@@ -1,6 +1,6 @@
 import type { Currency, OperationType, PropertyCondition, PropertyType } from "./property.ts";
 
-export type PublicPropertyType = Exclude<PropertyType, "land">;
+export type PublicPropertyType = PropertyType;
 export type PublicPropertySort = "newest" | "price_asc" | "price_desc";
 
 export interface PublicPropertyLocation {

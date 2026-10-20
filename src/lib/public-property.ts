@@ -3,7 +3,7 @@ import type { Currency, OperationType, PropertyCondition } from "../types/proper
 import type { PublicPropertyDetail, PublicPropertyDetailDto, PublicPropertyPublisher, PublicPropertySummary, PublicPropertySummaryDto, PublicPropertyType } from "../types/public-property.ts";
 
 const operations = new Set<OperationType>(["sale", "rent", "temporary_rent"]);
-const propertyTypes = new Set<PublicPropertyType>(["house", "apartment", "commercial"]);
+const propertyTypes = new Set<PublicPropertyType>(["house", "apartment", "land", "commercial"]);
 const currencies = new Set<Currency>(["ARS", "USD"]);
 const conditions = new Set<PropertyCondition>(["new", "excellent", "good", "to-renovate"]);
 

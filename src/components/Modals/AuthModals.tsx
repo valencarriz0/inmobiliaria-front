@@ -112,7 +112,7 @@ export default function AuthModals() {
     <>
       <Button size="sm" className="bg-primary px-2 text-xs text-primary-foreground hover:bg-primary/90 sm:px-3 sm:text-sm" onClick={() => changeDialog("login")}>Acceder</Button>
       <Dialog open={passwordChanged || authDialog !== null} onOpenChange={(open) => { if (!open) { setPasswordChanged(false); changeDialog(null); } }}>
-        <DialogContent className="sm:max-w-md max-h-[90dvh] overflow-y-auto">
+        <DialogContent className={`${authDialog === "register" ? "sm:max-w-xl" : "sm:max-w-md"} max-h-[90dvh] overflow-y-auto`}>
           {passwordChanged ? <><DialogHeader><DialogTitle>Contraseña modificada correctamente</DialogTitle><DialogDescription>Por seguridad, iniciá sesión nuevamente con tu nueva contraseña.</DialogDescription></DialogHeader><DialogFooter><Button onClick={() => { setPasswordChanged(false); changeDialog("login"); }}>Iniciar sesión</Button></DialogFooter></> : authDialog === "favorite" ? (
             <>
               <DialogHeader>
@@ -158,7 +158,7 @@ export default function AuthModals() {
                   <Button type="submit" className="w-full" disabled={isSubmitting}>{isSubmitting ? "Ingresando..." : "Iniciar sesión"}</Button>
                 </form>
               </> : authDialog === "register" ? <>
-                <UserForm role="interested" withPassword submitLabel="Crear cuenta" onSubmit={submitRegister} isSubmitting={isSubmitting} formError={formError} serverErrors={serverErrors} />
+                <UserForm role="interested" withPassword guided submitLabel="Crear cuenta" onSubmit={submitRegister} isSubmitting={isSubmitting} formError={formError} serverErrors={serverErrors} />
                 <div className="text-center text-sm space-y-2">
                   <Button variant="link" className="h-auto p-0" onClick={() => changeDialog("login")}>Ya tengo cuenta: iniciar sesión</Button>
                   <p><Link className="text-foreground underline underline-offset-4" to="/register" onClick={() => changeDialog(null)}>Quiero registrarme para publicar</Link></p>

@@ -116,7 +116,7 @@ export function validatePropertyForm(values: PropertyFormValues): PropertyFormEr
   errors.number = validateNumber(values.number, "La altura", { optional: true, integer: true });
   errors.price = validateNumber(values.price, "El precio", { exclusive: true });
   errors.totalArea = validateNumber(values.totalArea, "La superficie total", { exclusive: true });
-  errors.rooms = validateNumber(values.rooms, "La cantidad de ambientes", { integer: true, min: 1 });
+  errors.rooms = values.propertyType === "land" ? undefined : validateNumber(values.rooms, "La cantidad de ambientes", { integer: true, min: 1 });
   errors.bedrooms = validateNumber(values.bedrooms, "La cantidad de dormitorios", { optional: true, integer: true });
   errors.bathrooms = validateNumber(values.bathrooms, "La cantidad de baños", { optional: true, integer: true });
   errors.garage = validateNumber(values.garage, "La cantidad de cocheras", { optional: true, integer: true });

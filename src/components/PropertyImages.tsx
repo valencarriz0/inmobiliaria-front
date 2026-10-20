@@ -1,5 +1,5 @@
 import { Plus, X } from "lucide-react";
-import { useEffect, useRef, type ComponentProps } from "react";
+import { useEffect, useRef, useState, type ComponentProps, type DragEvent } from "react";
 import { PROPERTY_IMAGE_RULES } from "../constants/property";
 import { validateImageSelection } from "../lib/validation";
 import type { PropertyFormImage } from "../types/property-form";
@@ -40,6 +40,7 @@ function ImagePreview({ image, index }: { image: PropertyFormImage; index: numbe
 
 export default function PropertyImages({ images, onChange, onSelectionError, fieldProps, error, errorId }: PropertyImagesProps) {
   const group = useRef<HTMLDivElement>(null);
+  const [dragging, setDragging] = useState(false);
   const helpId = `${fieldProps.id}-help`;
   const describedBy = `${helpId}${error ? ` ${errorId}` : ""}`;
 
@@ -47,6 +48,25 @@ export default function PropertyImages({ images, onChange, onSelectionError, fie
     onChange(nextImages);
     // A removal, or reaching the limit, unmounts the focused control.
     requestAnimationFrame(() => group.current?.focus());
+  };
+
+  const addFiles = (files: File[]) => {
+    if (!files.length) return;
+    const additions: PropertyFormImage[] = files.map((file) => ({ kind: "new", id: crypto.randomUUID(), file }));
+    const nextImages = [...images, ...additions];
+    const selectionError = validateImageSelection(nextImages);
+    if (selectionError) {
+      onSelectionError(selectionError);
+      return;
+    }
+    changeImages(nextImages);
+    onSelectionError("");
+  };
+
+  const onDrop = (event: DragEvent<HTMLLabelElement>) => {
+    event.preventDefault();
+    setDragging(false);
+    addFiles(Array.from(event.dataTransfer.files));
   };
 
   return (
@@ -80,9 +100,13 @@ export default function PropertyImages({ images, onChange, onSelectionError, fie
         {images.length < PROPERTY_IMAGE_RULES.max && (
           <Label
             htmlFor={fieldProps.id}
+            onDragEnter={(event) => { event.preventDefault(); setDragging(true); }}
+            onDragOver={(event) => event.preventDefault()}
+            onDragLeave={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDragging(false); }}
+            onDrop={onDrop}
             className={cn(
-              "relative h-48 rounded-lg flex flex-col items-center justify-center cursor-pointer border-dashed border-2 p-4 focus-within:ring-2 focus-within:ring-ring",
-              error ? "border-destructive" : "border-border"
+              "relative h-48 rounded-xl flex flex-col items-center justify-center cursor-pointer border-dashed border-2 p-4 text-center transition-colors focus-within:ring-2 focus-within:ring-ring",
+              error ? "border-destructive" : dragging ? "border-primary bg-tertiary/60" : "border-border hover:border-primary hover:bg-muted/50"
             )}
           >
             <Input
@@ -97,19 +121,12 @@ export default function PropertyImages({ images, onChange, onSelectionError, fie
               onChange={(event) => {
                 const files = Array.from(event.target.files ?? []);
                 event.target.value = "";
-                if (!files.length) return;
-                const additions: PropertyFormImage[] = files.map((file) => ({ kind: "new", id: crypto.randomUUID(), file }));
-                const nextImages = [...images, ...additions];
-                const selectionError = validateImageSelection(nextImages);
-                if (selectionError) {
-                  onSelectionError(selectionError);
-                  return;
-                }
-                changeImages(nextImages);
+                addFiles(files);
               }}
             />
             <Plus className="size-6 text-muted-foreground" aria-hidden="true" />
-            <span>Agregar imágenes</span>
+            <span className="mt-2 font-medium">Arrastrá imágenes aquí</span>
+            <span className="mt-1 text-sm text-muted-foreground">o hacé clic para seleccionarlas</span>
           </Label>
         )}
       </div>

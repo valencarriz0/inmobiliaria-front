@@ -78,7 +78,7 @@ export function toPropertyInput(values: PropertyFormValues): PropertyFormSubmiss
         number: values.number.trim() || undefined,
       },
       totalArea: number(values.totalArea),
-      rooms: number(values.rooms),
+      rooms: values.propertyType === "land" ? 0 : number(values.rooms),
       bedrooms: optionalNumber(values.bedrooms),
       bathrooms: optionalNumber(values.bathrooms),
       garage: optionalNumber(values.garage),

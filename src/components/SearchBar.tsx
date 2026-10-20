@@ -74,7 +74,7 @@ export default function SearchBar({ initialValues, onSearch, onClear }: SearchBa
           onBlur={() => { validation.touch("provinceId"); validation.touch("cityId"); }}
           error={errors.provinceId ?? errors.cityId} />
         {selectField("operationType", "Categoría", Object.entries(OPERATION_TYPES), "Todas las categorías")}
-        {selectField("propertyType", "Tipo de inmueble", Object.entries(PROPERTY_TYPES).filter(([value]) => value !== "land"), "Todos los tipos")}
+        {selectField("propertyType", "Tipo de inmueble", Object.entries(PROPERTY_TYPES), "Todos los tipos")}
         <PropertyPriceFilter value={values}
           onChange={(price) => setValues((previous) => ({ ...previous, ...price }))}
           error={errors.currency ?? errors.minPrice ?? errors.maxPrice} />

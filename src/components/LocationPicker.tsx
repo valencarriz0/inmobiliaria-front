@@ -31,9 +31,11 @@ export default function LocationPicker({ cityId, street, streetNumber, confirmed
 
   const selectedCoordinates = selected && coordinatesFromMatch(selected);
   return (
-    <section className="space-y-3 rounded-lg border border-border bg-muted p-4" aria-label="Ubicación en el mapa">
-      <div><h3 className="text-sm font-medium">Ubicación en el mapa</h3><p className="text-sm text-muted-foreground">Buscá la dirección y confirmá el resultado que corresponda.</p></div>
-      <Button type="button" variant="outline" onClick={searchAddress} disabled={!canGeocode || loading}>{loading ? "Buscando ubicación..." : "Buscar ubicación"}</Button>
+    <section className="space-y-3 rounded-xl border border-border bg-muted/50 p-4" aria-label="Ubicación en el mapa">
+      <div><h3 className="text-sm font-semibold">Ubicación en el mapa</h3><p className="text-sm text-muted-foreground">Buscá la dirección y elegí el resultado que corresponda.</p></div>
+      {!selectedCoordinates && !confirmed && <Button type="button" variant="outline" onClick={() => void searchAddress()} disabled={!canGeocode || loading}>
+        {loading ? "Buscando ubicación..." : "Buscar ubicación"}
+      </Button>}
       {!canGeocode && <p className="text-sm text-muted-foreground">Seleccioná una localidad e ingresá una calle para buscar la ubicación.</p>}
       <FieldError>{error}</FieldError>
       {matches.length > 0 && <div className="space-y-2" role="radiogroup" aria-label="Resultados de ubicación">
@@ -44,9 +46,11 @@ export default function LocationPicker({ cityId, street, streetNumber, confirmed
       </div>}
       {selected && selectedCoordinates && <div className="space-y-3">
         <PropertyMap latitude={selected.latitude} longitude={selected.longitude} displayName={selected.displayName} boundingBox={selected.boundingBox} />
-        <Button type="button" onClick={() => onConfirm(selectedCoordinates)}>Confirmar ubicación</Button>
+        <Button type="button" variant={confirmed ? "default" : "outline"} className="w-full sm:w-auto" onClick={() => onConfirm(selectedCoordinates)} disabled={confirmed}>
+          {confirmed ? "Ubicación confirmada" : "Confirmar esta ubicación"}
+        </Button>
       </div>}
-      {confirmed && <p role="status" className="text-sm font-medium text-foreground">Ubicación confirmada</p>}
+      {confirmed && <p role="status" className="text-sm text-muted-foreground">La ubicación quedó guardada en la publicación.</p>}
     </section>
   );
 }

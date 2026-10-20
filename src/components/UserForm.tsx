@@ -6,6 +6,7 @@ import { Button } from "./ui/button";
 import { InputField } from "./ui/input-field";
 import { Label } from "./ui/label";
 import { FieldError } from "./ui/field-error";
+import GuidedFormSteps from "./GuidedFormSteps";
 
 interface UserFormProps {
   role: UserRole;
@@ -19,11 +20,18 @@ interface UserFormProps {
   isSubmitting?: boolean;
   formError?: string;
   serverErrors?: Partial<Record<keyof UserFormValues, string>>;
+  guided?: boolean;
 }
 
-export default function UserForm({ role, initialUser, withPassword = false, readOnlyEmail = false, publisherFields = false, submitLabel, onSubmit, onCancel, isSubmitting = false, formError, serverErrors = {} }: UserFormProps) {
+const registrationSteps = [
+  { title: "Tus datos", description: "Información personal" },
+  { title: "Tu cuenta", description: "Correo y contraseña" },
+] as const;
+
+export default function UserForm({ role, initialUser, withPassword = false, readOnlyEmail = false, publisherFields = false, submitLabel, onSubmit, onCancel, isSubmitting = false, formError, serverErrors = {}, guided = false }: UserFormProps) {
   const [values, setValues] = useState(() => createUserFormValues(initialUser));
-  const { errors, fieldProps, errorId, validateForm } = useFormValidation(() => validateUserForm(values, role, withPassword, publisherFields));
+  const [step, setStep] = useState(0);
+  const { errors, fieldProps, errorId, validateForm, touch } = useFormValidation(() => validateUserForm(values, role, withPassword, publisherFields));
   const publisher = publisherFields;
   const agency = publisher && values.publisherType === "agency";
 
@@ -37,6 +45,19 @@ export default function UserForm({ role, initialUser, withPassword = false, read
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (guided && step === 0) {
+      const errors = validateUserForm(values, role, withPassword, publisherFields);
+      const fields: (keyof UserFormValues)[] = ["firstName", "lastName", "phone"];
+      fields.forEach((field) => touch(field));
+      const firstInvalid = fields.find((field) => errors[field]);
+      if (firstInvalid) {
+        const form = event.currentTarget;
+        requestAnimationFrame(() => form.querySelector<HTMLElement>(`[name="${firstInvalid}"]`)?.focus());
+        return;
+      }
+      setStep(1);
+      return;
+    }
     if (!validateForm(event.currentTarget)) return;
     const submittedValues = { ...values, email: readOnlyEmail && initialUser ? initialUser.email : values.email };
     const succeeded = await onSubmit(submittedValues);
@@ -45,6 +66,7 @@ export default function UserForm({ role, initialUser, withPassword = false, read
 
   return (
     <form noValidate onSubmit={submit} className="space-y-6">
+      {guided && <GuidedFormSteps steps={registrationSteps} activeStep={step} onSelect={setStep} />}
       <p className="text-sm text-muted-foreground">Los campos con * son obligatorios.</p>
       {publisher && (
         <fieldset className="min-w-0 space-y-3">
@@ -62,10 +84,20 @@ export default function UserForm({ role, initialUser, withPassword = false, read
           <FieldError id={errorId("publisherType")}>{errors.publisherType}</FieldError>
         </fieldset>
       )}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {(!guided || step === 0) && <div className="grid grid-cols-1 gap-4">
         {input("firstName", agency ? "Nombre de la persona responsable" : "Nombre", { autoComplete: "given-name" })}
         {input("lastName", agency ? "Apellido de la persona responsable" : "Apellido", { autoComplete: "family-name" })}
-      </div>
+      </div>}
+      {guided && step === 0 && input("phone", "WhatsApp / teléfono (opcional)", { type: "tel", autoComplete: "tel", required: false })}
+      {guided && step === 1 && <div className="space-y-4 rounded-2xl border border-border bg-muted/40 p-4">
+        <div><h2 className="text-lg font-semibold">Creá tus datos de acceso</h2><p className="text-sm text-muted-foreground">Usá un correo al que tengas acceso para verificar tu cuenta.</p></div>
+        {input("email", "Correo electrónico", { type: "email", autoComplete: "email" })}
+        {withPassword && <div className="grid gap-4 sm:grid-cols-2">
+          {input("password", "Contraseña", { type: "password", autoComplete: "new-password", placeholder: "Al menos 6 caracteres" })}
+          {input("passwordConfirm", "Repetir contraseña", { type: "password", autoComplete: "new-password" })}
+        </div>}
+      </div>}
+      {!guided && <>
       {agency && input("agencyName", "Nombre / Razón social de la inmobiliaria", { autoComplete: "organization" })}
       {input("email", "Correo electrónico", { type: "email", autoComplete: "email", readOnly: readOnlyEmail })}
       {readOnlyEmail && <p className="text-xs text-muted-foreground">El correo de tu cuenta no se modifica desde este formulario.</p>}
@@ -75,9 +107,10 @@ export default function UserForm({ role, initialUser, withPassword = false, read
         {input("password", "Contraseña", { type: "password", autoComplete: "new-password", placeholder: "Al menos 6 caracteres" })}
         {input("passwordConfirm", "Repetir contraseña", { type: "password", autoComplete: "new-password" })}
       </div>}
-      <div className="flex flex-col-reverse sm:flex-row gap-3">
-        {onCancel && <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>}
-        <Button type="submit" className="flex-1" disabled={isSubmitting}>{isSubmitting ? "Procesando..." : submitLabel}</Button>
+      </>}
+      <div className="flex flex-col-reverse gap-3 sm:flex-row">
+        {guided && step === 1 ? <Button type="button" variant="outline" onClick={() => setStep(0)}>Volver al paso anterior</Button> : onCancel && <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>}
+        <Button type="submit" className="flex-1" disabled={isSubmitting}>{isSubmitting ? "Procesando..." : guided && step === 0 ? "Continuar" : submitLabel}</Button>
       </div>
       {formError && <p role="alert" className="text-sm text-destructive">{formError}</p>}
     </form>

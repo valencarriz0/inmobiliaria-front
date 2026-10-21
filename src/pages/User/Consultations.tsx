@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { MessageCircle } from "lucide-react";
 import HeaderUser from "../../components/HeaderUser";
 import BotonVolver from "../../components/BotonVolver";
 import ConsultationCard from "../../components/ConsultationCard";
-import { Card, CardContent } from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
 import { consultationService } from "../../services/consultationService";
 import type { Consultation } from "../../types/consultation";
+import "../Publisher/HomePublisher.css";
 
 export default function Consultations({ publisher = false }: { publisher?: boolean }) {
   const [consultations, setConsultations] = useState<Consultation[]>([]);
@@ -38,23 +38,44 @@ export default function Consultations({ publisher = false }: { publisher?: boole
     };
   }, [publisher, retry]);
 
-  return <div className="min-h-screen bg-background">
+  return <div className="publisher-dashboard-page">
     <HeaderUser />
     <BotonVolver fallbackTo={publisher ? "/dashboard" : "/"} />
-    <main className="container mx-auto max-w-6xl px-4 py-8 space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold">{publisher ? "Consultas recibidas" : "Mis consultas"}</h1>
-        <p className="text-muted-foreground">{publisher ? "Personas que solicitaron información sobre tus propiedades." : "Consultá las solicitudes de información que realizaste sobre propiedades de otros publicadores."}</p>
-      </div>
-      {loading ? <p role="status">Cargando consultas...</p> : error ? <div className="space-y-3">
-        <p role="alert">{error}</p>
-        <Button variant="outline" onClick={() => setRetry((value) => value + 1)}>Reintentar</Button>
-      </div> : consultations.length > 0 ? consultations.map((consultation) => <ConsultationCard key={consultation.id} consultation={consultation} publisher={publisher} />) : <Card>
-        <CardContent className="text-center py-8 space-y-4">
-          <h2 className="text-xl font-semibold">{publisher ? "Todavía no recibiste consultas" : "Todavía no realizaste consultas"}</h2>
-          <Button asChild><Link to={publisher ? "/dashboard" : "/"}>{publisher ? "Ver mis propiedades" : "Explorar propiedades"}</Link></Button>
-        </CardContent>
-      </Card>}
+    <main className="publisher-dashboard user-consultations-dashboard">
+      <section className="publisher-workspace" aria-labelledby="user-consultations-title">
+        <div className="publisher-tabs user-consultations-tabs" aria-hidden="true">
+          <span className="publisher-tab is-selected">{publisher ? "Consultas" : "Mis consultas"}</span>
+        </div>
+
+        <div className="publisher-tabpanel">
+          <article className="publisher-panel publisher-consultations-panel">
+            <div className="publisher-panel-heading">
+              <div>
+                <h1 id="user-consultations-title">{publisher ? "Consultas recibidas" : "Mis consultas"}</h1>
+                <p>{publisher ? "Personas interesadas en tus propiedades" : "Solicitudes de información que enviaste a otros publicadores"}</p>
+              </div>
+            </div>
+
+            <div className="publisher-consultation-list publisher-consultation-grid">
+              {loading ? <p className="publisher-empty-state" role="status">Cargando consultas...</p> : error ? (
+                <div className="publisher-empty-state publisher-consultation-error" role="alert">
+                  <span>{error}</span>
+                  <button type="button" onClick={() => setRetry((value) => value + 1)}>Reintentar</button>
+                </div>
+              ) : consultations.length > 0 ? consultations.map((consultation) => (
+                <ConsultationCard key={consultation.id} consultation={consultation} publisher={publisher} />
+              )) : (
+                <div className="publisher-empty-state user-consultations-empty">
+                  <MessageCircle size={24} aria-hidden="true" />
+                  <h2>{publisher ? "Todavía no recibiste consultas" : "Todavía no realizaste consultas"}</h2>
+                  <p>{publisher ? "Cuando alguien se interese en una propiedad, su consulta aparecerá acá." : "Explorá las propiedades y contactá al publicador de la que te interese."}</p>
+                  <Link className="user-consultations-primary-action" to={publisher ? "/dashboard" : "/"}>{publisher ? "Ver mis propiedades" : "Explorar propiedades"}</Link>
+                </div>
+              )}
+            </div>
+          </article>
+        </div>
+      </section>
     </main>
   </div>;
 }

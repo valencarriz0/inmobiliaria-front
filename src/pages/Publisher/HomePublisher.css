@@ -911,6 +911,56 @@
   font-weight: 600;
 }
 
+.user-consultations-dashboard {
+  padding-top: 14px;
+}
+
+.user-consultations-tabs {
+  pointer-events: none;
+}
+
+.user-consultations-empty {
+  flex-direction: column;
+  gap: 8px;
+  padding: 32px 16px;
+}
+
+.user-consultations-empty h2,
+.user-consultations-empty p {
+  margin: 0;
+}
+
+.user-consultations-empty h2 {
+  color: #30352d;
+  font-size: 18px;
+}
+
+.user-consultations-empty p {
+  max-width: 480px;
+  line-height: 1.5;
+}
+
+.user-consultations-primary-action {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 6px;
+  border-radius: 999px;
+  background: #cafa41;
+  padding: 0 16px;
+  color: #20251a;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background 150ms ease, transform 150ms ease;
+}
+
+.user-consultations-primary-action:hover {
+  background: #bce933;
+  transform: translateY(-1px);
+}
+
 @media (max-width: 1100px) {
   .publisher-dashboard {
     padding: 22px 20px 30px;

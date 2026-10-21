@@ -5,15 +5,13 @@ import {
   MessageCircle,
   MoreVertical,
   Plus,
-  Mail,
-  MessageCircleMore,
   Pause,
   Pencil,
   Play,
   Trash2,
-  ExternalLink,
 } from "lucide-react";
 import HeaderUser from "../../components/HeaderUser";
+import ConsultationCard from "../../components/ConsultationCard";
 import { usePublisherProperties } from "../../hooks/use-publisher-properties";
 import { getPublisherMetrics, type PublisherMetrics } from "../../services/publisherMetricsService";
 import { publisherPropertyService } from "../../services/publisherPropertyService";
@@ -46,20 +44,6 @@ import "./HomePublisher.css";
 
 const numberFormat = new Intl.NumberFormat("es-AR");
 type PublisherPropertySort = "recent" | "oldest" | "price-desc" | "price-asc" | "views" | "consultations";
-
-function Initials({ name }: { name: string }) {
-  const initials = name.split(" ").map((part) => part[0]).slice(0, 2).join("").toUpperCase();
-  return <span className="publisher-avatar" aria-hidden="true">{initials}</span>;
-}
-
-function timeAgo(date: string) {
-  const elapsed = Math.max(0, Date.now() - new Date(date).getTime());
-  const hours = Math.floor(elapsed / 3_600_000);
-  if (hours < 1) return "Hace unos minutos";
-  if (hours < 24) return `Hace ${hours} h`;
-  const days = Math.floor(hours / 24);
-  return `Hace ${days} d`;
-}
 
 export default function PublisherDashboard() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -324,7 +308,15 @@ export default function PublisherDashboard() {
                       <span>{consultationError}</span>
                       <button type="button" onClick={() => setConsultationRetry((value) => value + 1)}>Reintentar</button>
                     </div>
-                  ) : consultations.length ? consultations.map((consultation) => <ConsultationRow key={consultation.id} consultation={consultation} isNew={newConsultationIds.has(consultation.id)} onMarkSeen={() => void markConsultationSeen(consultation.id)} />) : (
+                  ) : consultations.length ? consultations.map((consultation) => (
+                    <ConsultationCard
+                      key={consultation.id}
+                      consultation={consultation}
+                      publisher
+                      isNew={newConsultationIds.has(consultation.id)}
+                      onMarkSeen={() => void markConsultationSeen(consultation.id)}
+                    />
+                  )) : (
                     <div className="publisher-empty-state">
                       <MessageCircle size={22} />
                       <span>Todavía no recibiste consultas.</span>
@@ -371,39 +363,5 @@ export default function PublisherDashboard() {
         </AlertDialog>
       </main>
     </div>
-  );
-}
-
-function ConsultationRow({ consultation, isNew, onMarkSeen }: { consultation: Consultation; isNew: boolean; onMarkSeen: () => void }) {
-  const name = `${consultation.firstName} ${consultation.lastName}`;
-  const whatsapp = consultation.phone.replace(/\D/g, "");
-  return (
-    <article className={`publisher-consultation-card ${isNew ? "is-new" : ""}`}>
-      <div className="publisher-consultation-topline">
-        <Initials name={name} />
-        <div className="publisher-consultation-heading">
-          <strong>{name}</strong>
-          <time dateTime={consultation.createdAt}>{timeAgo(consultation.createdAt)}</time>
-        </div>
-        {isNew && <span className="publisher-new-badge"><span className="publisher-new-dot" />Nueva</span>}
-      </div>
-      <div className="publisher-consultation-body">
-        {consultation.property.images[0] && <img src={consultation.property.images[0]} alt="" />}
-        <div>
-          <strong>Consulta por {consultation.property.title}</strong>
-        </div>
-      </div>
-      <dl className="publisher-consultation-contact-details">
-        <div><dt>Mensaje</dt><dd>{consultation.message?.trim() || "No hay mensaje."}</dd></div>
-        <div><dt>Correo electrónico</dt><dd>{consultation.email}</dd></div>
-        <div><dt>Teléfono</dt><dd>{consultation.phone || "No informado"}</dd></div>
-      </dl>
-      <div className="publisher-consultation-actions">
-        <Link className="publisher-consultation-action is-subtle" to={`/detailPublisher/${consultation.propertyId}`}><ExternalLink size={14} /> Ver propiedad</Link>
-        <a className="publisher-consultation-action" href={`mailto:${consultation.email}`}><Mail size={14} /> Responder por correo</a>
-        {whatsapp && <a className="publisher-consultation-action is-whatsapp" href={`https://wa.me/${whatsapp}`} target="_blank" rel="noreferrer"><MessageCircleMore size={14} /> WhatsApp</a>}
-        {isNew && <button className="publisher-mark-seen" type="button" onClick={onMarkSeen}>Marcar como vista</button>}
-      </div>
-    </article>
   );
 }

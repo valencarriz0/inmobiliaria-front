@@ -15,6 +15,7 @@ import type { UserFormValues } from "../../types/user";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
 import { InputField } from "../../components/ui/input-field";
+import { Skeleton, SkeletonStatus } from "../../components/ui/skeleton";
 
 const roleLabels = { interested: "Interesado", publisher: "Publicador", admin: "Administrador" } as const;
 const statusLabels = { active: "Activa", disabled: "Deshabilitada" } as const;
@@ -82,7 +83,7 @@ export default function Profile() {
   const publisherApplicationCard = (user.role === "interested" || application?.status === "approved") && <Card className="rounded-2xl">
     <CardHeader><CardTitle>Publicar propiedades</CardTitle><CardDescription>Solicitá la habilitación para publicar desde esta cuenta.</CardDescription></CardHeader>
     <CardContent className="space-y-3">
-      {isLoadingApplication ? <p role="status">Consultando el estado de tu solicitud...</p> : applicationError ? <><p role="alert">{applicationError}</p><Button variant="outline" onClick={() => void loadApplication()}>Reintentar</Button></> : !application ? <Button asChild><Link to="/become-publisher">Quiero publicar propiedades</Link></Button> : <>
+      {isLoadingApplication ? <SkeletonStatus label="Consultando el estado de tu solicitud..."><Skeleton className="h-10 w-44" /></SkeletonStatus> : applicationError ? <><p role="alert">{applicationError}</p><Button variant="outline" onClick={() => void loadApplication()}>Reintentar</Button></> : !application ? <Button asChild><Link to="/become-publisher">Quiero publicar propiedades</Link></Button> : <>
         <p className="font-medium">Estado: {publisherApplicationStatusLabels[application.status]}</p>
         {application.status === "pending" && <p className="text-muted-foreground">Tu solicitud está pendiente de revisión.</p>}
         {application.status === "rejected" && <>

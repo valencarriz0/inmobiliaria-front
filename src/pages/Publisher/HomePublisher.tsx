@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import HeaderUser from "../../components/HeaderUser";
 import ConsultationCard from "../../components/ConsultationCard";
+import { CardListSkeleton } from "../../components/LoadingSkeletons";
+import { Skeleton } from "../../components/ui/skeleton";
 import { usePublisherProperties } from "../../hooks/use-publisher-properties";
 import { getPublisherMetrics, type PublisherMetrics } from "../../services/publisherMetricsService";
 import { publisherPropertyService } from "../../services/publisherPropertyService";
@@ -54,6 +56,7 @@ export default function PublisherDashboard() {
   const [propertySort, setPropertySort] = useState<PublisherPropertySort>("recent");
   const { properties, loading, error, refresh } = usePublisherProperties();
   const [metrics, setMetrics] = useState<PublisherMetrics | null>(null);
+  const [metricsLoading, setMetricsLoading] = useState(true);
   const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [consultationNotifications, setConsultationNotifications] = useState<AppNotification[]>([]);
   const [consultationsLoading, setConsultationsLoading] = useState(true);
@@ -77,6 +80,8 @@ export default function PublisherDashboard() {
       if (active) setMetrics(result);
     }).catch(() => {
       if (active) setMetricsError(true);
+    }).finally(() => {
+      if (active) setMetricsLoading(false);
     });
     return () => { active = false; };
   }, []);
@@ -241,7 +246,7 @@ export default function PublisherDashboard() {
                   </div>
                 </div>
                 <div className="publisher-listing-list publisher-listing-grid">
-                  {loading ? <p className="publisher-empty-state" role="status">Cargando propiedades...</p> : sortedProperties.length ? sortedProperties.map((property) => {
+                  {loading ? <CardListSkeleton label="Cargando publicaciones..." variant="listings" /> : sortedProperties.length ? sortedProperties.map((property) => {
                     const status = PUBLICATION_STATUSES[property.publicationStatus] ?? "Pendiente";
                     const metric = metrics?.properties.find((item) => item.propertyId === property.id);
                     const isMostViewed = topProperty?.propertyId === property.id;
@@ -254,8 +259,8 @@ export default function PublisherDashboard() {
                           </div>
                           <span>{formatPrice(property.price, property.currency)}</span>
                           <div className="publisher-listing-metrics">
-                            <span><Eye size={15} /> Vistas <strong>{numberFormat.format(metric?.views ?? 0)}</strong></span>
-                            <span><MessageCircle size={15} /> Consultas <strong>{numberFormat.format(metric?.consultations ?? 0)}</strong></span>
+                            <span><Eye size={15} /> Vistas {metricsLoading ? <Skeleton className="inline-block h-4 w-7" /> : <strong>{numberFormat.format(metric?.views ?? 0)}</strong>}</span>
+                            <span><MessageCircle size={15} /> Consultas {metricsLoading ? <Skeleton className="inline-block h-4 w-7" /> : <strong>{numberFormat.format(metric?.consultations ?? 0)}</strong>}</span>
                           </div>
                         </div>
                         <div className="publisher-listing-meta">
@@ -303,7 +308,7 @@ export default function PublisherDashboard() {
                   {newConsultationCount > 0 && <span className="publisher-new-count">{newConsultationCount} nuevas</span>}
                 </div>
                 <div className="publisher-consultation-list publisher-consultation-grid">
-                  {consultationsLoading ? <p className="publisher-empty-state" role="status">Cargando consultas...</p> : consultationError ? (
+                  {consultationsLoading ? <CardListSkeleton label="Cargando consultas..." variant="consultations" /> : consultationError ? (
                     <div className="publisher-empty-state publisher-consultation-error" role="alert">
                       <span>{consultationError}</span>
                       <button type="button" onClick={() => setConsultationRetry((value) => value + 1)}>Reintentar</button>

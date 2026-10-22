@@ -24,6 +24,7 @@ import { useAuth } from "../hooks/use-auth";
 import type { UserRole } from "../types/user";
 import { roleHome } from "../lib/auth-navigation";
 import PropertyViewHistory from "../pages/User/PropertyViewHistory";
+import { Skeleton, SkeletonStatus } from "../components/ui/skeleton";
 
 function AccessRequired() {
   return <div className="min-h-screen bg-background">
@@ -43,7 +44,7 @@ function AccessRequired() {
 
 function RequireAuth() {
   const { user, isLoading } = useAuth();
-  if (isLoading) return <p role="status" className="p-8 text-center">Restaurando sesión...</p>;
+  if (isLoading) return <div className="min-h-screen bg-background"><Header page="/post" /><SkeletonStatus label="Restaurando sesión..." className="container mx-auto space-y-6 px-4 py-12"><Skeleton className="h-9 w-52" /><div className="grid gap-5 md:grid-cols-3">{[0, 1, 2].map((item) => <Skeleton key={item} className="h-64 rounded-2xl" />)}</div></SkeletonStatus></div>;
   return user ? <Outlet /> : <AccessRequired />;
 }
 

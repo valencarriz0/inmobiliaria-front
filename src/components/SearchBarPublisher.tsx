@@ -14,7 +14,7 @@ export default function SearchBarPublisher({ filters, onChange }: { filters: Pub
           <Label htmlFor={`${id}-query`}>Buscar por título o ubicación</Label>
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" aria-hidden="true" />
-            <Input id={`${id}-query`} type="search" placeholder="Buscar por título o ubicación" className="pl-10 h-10"
+            <Input id={`${id}-query`} type="search" placeholder="Buscar por título o ubicación" className="h-10 rounded-xl border-border pl-10 shadow-none"
               value={filters.query} onChange={(event) => onChange({ ...filters, query: event.target.value })} />
           </div>
         </div>

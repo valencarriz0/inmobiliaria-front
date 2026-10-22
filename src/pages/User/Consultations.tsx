@@ -4,6 +4,7 @@ import { MessageCircle } from "lucide-react";
 import ConsultationCard from "../../components/ConsultationCard";
 import { consultationService } from "../../services/consultationService";
 import type { Consultation } from "../../types/consultation";
+import { CardListSkeleton } from "../../components/LoadingSkeletons";
 
 export default function Consultations() {
   const [consultations, setConsultations] = useState<Consultation[]>([]);
@@ -42,7 +43,7 @@ export default function Consultations() {
     </div>
 
     <div className="publisher-consultation-list publisher-consultation-grid">
-      {loading ? <p className="publisher-empty-state" role="status">Cargando consultas...</p> : error ? (
+      {loading ? <CardListSkeleton label="Cargando consultas..." variant="consultations" /> : error ? (
         <div className="publisher-empty-state publisher-consultation-error" role="alert">
           <span>{error}</span>
           <button type="button" onClick={() => setRetry((value) => value + 1)}>Reintentar</button>

@@ -6,8 +6,10 @@ import type { PropertySearchFilters } from "../types/property-search";
 import PropertyList from "./PropertyList";
 import SearchBar from "./SearchBar";
 import { Button } from "./ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import RecentProperties from "./RecentProperties";
 import { searchAlertService } from "../services/searchAlertService";
+import { PropertyGridSkeleton } from "./LoadingSkeletons";
 
 const sortLabels: Record<PublicPropertySort, string> = { newest: "Más recientes", price_asc: "Precio: menor a mayor", price_desc: "Precio: mayor a menor" };
 
@@ -29,13 +31,21 @@ export default function PropertyCatalog({ loggedIn = false }: { loggedIn?: boole
     <section aria-labelledby="property-results-title" aria-busy={loading}>
       <h2 id="property-results-title" className="text-3xl font-bold mb-4 font-[family-name:var(--font-grotesk)] text-center">Propiedades disponibles</h2>
       {filters === undefined ? <p role="alert" className="text-center">La búsqueda tiene filtros inválidos. Revisá los campos indicados o limpiá los filtros.</p>
-        : loading ? <p role="status" className="text-center">Cargando propiedades...</p>
+        : loading ? <PropertyGridSkeleton />
           : error ? <div className="text-center space-y-4"><p role="alert">No se pudieron cargar las propiedades.</p><Button variant="outline" onClick={refresh}>Reintentar</Button></div>
             : properties.length === 0 ? <div className="text-center space-y-4 py-8"><p role="status">No encontramos propiedades que coincidan con los filtros seleccionados.</p><Button variant="outline" onClick={clear}>Limpiar filtros</Button></div>
               : <>
                 <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
                   <p role="status" className="text-muted-foreground">{pagination.total} {pagination.total === 1 ? "propiedad encontrada" : "propiedades encontradas"}</p>
-                  <label className="text-sm text-muted-foreground">Ordenar por <select aria-label="Ordenar propiedades" className="ml-2 rounded-md border bg-background p-2 text-foreground" value={filters.sort ?? "newest"} onChange={(event) => changeSort(event.target.value as PublicPropertySort)}>{(Object.keys(sortLabels) as PublicPropertySort[]).map((sort) => <option key={sort} value={sort}>{sortLabels[sort]}</option>)}</select></label>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-muted-foreground">Ordenar por</span>
+                    <Select value={filters.sort ?? "newest"} onValueChange={(value) => changeSort(value as PublicPropertySort)}>
+                      <SelectTrigger aria-label="Ordenar propiedades" className="w-44"><SelectValue /></SelectTrigger>
+                      <SelectContent align="end">
+                        {(Object.keys(sortLabels) as PublicPropertySort[]).map((sort) => <SelectItem key={sort} value={sort}>{sortLabels[sort]}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
                 <PropertyList properties={properties} />
                 {pagination.totalPages > 1 && <nav className="mt-8 flex items-center justify-center gap-3" aria-label="Paginación"><Button variant="outline" onClick={() => changePage(pagination.page - 1)} disabled={pagination.page <= 1}>Anterior</Button><span aria-current="page" className="text-sm text-muted-foreground">Página {pagination.page} de {pagination.totalPages}</span><Button variant="outline" onClick={() => changePage(pagination.page + 1)} disabled={pagination.page >= pagination.totalPages}>Siguiente</Button></nav>}

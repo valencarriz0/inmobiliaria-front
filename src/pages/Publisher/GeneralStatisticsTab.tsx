@@ -4,6 +4,7 @@ import { Button } from "../../components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { compareCount, compareRate, consultationRate, formatMetricRate } from "../../lib/publisher-statistics";
 import { getPublisherMetrics, type PublisherActivityDay, type PublisherMetrics, type PublisherMetricsPeriod } from "../../services/publisherMetricsService";
+import { StatisticsSkeleton } from "../../components/LoadingSkeletons";
 
 const numberFormat = new Intl.NumberFormat("es-AR");
 
@@ -55,7 +56,7 @@ export default function GeneralStatisticsTab() {
         </div>
       </div>
 
-      {loading ? <p className="publisher-empty-state" role="status">Cargando estadísticas...</p> : error ? (
+      {loading ? <StatisticsSkeleton /> : error ? (
         <div className="publisher-stats-error" role="alert">
           <p>{error}</p>
           <Button variant="outline" onClick={() => setRetry((value) => value + 1)}>Reintentar</Button>

@@ -6,6 +6,7 @@ import type { GeocodingMatch } from "../types/location.ts";
 import PropertyMap from "./maps/PropertyMap";
 import { Button } from "./ui/button";
 import { FieldError } from "./ui/field-error";
+import { Skeleton, SkeletonStatus } from "./ui/skeleton";
 
 interface LocationPickerProps { cityId: string; street: string; streetNumber: string; confirmed: boolean; onConfirm: (coordinates: { latitude: number; longitude: number }) => void; }
 
@@ -38,6 +39,7 @@ export default function LocationPicker({ cityId, street, streetNumber, confirmed
       </Button>}
       {!canGeocode && <p className="text-sm text-muted-foreground">Seleccioná una localidad e ingresá una calle para buscar la ubicación.</p>}
       <FieldError>{error}</FieldError>
+      {loading && <SkeletonStatus label="Buscando resultados de ubicación..." className="space-y-2"><Skeleton className="h-12 w-full" /><Skeleton className="h-12 w-full" /></SkeletonStatus>}
       {matches.length > 0 && <div className="space-y-2" role="radiogroup" aria-label="Resultados de ubicación">
         {matches.map((match, index) => <label key={`${match.latitude}-${match.longitude}-${index}`} className="flex cursor-pointer items-start gap-2 rounded-md border bg-background p-3">
           <input type="radio" name="geocoding-match" checked={selected === match} onChange={() => setSelected(match)} />

@@ -3,12 +3,13 @@ import { useProperty } from "../../../hooks/use-property";
 import { Button } from "../../../components/ui/button.tsx";
 import Header from "../../../components/Header.tsx";
 import PropertyDetail from "../../../components/PropertyDetail.tsx";
+import { PropertyDetailSkeleton } from "../../../components/LoadingSkeletons";
 
 export default function PropertyDetailPage() {
   const { id } = useParams();
   const { property, loading, error } = useProperty(id);
 
-  if (loading) return <p role="status" className="text-center py-10">Cargando propiedad...</p>;
+  if (loading) return <div className="min-h-screen bg-background"><Header page="/post" /><PropertyDetailSkeleton /></div>;
   if (error) return <p role="alert" className="text-center py-10">{error}</p>;
 
   if (!property) {

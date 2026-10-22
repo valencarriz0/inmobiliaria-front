@@ -32,12 +32,14 @@ import { getPublisherMetrics, type PublisherPropertyMetric } from "../../service
 import { hasValidCoordinates } from "../../lib/geocoding";
 import PropertyMap from "../../components/maps/PropertyMap";
 import PropertyChangeHistoryDialog from "../../components/PropertyChangeHistoryDialog";
+import { PropertyDetailSkeleton } from "../../components/LoadingSkeletons";
+import { Skeleton, SkeletonStatus } from "../../components/ui/skeleton";
 
 export default function PropertyDetailPublisher() {
   const { id } = useParams();
   const { property, loading, error, refresh } = useProperty(id, "publisher");
 
-  if (loading) return <p role="status" className="text-center py-10">Cargando propiedad...</p>;
+  if (loading) return <div className="min-h-screen bg-background"><HeaderUser /><PropertyDetailSkeleton /></div>;
   if (error) return <p role="alert" className="text-center py-10">{error}</p>;
   if (!property || property.publicationStatus === "deleted") {
     return (
@@ -61,12 +63,15 @@ function PublisherPropertyDetail({ property, refresh }: { property: PublisherPro
   const inFlight = useRef(false);
 
   const [metrics, setMetrics] = useState<PublisherPropertyMetric>();
+  const [metricsLoading, setMetricsLoading] = useState(true);
   useEffect(() => {
     let active = true;
     void getPublisherMetrics().then((result) => {
       if (active) setMetrics(result.properties.find((item) => item.propertyId === property.id));
     }).catch(() => {
       if (active) setMetrics(undefined);
+    }).finally(() => {
+      if (active) setMetricsLoading(false);
     });
     return () => { active = false; };
   }, [property.id]);
@@ -197,6 +202,7 @@ function PublisherPropertyDetail({ property, refresh }: { property: PublisherPro
               </Link>
             </CardHeader>
             <CardContent className="px-5 pb-5">
+              {metricsLoading ? <SkeletonStatus label="Cargando actividad de la publicación..." className="space-y-5"><Skeleton className="h-3 w-full rounded-full" /><div className="grid grid-cols-2 gap-4">{[0, 1, 2, 3].map((item) => <Skeleton key={item} className="h-5 w-full" />)}</div></SkeletonStatus> : <>
               <div
                 className="flex h-3 overflow-hidden rounded-full bg-muted"
                 role="img"
@@ -248,6 +254,7 @@ function PublisherPropertyDetail({ property, refresh }: { property: PublisherPro
                   <span className="font-semibold tabular-nums">{consultationRate}%</span>
                 </div>
               </div>
+              </>}
             </CardContent>
           </Card>
 

@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { Bell, MoreVertical, Pause, Pencil, Play, Search, Trash2 } from "lucide-react";
 import PropertyLocationCombobox from "../../components/PropertyLocationCombobox";
+import { CardListSkeleton } from "../../components/LoadingSkeletons";
 import { Button } from "../../components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../../components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../../components/ui/dialog";
@@ -206,7 +207,7 @@ export default function SearchAlerts() {
         </div>
       </div>
       {notice && <p role={notice.isError ? "alert" : "status"} className="mb-4 text-sm text-foreground">{notice.message}</p>}
-      {loading ? <p className="publisher-empty-state" role="status">Cargando alertas...</p> : error ? (
+      {loading ? <CardListSkeleton label="Cargando alertas..." variant="alerts" count={2} /> : error ? (
         <div className="publisher-empty-state publisher-consultation-error" role="alert">
           <span>{error}</span>
           <button type="button" onClick={() => setRetry((value) => value + 1)}>Reintentar</button>

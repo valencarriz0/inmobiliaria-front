@@ -7,6 +7,7 @@ import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import { getPropertyViewHistory } from "../../services/propertyViewHistoryService";
 import type { PropertyViewHistoryItem } from "../../types/public-property";
+import { PropertyGridSkeleton } from "../../components/LoadingSkeletons";
 
 export default function PropertyViewHistory() {
   const [history, setHistory] = useState<PropertyViewHistoryItem[]>([]);
@@ -38,7 +39,7 @@ export default function PropertyViewHistory() {
     <BotonVolver fallbackTo="/" />
     <main className="container mx-auto px-4 py-8 space-y-6">
       <div className="space-y-2"><h1 className="text-3xl font-bold">Propiedades vistas</h1><p className="text-muted-foreground">Las propiedades públicas que consultaste recientemente.</p></div>
-      {loading ? <p role="status">Cargando propiedades vistas...</p> : error ? <div className="space-y-3"><p role="alert">{error}</p><Button variant="outline" onClick={() => setRetry((value) => value + 1)}>Reintentar</Button></div>
+      {loading ? <PropertyGridSkeleton label="Cargando propiedades vistas..." /> : error ? <div className="space-y-3"><p role="alert">{error}</p><Button variant="outline" onClick={() => setRetry((value) => value + 1)}>Reintentar</Button></div>
         : history.length ? <PropertyList properties={history.map(({ property }) => property)} /> : <Card><CardContent className="py-8 text-center space-y-4"><h2 className="text-xl font-semibold">Todavía no viste propiedades.</h2><Button asChild><Link to="/">Explorar propiedades</Link></Button></CardContent></Card>}
     </main>
   </div>;

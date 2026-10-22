@@ -19,6 +19,7 @@ import { InputField } from "./ui/input-field";
 import { Label } from "./ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Textarea } from "./ui/textarea";
+import { Skeleton, SkeletonStatus } from "./ui/skeleton";
 
 interface PropertyFormProps {
   initialProperty?: EditablePropertyData & Pick<Property, "images">;
@@ -51,6 +52,7 @@ export default function PropertyForm({ initialProperty, submitLabel, onSubmit, o
   const [cities, setCities] = useState<City[]>([]);
   const [locationsError, setLocationsError] = useState<string>();
   const [loadingLocations, setLoadingLocations] = useState(true);
+  const [loadingCities, setLoadingCities] = useState(false);
   const submitting = useRef(false);
   const { errors, fieldProps, errorId, validateForm, touch } = useFormValidation(() => {
     const validation = validatePropertyForm(values);
@@ -66,12 +68,14 @@ export default function PropertyForm({ initialProperty, submitLabel, onSubmit, o
   }, []);
 
   useEffect(() => {
-    if (!values.provinceId) { setCities([]); return; }
+    if (!values.provinceId) { setCities([]); setLoadingCities(false); return; }
     const controller = new AbortController();
     setCities([]);
+    setLoadingCities(true);
     getCities(values.provinceId, controller.signal)
       .then(({ cities: result }) => setCities(result))
-      .catch(() => { if (!controller.signal.aborted) setLocationsError("No se pudieron cargar las localidades."); });
+      .catch(() => { if (!controller.signal.aborted) setLocationsError("No se pudieron cargar las localidades."); })
+      .finally(() => { if (!controller.signal.aborted) setLoadingCities(false); });
     return () => controller.abort();
   }, [values.provinceId]);
 
@@ -84,7 +88,8 @@ export default function PropertyForm({ initialProperty, submitLabel, onSubmit, o
   function inputField(field: TextField, label: string, required = false, inputMode?: ComponentProps<"input">["inputMode"], placeholder?: string, disabled = false) {
     return <InputField {...fieldProps(field)} label={label} required={required} aria-required={required} disabled={disabled}
       value={values[field]} onChange={(event) => updateField(field, event.target.value)} inputMode={inputMode}
-      placeholder={placeholder ?? (disabled ? "No aplica para terrenos" : undefined)} error={errors[field]} errorId={errorId(field)} />;
+      placeholder={placeholder ?? (disabled ? "No aplica para terrenos" : undefined)} error={errors[field]} errorId={errorId(field)}
+      className="h-11 rounded-xl border-border shadow-none" />;
   }
 
   function selectField<T extends string>(field: keyof PropertyFormValues, label: string, value: T | "", options: readonly { value: T; label: string }[], onChange: (value: T | "") => void, required = false, disabled = false) {
@@ -96,7 +101,7 @@ export default function PropertyForm({ initialProperty, submitLabel, onSubmit, o
         else if (option) onChange(option.value);
         touch(field);
       }} disabled={disabled}>
-        <SelectTrigger {...fieldProps(field)} aria-required={required} className="w-full bg-background"><SelectValue placeholder="Seleccioná una opción" /></SelectTrigger>
+        <SelectTrigger {...fieldProps(field)} aria-required={required} className="w-full data-[size=default]:h-11"><SelectValue placeholder="Seleccioná una opción" /></SelectTrigger>
         <SelectContent>{!required && <SelectItem value="unspecified">No especificado</SelectItem>}{options.map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}</SelectContent>
       </Select>
       <FieldError id={errorId(field)}>{errors[field]}</FieldError>
@@ -159,16 +164,16 @@ export default function PropertyForm({ initialProperty, submitLabel, onSubmit, o
       {step === 1 && <section className="space-y-5" aria-labelledby="property-location-title">
         <div><h2 id="property-location-title" className="text-xl font-semibold">¿Dónde está ubicada?</h2><p className="mt-1 text-sm text-muted-foreground">Completá la dirección y buscá el punto en el mapa a continuación.</p></div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <LocationOptionCombobox id={fieldProps("provinceId").id} name="provinceId" label="Provincia" placeholder="Escribí para buscar una provincia"
+          {loadingLocations ? <SkeletonStatus label="Cargando provincias..." className="space-y-2"><Skeleton className="h-4 w-20" /><Skeleton className="h-11 w-full" /></SkeletonStatus> : <LocationOptionCombobox id={fieldProps("provinceId").id} name="provinceId" label="Provincia" placeholder="Escribí para buscar una provincia"
             inputProps={fieldProps("provinceId")} options={provinces} value={values.province ? { id: values.provinceId, name: values.province } : undefined}
             error={errors.province || locationsError} disabled={loadingLocations}
             onBlur={() => touch("province")}
-            onChange={(province) => setValues((previous) => invalidateConfirmedCoordinates({ ...previous, provinceId: province?.id ?? "", province: province?.name ?? "", cityId: "", city: "" }))} />
-          <LocationOptionCombobox id={fieldProps("cityId").id} name="cityId" label="Localidad" placeholder={values.provinceId ? "Escribí para buscar una localidad" : "Primero elegí una provincia"}
+            onChange={(province) => setValues((previous) => invalidateConfirmedCoordinates({ ...previous, provinceId: province?.id ?? "", province: province?.name ?? "", cityId: "", city: "" }))} />}
+          {loadingCities ? <SkeletonStatus label="Cargando localidades..." className="space-y-2"><Skeleton className="h-4 w-20" /><Skeleton className="h-11 w-full" /></SkeletonStatus> : <LocationOptionCombobox id={fieldProps("cityId").id} name="cityId" label="Localidad" placeholder={values.provinceId ? "Escribí para buscar una localidad" : "Primero elegí una provincia"}
             inputProps={fieldProps("cityId")} options={cities} value={values.city ? { id: values.cityId, name: values.city } : undefined}
             error={errors.city} disabled={!values.provinceId}
             onBlur={() => touch("city")}
-            onChange={(city) => setValues((previous) => invalidateConfirmedCoordinates({ ...previous, cityId: city?.id ?? "", city: city?.name ?? "" }))} />
+            onChange={(city) => setValues((previous) => invalidateConfirmedCoordinates({ ...previous, cityId: city?.id ?? "", city: city?.name ?? "" }))} />}
           {inputField("street", "Calle", false, undefined, "Ejemplo: Av. Libertador")}
           {inputField("number", "Altura", false, "numeric", "Ejemplo: 1234")}
         </div>
@@ -202,7 +207,7 @@ export default function PropertyForm({ initialProperty, submitLabel, onSubmit, o
         <fieldset><legend className="mb-3 text-sm font-medium">Comodidades</legend><div className="flex flex-wrap gap-6">
           {optionList(PROPERTY_AMENITIES).map(({ value, label }, index) => <Label key={value} className="flex cursor-pointer items-center gap-2"><input {...fieldProps("amenities")} id={`${fieldProps("amenities").id}-${index}`} type="checkbox" value={value} checked={values.amenities.includes(value)} onChange={(event) => updateField("amenities", event.target.checked ? [...values.amenities, value] : values.amenities.filter((amenity) => amenity !== value))} className="size-4" /><span className="text-sm">{label}</span></Label>)}
         </div><FieldError id={errorId("amenities")}>{errors.amenities}</FieldError></fieldset>
-        <div><Label htmlFor={fieldProps("description").id} className="mb-1 block text-sm font-medium">Descripción <span className="text-destructive">*</span></Label><Textarea {...fieldProps("description")} required aria-required placeholder="Ejemplo: Hermosa casa ubicada en una zona tranquila..." rows={5} value={values.description} onChange={(event) => updateField("description", event.target.value)} className="bg-background" /><FieldError id={errorId("description")}>{errors.description}</FieldError></div>
+        <div><Label htmlFor={fieldProps("description").id} className="mb-1 block text-sm font-medium">Descripción <span className="text-destructive">*</span></Label><Textarea {...fieldProps("description")} required aria-required placeholder="Ejemplo: Hermosa casa ubicada en una zona tranquila..." rows={5} value={values.description} onChange={(event) => updateField("description", event.target.value)} className="rounded-xl border-border bg-background shadow-none" /><FieldError id={errorId("description")}>{errors.description}</FieldError></div>
         <PropertyImages images={values.images} onChange={(images) => { updateField("images", images); setImageSelectionError(undefined); touch("images"); }} onSelectionError={(error) => { setImageSelectionError(error); touch("images"); }} fieldProps={fieldProps("images")} error={errors.images} errorId={errorId("images")} />
       </section>}
 

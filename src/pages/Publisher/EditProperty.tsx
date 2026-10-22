@@ -5,13 +5,14 @@ import HeaderUser from "../../components/HeaderUser";
 import { useProperty } from "../../hooks/use-property";
 import { publisherPropertyService } from "../../services/publisherPropertyService";
 import { Button } from "../../components/ui/button";
+import { FormSkeleton } from "../../components/LoadingSkeletons";
 
 export default function EditProperty() {
   const { id } = useParams();
   const { property, loading, error } = useProperty(id, "publisher");
   const navigate = useNavigate();
 
-  if (loading) return <p role="status" className="text-center py-10">Cargando propiedad...</p>;
+  if (loading) return <div className="min-h-screen bg-background"><HeaderUser /><FormSkeleton label="Cargando propiedad para editar..." /></div>;
   if (error || !property || property.publicationStatus === "deleted") {
     const message = error ?? "Propiedad no encontrada";
     return (

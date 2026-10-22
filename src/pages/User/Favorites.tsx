@@ -9,6 +9,7 @@ import { Card, CardContent } from "../../components/ui/card";
 import { useAuth } from "../../hooks/use-auth";
 import { getPublicPropertyById } from "../../services/publicPropertyService";
 import type { PublicPropertySummary } from "../../types/public-property";
+import { PropertyGridSkeleton } from "../../components/LoadingSkeletons";
 
 export default function Favorites() {
   const { favoriteIds, favoritesLoading, favoritesError, refreshFavorites } = useAuth();
@@ -58,7 +59,7 @@ export default function Favorites() {
         <h1 className="text-3xl font-bold">Mis propiedades favoritas</h1>
         <p className="text-muted-foreground">Encontrá rápidamente las propiedades que guardaste.</p>
       </div>
-      {loading ? <p role="status">Cargando favoritos...</p> : error ? <div className="space-y-3">
+      {loading ? <PropertyGridSkeleton label="Cargando favoritos..." /> : error ? <div className="space-y-3">
         <p role="alert">{error}</p><Button variant="outline" onClick={retryLoad}>Reintentar</Button>
       </div> : properties.length > 0 ? <PropertyList properties={properties} /> : <Card className="rounded-2xl">
         <CardContent className="flex flex-col items-center gap-4 py-8 text-center">

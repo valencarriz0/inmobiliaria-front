@@ -93,15 +93,15 @@ export default function LocationOptionCombobox({
         onClick={() => setOpen(true)}
         onChange={(event) => { setQuery(event.target.value); setOpen(true); setActiveIndex(0); onChange(undefined); }}
         onKeyDown={keyDown}
-        className="pr-10"
+        className="h-11 rounded-xl border-border bg-background pr-10 shadow-none"
       />
-      {value ? <button type="button" aria-label={`Limpiar ${label.toLocaleLowerCase("es")}`} disabled={disabled} onClick={() => choose()} className="absolute right-1 top-1 grid size-8 place-items-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-50"><X className="size-4" aria-hidden="true" /></button> : <ChevronDown className="pointer-events-none absolute right-3 top-3 size-4 text-muted-foreground" aria-hidden="true" />}
+      {value ? <button type="button" aria-label={`Limpiar ${label.toLocaleLowerCase("es")}`} disabled={disabled} onClick={() => choose()} className="absolute right-1 top-1 grid size-9 place-items-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-50"><X className="size-4" aria-hidden="true" /></button> : <ChevronDown className="pointer-events-none absolute right-3 top-3.5 size-4 text-muted-foreground" aria-hidden="true" />}
     </div>
     {open && !disabled && <div className="absolute inset-x-0 top-full z-50 mt-2 rounded-xl border border-border bg-background p-1.5 shadow-lg">
       <ul id={`${id}-options`} role="listbox" aria-label={`Opciones de ${label.toLocaleLowerCase("es")}`} className="max-h-60 overflow-y-auto overscroll-contain">
         {shownOptions.map((option, index) => <li key={option.id} id={`${id}-option-${index}`} role="option" aria-selected={value?.id === option.id || activeIndex === index}
           onPointerDown={(event) => event.preventDefault()} onClick={() => choose(option)}
-          className={`flex cursor-pointer items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-sm ${activeIndex === index ? "bg-tertiary text-foreground" : "hover:bg-muted"}`}>
+          className={`flex cursor-pointer items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-sm ${activeIndex === index ? "bg-accent text-foreground" : "hover:bg-muted"}`}>
           <span>{option.name}</span>{value?.id === option.id && <Check className="size-4 text-foreground" aria-hidden="true" />}
         </li>)}
       </ul>

@@ -7,6 +7,7 @@ import type { PropertySearchValues } from "../types/property-search";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { FieldError } from "./ui/field-error";
+import { Skeleton, SkeletonStatus } from "./ui/skeleton";
 
 type LocationValue = Pick<PropertySearchValues, "province" | "city" | "provinceId" | "cityId">;
 
@@ -107,7 +108,7 @@ export default function PropertyLocationCombobox({ value, onChange, onBlur, erro
         <span className="block font-medium">{result.name}</span><span className="block text-xs text-muted-foreground">{result.type === "city" ? `Localidad · ${result.provinceName}` : "Provincia"}</span>
       </li>)}
     </ul>
-    {loading && <p role="status" className="px-3 py-4 text-sm text-muted-foreground">Buscando ubicaciones...</p>}
+    {loading && <SkeletonStatus label="Buscando ubicaciones..." className="space-y-2 px-3 py-3"><Skeleton className="h-5 w-3/4" /><Skeleton className="h-4 w-1/2" /></SkeletonStatus>}
     {!loading && (query?.trim().length ?? 0) < 2 && <p role="status" className="px-3 py-4 text-sm text-muted-foreground">Ingresá al menos 2 caracteres para buscar.</p>}
     {!loading && (query?.trim().length ?? 0) >= 2 && matches.length === 0 && <p role="status" className="px-3 py-4 text-sm text-muted-foreground">No encontramos provincias o localidades.</p>}
   </div>;

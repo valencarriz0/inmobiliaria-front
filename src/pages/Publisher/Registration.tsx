@@ -12,6 +12,7 @@ import { canReapplyPublisherApplication, publisherApplicationStatusLabels } from
 import { publicPublisherApplicationInput, publisherApplicationInput } from "../../lib/user-form";
 import type { PublisherApplication } from "../../types/publisher-application";
 import type { UserFormValues } from "../../types/user";
+import { FormSkeleton } from "../../components/LoadingSkeletons";
 
 function messageFrom(error: unknown) {
   return error instanceof ApiError ? error.message : "No se pudo completar la solicitud. Intentá nuevamente.";
@@ -106,7 +107,7 @@ export default function PublisherRegistration({ mode }: { mode: "visitor" | "int
           <h1 className="text-3xl lg:text-4xl font-bold text-foreground">{upgrade ? "Quiero publicar propiedades" : "Registro de publicadores"}</h1>
           <p className="text-muted-foreground text-lg">Completá los datos para solicitar la habilitación como publicador.</p>
         </div>
-        {upgrade && isLoadingApplication ? <p role="status" className="text-center">Consultando el estado de tu solicitud...</p> : null}
+        {upgrade && isLoadingApplication ? <FormSkeleton label="Consultando el estado de tu solicitud..." /> : null}
         {upgrade && applicationError ? <div className="space-y-3 text-center"><p role="alert">{applicationError}</p><Button variant="outline" onClick={() => void loadApplication()}>Reintentar</Button></div> : null}
         {applicationStatus}
         {publicSuccess ? <Card><CardContent className="space-y-4 py-6"><h2 className="text-xl font-semibold">Solicitud enviada</h2><p role="status">{publicSuccess} Verificá tu correo antes de iniciar sesión.</p><div className="flex gap-2"><Button asChild><Link to="/">Iniciar sesión</Link></Button><Button asChild variant="outline"><Link to="/">Ir al inicio</Link></Button></div></CardContent></Card> : !isLoadingApplication && !applicationError && !application && <Card className="rounded-2xl bg-muted dark:bg-card min-w-0">

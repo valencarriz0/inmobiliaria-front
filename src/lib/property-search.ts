@@ -5,7 +5,7 @@ import type { PropertySearchErrors, PropertySearchFilters, PropertySearchValues 
 import { isOptionKey, validateNumber } from "./validation.ts";
 
 const SEARCH_PARAMS = { operationType: "operation", propertyType: "type", provinceId: "provinceId", cityId: "cityId", province: "province", city: "city", currency: "currency", minPrice: "minPrice", maxPrice: "maxPrice", sort: "sort", page: "page" } as const;
-const PUBLIC_TYPES = new Set<PublicPropertyType>(["house", "apartment", "commercial"]);
+const PUBLIC_TYPES = new Set<PublicPropertyType>(["house", "apartment", "land", "commercial"]);
 const SORTS = new Set<PublicPropertySort>(["newest", "price_asc", "price_desc"]);
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const searchPriceFormatter = new Intl.NumberFormat("en-US", { useGrouping: false, maximumSignificantDigits: 21 });

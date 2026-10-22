@@ -17,6 +17,17 @@ test("alertas actualiza todos los criterios permitidos con PATCH y Bearer", asyn
   assert.deepEqual(await request?.json(), { name: "Centro", operationType: "sale", propertyType: "apartment", provinceId: null, cityId: "city", currency: "USD", minPrice: 10, maxPrice: 20 });
 });
 
+test("alertas elimina mediante el endpoint DELETE correspondiente", async () => {
+  setAuthToken("alert-token");
+  let request: Request | undefined;
+  globalThis.fetch = async (input, init) => { request = new Request(input, init); return new Response(null, { status: 204 }); };
+
+  await searchAlertService.remove("alert-1");
+
+  assert.equal(request?.url.endsWith("/users/me/search-alerts/alert-1"), true);
+  assert.equal(request?.method, "DELETE");
+});
+
 test("admin actualiza sólo datos básicos permitidos", async () => {
   setAuthToken("admin-token");
   let request: Request | undefined;

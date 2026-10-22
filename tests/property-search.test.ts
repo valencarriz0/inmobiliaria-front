@@ -19,6 +19,7 @@ const validCases: { name: string; values: Partial<PropertySearchValues>; filters
   { name: "precios decimales con coma y punto", values: { currency: "USD", minPrice: " 100,50 ", maxPrice: "200.25" }, filters: { currency: "USD", minPrice: 100.5, maxPrice: 200.25 } },
   { name: "provincia sin ciudad", values: { province: "Córdoba" }, filters: { province: "Córdoba" } },
   { name: "ciudad sin provincia", values: { city: "La Plata" }, filters: { city: "La Plata" } },
+  { name: "tipo terreno", values: { propertyType: "land" }, filters: { propertyType: "land" } },
 ];
 for (const { name, values, filters } of validCases) {
   test(`validación de búsqueda acepta ${name}`, () => {

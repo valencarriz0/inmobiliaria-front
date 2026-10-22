@@ -5,9 +5,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import Activity from "../src/pages/User/Activity";
 import type { SearchAlert } from "../src/types/search-alert";
 
-const services = vi.hoisted(() => ({ mine: vi.fn(), list: vi.fn(), update: vi.fn() }));
+const services = vi.hoisted(() => ({ mine: vi.fn(), list: vi.fn(), update: vi.fn(), activate: vi.fn(), deactivate: vi.fn(), remove: vi.fn() }));
 vi.mock("../src/services/consultationService", () => ({ consultationService: { mine: services.mine } }));
-vi.mock("../src/services/searchAlertService", () => ({ searchAlertService: { list: services.list, update: services.update } }));
+vi.mock("../src/services/searchAlertService", () => ({ searchAlertService: { list: services.list, update: services.update, activate: services.activate, deactivate: services.deactivate, remove: services.remove } }));
 vi.mock("../src/components/HeaderUser", () => ({ default: () => <header>Encabezado</header> }));
 vi.mock("../src/components/PropertyLocationCombobox", () => ({ default: () => null }));
 
@@ -65,6 +65,44 @@ describe("Mi actividad", () => {
     expect(await screen.findByRole("heading", { name: "Mi búsqueda actualizada" })).toBeTruthy();
     expect(services.update).toHaveBeenCalledWith("alert-1", expect.objectContaining({ name: "Mi búsqueda actualizada", operationType: "sale", propertyType: "house", currency: "USD", maxPrice: 150000 }));
     expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  it("muestra los filtros, abre las coincidencias y permite pausar una alerta", async () => {
+    const user = userEvent.setup();
+    services.deactivate.mockResolvedValue({ alert: { ...alert, isActive: false } });
+    services.activate.mockResolvedValue({ alert });
+    renderActivity("/activity?tab=alerts");
+
+    expect(await screen.findByRole("heading", { name: "Casas en venta" })).toBeTruthy();
+    expect(screen.getByText("Activa").className).toContain("publisher-status");
+    expect(screen.getByText("Hasta USD 150.000")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Ver coincidencias" }).getAttribute("href")).toBe("/?operation=sale&type=house&currency=USD&maxPrice=150000");
+
+    await user.click(screen.getByRole("button", { name: "Más acciones para Casas en venta" }));
+    await user.click(screen.getByRole("menuitem", { name: "Pausar alerta" }));
+    expect(services.deactivate).toHaveBeenCalledWith("alert-1");
+    expect(await screen.findByText("Pausada")).toBeTruthy();
+
+    await user.click(screen.getByRole("button", { name: "Más acciones para Casas en venta" }));
+    await user.click(screen.getByRole("menuitem", { name: "Reactivar" }));
+    expect(services.activate).toHaveBeenCalledWith("alert-1");
+    expect(await screen.findByText("Activa")).toBeTruthy();
+  });
+
+  it("confirma la eliminación de una alerta antes de quitarla", async () => {
+    const user = userEvent.setup();
+    services.remove.mockResolvedValue(undefined);
+    renderActivity("/activity?tab=alerts");
+    expect(await screen.findByRole("heading", { name: "Casas en venta" })).toBeTruthy();
+
+    await user.click(screen.getByRole("button", { name: "Más acciones para Casas en venta" }));
+    await user.click(screen.getByRole("menuitem", { name: "Eliminar" }));
+    expect(screen.getByRole("alertdialog").textContent).toContain("¿Eliminar esta alerta?");
+    expect(services.remove).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole("button", { name: "Eliminar alerta" }));
+    expect(services.remove).toHaveBeenCalledWith("alert-1");
+    expect(await screen.findByText("Todavía no creaste alertas")).toBeTruthy();
   });
 
   it("permite reintentar una carga fallida de alertas dentro de la tab", async () => {

@@ -8,4 +8,5 @@ export const searchAlertService = {
   update: (id: string, input: SearchAlertInput) => apiRequest<{ alert: SearchAlert }>(`/users/me/search-alerts/${id}`, { ...options(), method: "PATCH", body: input }),
   activate: (id: string) => apiRequest<{ alert: SearchAlert }>(`/users/me/search-alerts/${id}/activate`, { ...options(), method: "PATCH" }),
   deactivate: (id: string) => apiRequest<{ alert: SearchAlert }>(`/users/me/search-alerts/${id}/deactivate`, { ...options(), method: "PATCH" }),
+  remove: (id: string) => apiRequest<void>(`/users/me/search-alerts/${id}`, { ...options(), method: "DELETE" }),
 };

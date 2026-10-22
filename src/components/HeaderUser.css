@@ -1,0 +1,120 @@
+.user-header-inner {
+  display: grid;
+  min-height: 64px;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+}
+
+.user-header-brand {
+  justify-self: start;
+}
+
+.user-header-navigation,
+.user-header-actions {
+  display: flex;
+  align-items: center;
+}
+
+.user-header-navigation {
+  justify-content: center;
+  gap: 4px;
+}
+
+.user-header-nav-item {
+  position: relative;
+  border-radius: 0;
+  padding-inline: 14px;
+  color: var(--muted-foreground);
+}
+
+.user-header-nav-item:hover,
+.user-header-nav-item.is-active,
+.user-header-nav-item[data-state="open"] {
+  background: transparent;
+  color: var(--foreground);
+}
+
+.user-header-nav-item::after {
+  position: absolute;
+  right: 14px;
+  bottom: 2px;
+  left: 14px;
+  height: 2px;
+  border-radius: 999px;
+  background: transparent;
+  content: "";
+}
+
+.user-header-nav-item.is-active::after {
+  background: var(--primary);
+}
+
+.user-header-nav-item:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+}
+
+.user-header-nav-item svg {
+  width: 14px;
+  height: 14px;
+}
+
+.user-header-actions {
+  justify-self: end;
+  gap: 8px;
+}
+
+.user-header-publish {
+  min-height: 36px;
+  padding-inline: 14px;
+  font-weight: 600;
+}
+
+@media (max-width: 1099px) {
+  .user-header-inner {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0 12px;
+  }
+
+  .user-header-brand,
+  .user-header-actions {
+    min-height: 64px;
+  }
+
+  .user-header-navigation {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    border-top: 1px solid var(--border);
+    padding-block: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .user-header-actions {
+    gap: 2px;
+  }
+
+  .user-header-nav-item {
+    gap: 4px;
+    padding-inline: 10px;
+    font-size: 12px;
+  }
+
+  .user-header-publish {
+    padding-inline: 10px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 400px) {
+  .user-header-brand-name {
+    display: none;
+  }
+
+  .user-header-nav-item {
+    gap: 2px;
+    padding-inline: 7px;
+    font-size: 11px;
+  }
+}

@@ -915,10 +915,6 @@
   padding-top: 14px;
 }
 
-.user-consultations-tabs {
-  pointer-events: none;
-}
-
 .user-consultations-empty {
   flex-direction: column;
   gap: 8px;

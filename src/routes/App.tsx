@@ -17,14 +17,13 @@ import AuthModals from "../components/Modals/AuthModals";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import Favorites from "../pages/User/Favorites";
-import Consultations from "../pages/User/Consultations";
+import Activity from "../pages/User/Activity";
 import VerifyEmail from "../pages/User/VerifyEmail";
 import ResetPassword from "../pages/User/ResetPassword";
 import { useAuth } from "../hooks/use-auth";
 import type { UserRole } from "../types/user";
 import { roleHome } from "../lib/auth-navigation";
 import PropertyViewHistory from "../pages/User/PropertyViewHistory";
-import SearchAlerts from "../pages/User/SearchAlerts";
 
 function AccessRequired() {
   return <div className="min-h-screen bg-background">
@@ -79,9 +78,10 @@ function App() {
           </Route>
           <Route element={<RequireRole roles={["interested", "publisher"]} />}>
             <Route path="/favorites" element={<Favorites />} />
-            <Route path="/consultations" element={<Consultations />} />
+            <Route path="/activity" element={<Activity />} />
+            <Route path="/consultations" element={<Navigate to="/activity" replace />} />
             <Route path="/view-history" element={<PropertyViewHistory />} />
-            <Route path="/search-alerts" element={<SearchAlerts />} />
+            <Route path="/search-alerts" element={<Navigate to="/activity?tab=alerts" replace />} />
           </Route>
           <Route element={<RequireRole roles={["publisher"]} />}>
             <Route path="/statistics" element={<Navigate to="/dashboard?tab=stats" replace />} />

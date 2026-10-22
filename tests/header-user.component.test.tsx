@@ -16,38 +16,62 @@ vi.mock("react-router-dom", async (importOriginal) => ({
 
 const baseUser = { id: "u1", firstName: "Ana", lastName: "Pérez", email: "ana@example.com", phone: null, accountStatus: "active", createdAt: "", updatedAt: "" };
 
-function renderHeader(role: "interested" | "publisher" | "admin") {
+function renderHeader(role: "interested" | "publisher" | "admin", path = "/") {
   const logout = vi.fn();
   useAuthMock.mockReturnValue({ user: { ...baseUser, role }, logout });
-  return { logout, ...render(<MemoryRouter><HeaderUser /></MemoryRouter>) };
+  return { logout, ...render(<MemoryRouter initialEntries={[path]}><HeaderUser /></MemoryRouter>) };
 }
 
 describe("HeaderUser", () => {
-  it("muestra las opciones del interesado y permite cerrar sesión", async () => {
-    const { logout } = renderHeader("interested");
-    const user = userEvent.setup();
+  it("ofrece acceso directo a la actividad y conserva la solicitud de habilitación del interesado", () => {
+    renderHeader("interested");
 
     expect(screen.getByRole("link", { name: "Favoritos" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Catálogo" }).getAttribute("href")).toBe("/");
+    expect(screen.getByRole("link", { name: "Publicar" }).getAttribute("href")).toBe("/become-publisher");
+    expect(screen.queryByRole("link", { name: "Panel Publicador" })).toBeNull();
+    expect(screen.getByRole("link", { name: "Mi actividad" }).getAttribute("href")).toBe("/activity");
+    expect(screen.queryByRole("button", { name: "Mi actividad" })).toBeNull();
+  });
+
+  it("enlaza directamente al panel y coloca Publicar antes del corazón", () => {
+    renderHeader("publisher");
+
+    expect(screen.queryByRole("button", { name: "Usuarios" })).toBeNull();
+    const publish = screen.getByRole("link", { name: "Publicar" });
+    expect(publish.getAttribute("href")).toBe("/newProperty");
+    expect(publish.nextElementSibling).toBe(screen.getByRole("link", { name: "Favoritos" }));
+    expect(screen.getByRole("link", { name: "Panel Publicador" }).getAttribute("href")).toBe("/dashboard");
+    expect(screen.queryByRole("button", { name: "Panel Publicador" })).toBeNull();
+  });
+
+  it("muestra Cuenta y los accesos de actividad, sin duplicar Seguridad, y permite cerrar sesión", async () => {
+    const { logout } = renderHeader("publisher");
+    const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: "Menú de usuario" }));
-    expect(screen.getByRole("menuitem", { name: "Mis alertas" })).toBeTruthy();
+
+    expect(screen.getAllByRole("menuitem")).toHaveLength(5);
+    for (const [label, to] of [["Cuenta", "/profile"], ["Mis alertas", "/activity?tab=alerts"], ["Mis consultas", "/activity"], ["Propiedades vistas", "/view-history"]]) {
+      expect(screen.getByRole("menuitem", { name: label }).getAttribute("href")).toBe(to);
+    }
+    expect(screen.queryByRole("menuitem", { name: "Datos personales" })).toBeNull();
+    expect(screen.queryByRole("menuitem", { name: "Seguridad" })).toBeNull();
     await user.click(screen.getByRole("menuitem", { name: "Cerrar sesión" }));
 
     expect(logout).toHaveBeenCalledOnce();
     expect(navigate).toHaveBeenCalledWith("/", { replace: true });
   });
 
-  it("ofrece herramientas del publicador y reserva Usuarios para administración", async () => {
-    renderHeader("publisher");
-    const user = userEvent.setup();
-
-    expect(screen.queryByRole("button", { name: "Usuarios" })).toBeNull();
-    await user.click(screen.getByRole("button", { name: "Menú de usuario" }));
-    expect(screen.getByRole("menuitem", { name: "Estadísticas" })).toBeTruthy();
-    expect(screen.getByRole("menuitem", { name: "Consultas recibidas" })).toBeTruthy();
+  it("destaca el grupo correspondiente a la sección actual", () => {
+    renderHeader("publisher", "/activity?tab=alerts");
+    expect(screen.getByRole("link", { name: "Mi actividad" }).getAttribute("aria-current")).toBe("page");
+    expect(screen.getByRole("link", { name: "Panel Publicador" }).getAttribute("aria-current")).toBeNull();
   });
 
   it("muestra el acceso de usuarios solamente para el administrador", async () => {
     renderHeader("admin");
+    expect(screen.getByRole("link", { name: "Panel administrador" }).getAttribute("href")).toBe("/admin");
+    expect(screen.queryByRole("link", { name: "Publicar" })).toBeNull();
     await userEvent.setup().click(screen.getByRole("button", { name: "Usuarios" }));
 
     expect(screen.getByRole("menuitem", { name: "Administrar usuarios" })).toBeTruthy();

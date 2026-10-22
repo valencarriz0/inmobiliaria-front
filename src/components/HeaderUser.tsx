@@ -1,5 +1,16 @@
-import { Heart, Home, User, UsersRound } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import {
+  Bell,
+  Eye,
+  Heart,
+  Home,
+  LayoutDashboard,
+  LogOut,
+  MessageCircle,
+  Plus,
+  User,
+  UsersRound,
+} from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/use-auth";
 import { Button } from "./ui/button";
 import {
@@ -13,60 +24,67 @@ import {
 import NotificationsMenu from "./NotificationsMenu";
 import { canUseInterestedFeatures } from "../lib/user-properties";
 import { roleHome } from "../lib/auth-navigation";
+import "./HeaderUser.css";
+
+const activityLinks = [
+  { label: "Mis alertas", to: "/activity?tab=alerts", icon: Bell },
+  { label: "Mis consultas", to: "/activity", icon: MessageCircle },
+  { label: "Propiedades vistas", to: "/view-history", icon: Eye },
+];
 
 export default function HeaderUser() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
 
   if (!user) return null;
 
   const home = roleHome(user.role);
-
-  const links = [
-    { label: "Perfil", to: "/profile" },
-    { label: "Catálogo", to: "/" },
-
-    ...(canUseInterestedFeatures(user)
-      ? [
-          { label: "Favoritos", to: "/favorites" },
-          { label: "Mis consultas", to: "/consultations" },
-          { label: "Propiedades vistas", to: "/view-history" },
-          { label: "Mis alertas", to: "/search-alerts" },
-        ]
-      : []),
-
-    ...(user.role === "publisher"
-      ? [
-          { label: "Mis propiedades", to: "/dashboard" },
-          { label: "Publicar nueva propiedad", to: "/newProperty" },
-          { label: "Estadísticas", to: "/dashboard?tab=stats" },
-          {
-            label: "Consultas recibidas",
-            to: "/dashboard?tab=consultations",
-          },
-        ]
-      : user.role === "admin"
-        ? []
-        : [
-            {
-              label: "Quiero publicar propiedades",
-              to: "/become-publisher",
-            },
-          ]),
-  ];
+  const hasActivity = canUseInterestedFeatures(user);
+  const activityActive = ["/activity", "/consultations", "/search-alerts", "/view-history"].includes(pathname);
+  const publisherActive = ["/dashboard", "/newProperty", "/editProperty", "/detailPublisher"].some((path) => pathname === path || pathname.startsWith(`${path}/`));
 
   return (
-    <header className="sticky top-0 z-50 isolate w-full border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto flex h-16 items-center justify-between gap-2">
-        <Link to={home} className="flex items-center gap-1 sm:gap-2">
+    <header className="user-header sticky top-0 z-50 isolate w-full border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="user-header-inner container mx-auto">
+        <Link to={home} aria-label="InmuConnect" className="user-header-brand flex items-center gap-1 sm:gap-2">
           <Home className="h-5 w-5 shrink-0 text-foreground sm:h-6 sm:w-6" />
-          <span className="text-base font-bold text-foreground sm:text-xl">
+          <span className="user-header-brand-name text-base font-bold text-foreground sm:text-xl">
             InmuConnect
           </span>
         </Link>
 
-        <div className="flex items-center gap-1 sm:gap-3">
-          {canUseInterestedFeatures(user) && (
+        <nav className="user-header-navigation" aria-label="Navegación principal">
+          <Button asChild variant="ghost" className={`user-header-nav-item ${pathname === "/" ? "is-active" : ""}`}>
+            <Link to="/" aria-current={pathname === "/" ? "page" : undefined}>Catálogo</Link>
+          </Button>
+          {hasActivity && (
+            <Button asChild variant="ghost" className={`user-header-nav-item ${activityActive ? "is-active" : ""}`}>
+              <Link to="/activity" aria-current={activityActive ? "page" : undefined}>Mi actividad</Link>
+            </Button>
+          )}
+          {user.role === "publisher" && (
+            <Button asChild variant="ghost" className={`user-header-nav-item ${publisherActive ? "is-active" : ""}`}>
+              <Link to="/dashboard" aria-current={publisherActive ? "page" : undefined}>Panel Publicador</Link>
+            </Button>
+          )}
+          {user.role === "admin" && (
+            <Button asChild variant="ghost" className={`user-header-nav-item ${pathname.startsWith("/admin") ? "is-active" : ""}`}>
+              <Link to="/admin"><LayoutDashboard aria-hidden="true" />Panel administrador</Link>
+            </Button>
+          )}
+        </nav>
+
+        <div className="user-header-actions">
+          {hasActivity && (
+            <Button asChild className="user-header-publish rounded-full" size="sm">
+              <Link to={user.role === "publisher" ? "/newProperty" : "/become-publisher"}>
+                <Plus aria-hidden="true" />Publicar
+              </Link>
+            </Button>
+          )}
+
+          {hasActivity && (
             <Button
               asChild
               variant="ghost"
@@ -134,11 +152,18 @@ export default function HeaderUser() {
 
               <DropdownMenuSeparator />
 
-              {links.map(({ label, to }) => (
-                <DropdownMenuItem key={label} asChild>
-                  <Link to={to}>{label}</Link>
-                </DropdownMenuItem>
-              ))}
+              <DropdownMenuItem asChild>
+                <Link to="/profile"><User aria-hidden="true" />Cuenta</Link>
+              </DropdownMenuItem>
+
+              {hasActivity && <>
+                <DropdownMenuSeparator />
+                {activityLinks.map(({ label, to, icon: Icon }) => (
+                  <DropdownMenuItem key={to} asChild>
+                    <Link to={to}><Icon aria-hidden="true" />{label}</Link>
+                  </DropdownMenuItem>
+                ))}
+              </>}
 
               <DropdownMenuSeparator />
 
@@ -149,7 +174,7 @@ export default function HeaderUser() {
                   navigate("/", { replace: true });
                 }}
               >
-                Cerrar sesión
+                <LogOut aria-hidden="true" />Cerrar sesión
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

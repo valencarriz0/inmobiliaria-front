@@ -1,2 +1,2 @@
 import type { AppNotification } from "../services/notificationService";
-export function notificationDestination(notification: AppNotification) { if (notification.type === "new_consultation") return "/dashboard?tab=consultations"; if (notification.type === "new_property_match" && notification.propertyId) return `/detail/${notification.propertyId}`; return "/profile"; }
+export function notificationDestination(notification: AppNotification) { if (notification.type === "new_consultation") return "/dashboard?tab=consultations"; if (notification.type === "new_publisher_application") return "/admin?tab=applications"; if (notification.type === "new_property_match" && notification.propertyId) return `/detail/${notification.propertyId}`; return "/profile"; }

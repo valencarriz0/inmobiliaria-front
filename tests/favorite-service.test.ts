@@ -40,17 +40,17 @@ test("favoritos agrega y quita con los endpoints protegidos", async () => {
   assert.ok(requests.every((request) => request.url.endsWith("/users/me/favorites/property-a")));
 });
 
-test("el corazón es visible para visitante, se oculta para admin y para una propiedad propia", () => {
+test("el corazón es visible para visitante y admin, y se oculta en una propiedad propia", () => {
   const ownIds = new Set(["own-property"]);
   assert.equal(canShowFavorite(null, "property-a", ownIds), true);
   assert.equal(canShowFavorite(user("interested"), "property-a", ownIds), true);
   assert.equal(canShowFavorite(user("publisher"), "property-a", ownIds), true);
   assert.equal(canShowFavorite(user("publisher"), "own-property", ownIds), false);
-  assert.equal(canShowFavorite(user("admin"), "property-a", ownIds), false);
+  assert.equal(canShowFavorite(user("admin"), "property-a", ownIds), true);
   assert.equal(canManageFavorites(null), false);
   assert.equal(canManageFavorites(user("interested")), true);
   assert.equal(canManageFavorites(user("publisher")), true);
-  assert.equal(canManageFavorites(user("admin")), false);
+  assert.equal(canManageFavorites(user("admin")), true);
 });
 
 test("una falla del backend al actualizar favoritos se propaga para restaurar el estado visual", async () => {

@@ -762,6 +762,29 @@
   color: #95641c;
 }
 
+.publisher-operation-badge {
+  display: inline-flex;
+  min-height: 26px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0 11px;
+  color: var(--foreground);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.publisher-operation-badge.is-sale { background: color-mix(in srgb, var(--secondary) 52%, var(--background)); }
+.publisher-operation-badge.is-rent { background: color-mix(in srgb, var(--primary) 52%, var(--background)); }
+.publisher-operation-badge.is-temporary_rent { background: color-mix(in srgb, var(--tertiary) 62%, var(--background)); }
+
+@media (max-width: 680px) {
+  .publisher-listing-card { flex-wrap: wrap; }
+  .publisher-listing-meta { width: 100%; flex-wrap: wrap; justify-content: flex-end; }
+}
+
 .publisher-listing-more {
   flex: 0 0 auto;
   color: #4e534d;

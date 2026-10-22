@@ -1,14 +1,133 @@
-import { useEffect, useState } from "react";
-import { adminService } from "../../services/adminService";
-import type { AdminMetrics, AdminUser } from "../../types/admin";
+import { useCallback, useEffect, useState } from "react";
+import { CalendarDays, Mail, MoreVertical, Pencil, Phone, UserCheck, UserX, UsersRound } from "lucide-react";
+import { CardListSkeleton } from "../../components/LoadingSkeletons";
 import { Button } from "../../components/ui/button";
-import { Card, CardContent } from "../../components/ui/card";
-import { Building2, CircleCheck, Eye, MessageSquare, PauseCircle, UsersRound } from "lucide-react";
-import { StatisticsSkeleton } from "../../components/LoadingSkeletons";
-import { Skeleton, SkeletonStatus } from "../../components/ui/skeleton";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../../components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../components/ui/dropdown-menu";
+import { FieldError } from "../../components/ui/field-error";
+import { Input } from "../../components/ui/input";
+import { Label } from "../../components/ui/label";
+import { adminService } from "../../services/adminService";
+import type { AdminUser } from "../../types/admin";
+
+export { AdminMetricsSection } from "./AdminMetricCards";
 
 const errorMessage = (error: unknown) => error instanceof Error ? error.message : "No se pudo completar la operación.";
+const roleLabels: Record<AdminUser["role"], string> = { interested: "Interesado", publisher: "Publicador" };
+const dateFormat = new Intl.DateTimeFormat("es-AR", { day: "2-digit", month: "short", year: "numeric" });
 
-export function AdminMetricsSection() { const [metrics, setMetrics] = useState<AdminMetrics>(); const [error, setError] = useState(""); useEffect(() => { void adminService.metrics().then(setMetrics).catch((reason) => setError(errorMessage(reason))); }, []); if (error) return <p role="alert" className="mb-8">{error}</p>; if (!metrics) return <div className="mb-8"><StatisticsSkeleton label="Cargando métricas..." count={6} showChart={false} /></div>; const items = [["Usuarios registrados", metrics.registeredUsers, UsersRound, "bg-primary text-primary-foreground"], ["Publicadores", metrics.publishers, Building2, "bg-secondary text-secondary-foreground"], ["Publicaciones activas", metrics.activeProperties, CircleCheck, "bg-tertiary text-tertiary-foreground"], ["Publicaciones pausadas", metrics.pausedProperties, PauseCircle, "bg-muted text-foreground"], ["Visualizaciones totales", metrics.totalViews, Eye, "bg-secondary text-secondary-foreground"], ["Consultas totales", metrics.totalConsultations, MessageSquare, "bg-tertiary text-tertiary-foreground"]] as const; return <div className="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">{items.map(([label, value, Icon, tone]) => <Card key={label} className="border-muted shadow-sm"><CardContent className="flex items-center gap-3 py-5"><div className={`rounded-lg p-2.5 ${tone}`}><Icon className="h-5 w-5" aria-hidden="true" /></div><div><p className="text-sm text-muted-foreground">{label}</p><p className="text-2xl font-bold">{value}</p></div></CardContent></Card>)}</div>; }
+function initials(user: AdminUser) {
+  return `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase();
+}
 
-export function AdminUsersSection() { const [users, setUsers] = useState<AdminUser[]>([]); const [usersLoading, setUsersLoading] = useState(true); const [editing, setEditing] = useState<AdminUser | null>(null); const [error, setError] = useState(""); useEffect(() => { void adminService.users({ page: "1", limit: "20" }).then((value) => setUsers(value.users)).catch((reason) => setError(errorMessage(reason))).finally(() => setUsersLoading(false)); }, []); const save = async () => { if (!editing) return; try { const user = await adminService.updateUser(editing.id, { firstName: editing.firstName, lastName: editing.lastName, phone: editing.phone }); setUsers((items) => items.map((item) => item.id === user.user.id ? user.user : item)); setEditing(null); } catch (reason) { setError(errorMessage(reason)); } }; return <section className="space-y-4">{error && <p role="alert">{error}</p>}<div className="overflow-x-auto"><table className="w-full text-sm"><tbody>{usersLoading ? <tr><td colSpan={3} className="p-3"><SkeletonStatus label="Cargando usuarios..." className="space-y-3">{[0, 1, 2, 3].map((item) => <div key={item} className="flex gap-4"><Skeleton className="h-10 w-1/3" /><Skeleton className="h-10 w-1/5" /><Skeleton className="h-10 flex-1" /></div>)}</SkeletonStatus></td></tr> : users.map((user) => <tr key={user.id} className="border-t"><td className="p-2">{user.firstName} {user.lastName}<br/>{user.email}</td><td>{user.role}</td><td className="space-x-2"><Button variant="outline" onClick={() => setEditing(user)}>Editar</Button><Button variant="outline" onClick={() => void (user.accountStatus === "active" ? adminService.disableUser(user.id) : adminService.reactivateUser(user.id)).then((result) => setUsers((items) => items.map((item) => item.id === user.id ? result.user : item))).catch((reason) => setError(errorMessage(reason)))}>{user.accountStatus === "active" ? "Deshabilitar" : "Reactivar"}</Button></td></tr>)}</tbody></table></div>{editing && <div className="rounded-lg border p-4 space-y-3"><input className="w-full rounded border p-2" aria-label="Nombre" value={editing.firstName} onChange={(event) => setEditing({ ...editing, firstName: event.target.value })}/><input className="w-full rounded border p-2" aria-label="Apellido" value={editing.lastName} onChange={(event) => setEditing({ ...editing, lastName: event.target.value })}/><input className="w-full rounded border p-2" aria-label="Teléfono" value={editing.phone ?? ""} onChange={(event) => setEditing({ ...editing, phone: event.target.value || null })}/><Button onClick={() => void save()}>Guardar cambios</Button><Button variant="outline" onClick={() => setEditing(null)}>Cancelar</Button></div>}</section>; }
+export function AdminUsersSection() {
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState<AdminUser | null>(null);
+  const [error, setError] = useState("");
+  const [editError, setEditError] = useState("");
+  const [savingUserId, setSavingUserId] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      setUsers((await adminService.users({ page: "1", limit: "20" })).users);
+    } catch (reason) {
+      setError(errorMessage(reason));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { void load(); }, [load]);
+
+  const openEditor = (user: AdminUser) => {
+    setEditError("");
+    setEditing({ ...user });
+  };
+
+  const save = async () => {
+    if (!editing || savingUserId) return;
+    setSavingUserId(editing.id);
+    setEditError("");
+    try {
+      const result = await adminService.updateUser(editing.id, {
+        firstName: editing.firstName,
+        lastName: editing.lastName,
+        phone: editing.phone,
+      });
+      setUsers((items) => items.map((item) => item.id === result.user.id ? result.user : item));
+      setEditing(null);
+    } catch (reason) {
+      setEditError(errorMessage(reason));
+    } finally {
+      setSavingUserId(null);
+    }
+  };
+
+  const changeStatus = async (user: AdminUser) => {
+    if (savingUserId) return;
+    setSavingUserId(user.id);
+    setError("");
+    try {
+      const result = user.accountStatus === "active"
+        ? await adminService.disableUser(user.id)
+        : await adminService.reactivateUser(user.id);
+      setUsers((items) => items.map((item) => item.id === result.user.id ? result.user : item));
+    } catch (reason) {
+      setError(errorMessage(reason));
+    } finally {
+      setSavingUserId(null);
+    }
+  };
+
+  return <section className="admin-management-panel admin-users-panel" aria-labelledby="admin-users-title">
+    <div className="publisher-panel-heading admin-section-heading">
+      <div><h2 id="admin-users-title">Gestión de cuentas</h2><p>Usuarios interesados y publicadores registrados</p></div>
+    </div>
+
+    {error && <div className="publisher-empty-state publisher-consultation-error" role="alert"><span>{error}</span><Button variant="outline" onClick={() => void load()}>Reintentar</Button></div>}
+    {loading ? <CardListSkeleton label="Cargando usuarios..." variant="listings" count={4} /> : !error && users.length === 0 ? (
+      <div className="publisher-empty-state" role="status"><UsersRound size={22} /><span>No hay usuarios para mostrar.</span></div>
+    ) : !error && <div className="publisher-listing-list admin-user-list">
+      {users.map((user) => <article className="publisher-listing-card admin-user-card" key={user.id}>
+        <span className="publisher-avatar admin-user-avatar" aria-hidden="true">{initials(user)}</span>
+        <div className="publisher-listing-copy admin-user-copy">
+          <strong>{user.firstName} {user.lastName}</strong>
+          <div className="admin-user-details">
+            <span><Mail size={14} aria-hidden="true" />{user.email}</span>
+            <span><Phone size={14} aria-hidden="true" />{user.phone || "Sin teléfono"}</span>
+            <span><CalendarDays size={14} aria-hidden="true" />Desde {dateFormat.format(new Date(user.createdAt))}</span>
+          </div>
+        </div>
+        <div className="publisher-listing-meta admin-user-meta">
+          <span className={`publisher-operation-badge admin-role-badge is-${user.role}`}>{roleLabels[user.role]}</span>
+          <span className={`publisher-status ${user.accountStatus === "active" ? "is-active" : "is-disabled"}`}>{user.accountStatus === "active" ? "Activo" : "Deshabilitado"}</span>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild><button className="publisher-listing-menu-trigger" type="button" aria-label={`Acciones para ${user.firstName} ${user.lastName}`} disabled={savingUserId === user.id}><MoreVertical size={19} aria-hidden="true" /></button></DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onSelect={() => openEditor(user)}><Pencil />Editar datos</DropdownMenuItem>
+              <DropdownMenuItem variant={user.accountStatus === "active" ? "destructive" : "default"} onSelect={() => void changeStatus(user)}>
+                {user.accountStatus === "active" ? <><UserX />Deshabilitar</> : <><UserCheck />Reactivar</>}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </article>)}
+    </div>}
+
+    <Dialog open={Boolean(editing)} onOpenChange={(open) => { if (!open && !savingUserId) setEditing(null); }}>
+      <DialogContent className="admin-user-dialog">
+        <DialogHeader><DialogTitle>Editar usuario</DialogTitle><DialogDescription>Actualizá los datos personales de la cuenta.</DialogDescription></DialogHeader>
+        {editing && <form className="admin-user-form" onSubmit={(event) => { event.preventDefault(); void save(); }}>
+          <div><Label htmlFor="admin-user-first-name">Nombre</Label><Input id="admin-user-first-name" value={editing.firstName} onChange={(event) => setEditing({ ...editing, firstName: event.target.value })} disabled={Boolean(savingUserId)} /></div>
+          <div><Label htmlFor="admin-user-last-name">Apellido</Label><Input id="admin-user-last-name" value={editing.lastName} onChange={(event) => setEditing({ ...editing, lastName: event.target.value })} disabled={Boolean(savingUserId)} /></div>
+          <div><Label htmlFor="admin-user-phone">Teléfono</Label><Input id="admin-user-phone" value={editing.phone ?? ""} onChange={(event) => setEditing({ ...editing, phone: event.target.value || null })} disabled={Boolean(savingUserId)} /></div>
+          <FieldError>{editError}</FieldError>
+          <DialogFooter><Button type="button" variant="outline" onClick={() => setEditing(null)} disabled={Boolean(savingUserId)}>Cancelar</Button><Button type="submit" disabled={Boolean(savingUserId)}>{savingUserId ? "Guardando..." : "Guardar cambios"}</Button></DialogFooter>
+        </form>}
+      </DialogContent>
+    </Dialog>
+  </section>;
+}

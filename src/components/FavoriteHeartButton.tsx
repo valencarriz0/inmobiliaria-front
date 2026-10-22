@@ -30,8 +30,8 @@ export default function FavoriteHeartButton({
       variant="ghost"
       size="icon"
       aria-pressed={isFavorite}
-      aria-label={canFavorite ? `${isFavorite ? "Quitar de" : "Guardar en"} favoritos: ${property.title}` : "Favoritos disponibles para interesados y publicadores"}
-      title={canFavorite ? undefined : "Accedé como interesado o publicador para guardar propiedades"}
+      aria-label={canFavorite ? `${isFavorite ? "Quitar de" : "Guardar en"} favoritos: ${property.title}` : "Iniciá sesión para guardar propiedades favoritas"}
+      title={canFavorite ? undefined : "Iniciá sesión para guardar propiedades favoritas"}
       disabled={pendingFavoriteIds.has(property.id)}
       onClick={async (event) => {
         event.preventDefault();

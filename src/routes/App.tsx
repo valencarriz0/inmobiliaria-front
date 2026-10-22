@@ -10,8 +10,6 @@ import NewProperty from "../pages/Publisher/NewProperty";
 import Profile from "../pages/User/Profile";
 import AdminDashboard from "../pages/Admin/Dashboard";
 import AdminPropertyDetail from "../pages/Admin/PropertyDetail";
-import AdminUsersPage from "../pages/Admin/Users";
-import AdminApplicationsPage from "../pages/Admin/Applications";
 import Header from "../components/Header";
 import AuthModals from "../components/Modals/AuthModals";
 import { Button } from "../components/ui/button";
@@ -77,8 +75,10 @@ function App() {
           <Route element={<RequireRole roles={["interested"]} />}>
             <Route path="/become-publisher" element={<PublisherRegistration mode="interested" />} />
           </Route>
-          <Route element={<RequireRole roles={["interested", "publisher"]} />}>
+          <Route element={<RequireRole roles={["interested", "publisher", "admin"]} />}>
             <Route path="/favorites" element={<Favorites />} />
+          </Route>
+          <Route element={<RequireRole roles={["interested", "publisher", "admin"]} />}>
             <Route path="/activity" element={<Activity />} />
             <Route path="/consultations" element={<Navigate to="/activity" replace />} />
             <Route path="/view-history" element={<PropertyViewHistory />} />
@@ -97,8 +97,8 @@ function App() {
           <Route element={<RequireRole roles={["admin"]} />}>
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/properties/:id" element={<AdminPropertyDetail />} />
-            <Route path="/admin/users" element={<AdminUsersPage />} />
-            <Route path="/admin/applications" element={<AdminApplicationsPage />} />
+            <Route path="/admin/users" element={<Navigate to="/admin?tab=users" replace />} />
+            <Route path="/admin/applications" element={<Navigate to="/admin?tab=applications" replace />} />
           </Route>
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

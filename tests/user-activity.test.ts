@@ -164,13 +164,13 @@ test("los ejemplos relacionan consultas y notificaciones con las propiedades cor
     assert.equal(consultation.publisherId, property.publisherId);
     assert.equal(consultation.propertyTitle, property.title);
     assert.equal(consultation.propertyImage, property.images[0]);
-    assert.ok(mockPublisherNotifications.some(({ id, to }) => id === consultation.id && to === "/publisher/consultations"));
+    assert.ok(mockPublisherNotifications.some(({ id, to }) => id === consultation.id && to === "/dashboard?tab=consultations"));
   }
   assert.ok(mockConsultations.some(({ message }) => !message));
   assert.ok(mockConsultations.some(({ userEmail }) => !userEmail));
 });
 
-test("interesado y publicador comparten Favoritos; visitante y administrador no", async () => {
+test("los usuarios registrados pueden guardar Favoritos; el visitante no", async () => {
   const { canUseInterestedFeatures, canFavoriteProperty } = await import("../src/lib/user-properties.ts");
   const interested = authenticatedUser("interested");
   const publisher = authenticatedUser("publisher");
@@ -181,7 +181,7 @@ test("interesado y publicador comparten Favoritos; visitante y administrador no"
   assert.equal(canUseInterestedFeatures(null), false);
   for (const property of mockProperties) {
     assert.equal(canFavoriteProperty(interested, property), true);
-    assert.equal(canFavoriteProperty(admin, property), false);
+    assert.equal(canFavoriteProperty(admin, property), true);
     assert.equal(canFavoriteProperty(null, property), false);
   }
 });

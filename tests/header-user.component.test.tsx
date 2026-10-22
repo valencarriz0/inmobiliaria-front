@@ -68,13 +68,16 @@ describe("HeaderUser", () => {
     expect(screen.getByRole("link", { name: "Panel Publicador" }).getAttribute("aria-current")).toBeNull();
   });
 
-  it("muestra el acceso de usuarios solamente para el administrador", async () => {
+  it("ofrece al administrador su actividad desde el nav y Cuenta sin mostrar acciones de publicador", async () => {
     renderHeader("admin");
     expect(screen.getByRole("link", { name: "Panel administrador" }).getAttribute("href")).toBe("/admin");
+    expect(screen.getByRole("link", { name: "Mi actividad" }).getAttribute("href")).toBe("/activity");
     expect(screen.queryByRole("link", { name: "Publicar" })).toBeNull();
-    await userEvent.setup().click(screen.getByRole("button", { name: "Usuarios" }));
-
-    expect(screen.getByRole("menuitem", { name: "Administrar usuarios" })).toBeTruthy();
-    expect(screen.getByRole("menuitem", { name: "Solicitudes de publicadores" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Favoritos" }).getAttribute("href")).toBe("/favorites");
+    expect(screen.queryByRole("button", { name: "Usuarios" })).toBeNull();
+    await userEvent.setup().click(screen.getByRole("button", { name: "Menú de usuario" }));
+    for (const [label, to] of [["Cuenta", "/profile"], ["Mis alertas", "/activity?tab=alerts"], ["Mis consultas", "/activity"], ["Propiedades vistas", "/view-history"]]) {
+      expect(screen.getByRole("menuitem", { name: label }).getAttribute("href")).toBe(to);
+    }
   });
 });

@@ -48,6 +48,7 @@ export default function AuthModals() {
     email: validateEmail(loginValues.email),
     password: !loginValues.password ? "La contraseña es obligatoria." : undefined,
   }));
+  const forgotValidation = useFormValidation(() => ({ email: validateEmail(loginValues.email) }));
 
   function changeDialog(next: typeof authDialog) {
     setAuthDialog(next);
@@ -57,6 +58,7 @@ export default function AuthModals() {
     setServerErrors({});
     setIsSubmitting(false);
     validation.resetValidation();
+    forgotValidation.resetValidation();
   }
 
   async function submitLogin(event: FormEvent<HTMLFormElement>) {
@@ -103,8 +105,8 @@ export default function AuthModals() {
 
   async function submitForgot(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!validateEmail(loginValues.email)) return;
-    setIsSubmitting(true); setFormError("");
+    if (!forgotValidation.validateForm(event.currentTarget)) return;
+    setIsSubmitting(true); setFormError(""); setNotice("");
     try { setNotice((await forgotPassword({ email: loginValues.email.trim() })).message); } catch (error) { setFormError(messageFrom(error)); } finally { setIsSubmitting(false); }
   }
 
@@ -135,7 +137,7 @@ export default function AuthModals() {
             <DialogFooter className="sm:justify-center"><Button type="button" onClick={() => void resend()} disabled={isSubmitting}>Reenviar correo de verificación</Button><Button type="button" variant="outline" onClick={() => changeDialog("login")}>Iniciar sesión</Button></DialogFooter>
           </> : authDialog === "forgot-password" ? <>
             <DialogHeader><DialogTitle className="text-center text-xl font-bold">Restablecer contraseña</DialogTitle><DialogDescription className="text-center">Te enviaremos un enlace para restablecer tu contraseña.</DialogDescription></DialogHeader>
-            <form noValidate className="space-y-4" onSubmit={submitForgot}><InputField {...validation.fieldProps("email")} label="Correo electrónico" type="email" required value={loginValues.email} disabled={isSubmitting} onChange={(event) => setLoginValues({ ...loginValues, email: event.target.value })} error={validation.errors.email} errorId={validation.errorId("email")} />{notice && <p role="status">{notice}</p>}{formError && <p role="alert">{formError}</p>}<DialogFooter><Button type="button" variant="outline" onClick={() => changeDialog("login")}>Volver</Button><Button type="submit" disabled={isSubmitting}>{isSubmitting ? "Enviando..." : "Enviar enlace"}</Button></DialogFooter></form>
+            <form noValidate className="space-y-4" onSubmit={submitForgot}><InputField {...forgotValidation.fieldProps("email")} label="Correo electrónico" type="email" autoComplete="email" required value={loginValues.email} disabled={isSubmitting} onChange={(event) => { setLoginValues({ ...loginValues, email: event.target.value }); setNotice(""); setFormError(""); }} error={forgotValidation.errors.email} errorId={forgotValidation.errorId("email")} />{notice && <p role="status">{notice}</p>}{formError && <p role="alert">{formError}</p>}<DialogFooter><Button type="button" variant="outline" onClick={() => changeDialog("login")}>Volver</Button><Button type="submit" disabled={isSubmitting}>{isSubmitting ? "Enviando..." : "Enviar enlace"}</Button></DialogFooter></form>
           </> : (
             <>
               <DialogHeader>

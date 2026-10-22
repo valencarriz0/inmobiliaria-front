@@ -8,6 +8,7 @@ describe("estados de carga", () => {
 
     expect(screen.getByRole("status", { name: "Cargando propiedades..." })).toBeTruthy();
     expect(container.querySelectorAll('[class*="min-h-[31rem]"]')).toHaveLength(3);
+    expect(screen.getByRole("status", { name: "Cargando propiedades..." }).querySelectorAll(":scope > div")).toHaveLength(3);
     expect(screen.queryByRole("link")).toBeNull();
   });
 

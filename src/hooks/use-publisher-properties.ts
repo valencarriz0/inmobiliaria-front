@@ -12,6 +12,14 @@ export function usePublisherProperties() {
   const [reloadKey, setReloadKey] = useState(0);
 
   const refresh = useCallback(() => setReloadKey((value) => value + 1), []);
+  const applyPropertyStatus = useCallback((id: string, status: PublisherProperty["publicationStatus"]) => {
+    setResult((current) => current ? {
+      ...current,
+      properties: status === "deleted"
+        ? current.properties.filter((property) => property.id !== id)
+        : current.properties.map((property) => property.id === id ? { ...property, publicationStatus: status } : property),
+    } : current);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -28,5 +36,5 @@ export function usePublisherProperties() {
   }, [reloadKey]);
 
   const current = result;
-  return { properties: current?.properties ?? [], loading: !current, error: current?.error ?? null, refresh };
+  return { properties: current?.properties ?? [], loading: !current, error: current?.error ?? null, refresh, applyPropertyStatus };
 }

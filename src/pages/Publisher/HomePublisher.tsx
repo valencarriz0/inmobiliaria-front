@@ -20,7 +20,7 @@ import { publisherPropertyService } from "../../services/publisherPropertyServic
 import { consultationService } from "../../services/consultationService";
 import { notificationService, type AppNotification } from "../../services/notificationService";
 import { formatPrice } from "../../lib/formatters";
-import { PUBLICATION_STATUSES } from "../../constants/property";
+import { OPERATION_TYPES, PUBLICATION_STATUSES } from "../../constants/property";
 import type { Consultation } from "../../types/consultation";
 import type { PublisherProperty } from "../../types/publisher-property";
 import GeneralStatisticsTab from "./GeneralStatisticsTab";
@@ -54,7 +54,7 @@ export default function PublisherDashboard() {
     return initialTab === "consultations" || initialTab === "stats" ? initialTab : "listings";
   });
   const [propertySort, setPropertySort] = useState<PublisherPropertySort>("recent");
-  const { properties, loading, error, refresh } = usePublisherProperties();
+  const { properties, loading, error, applyPropertyStatus } = usePublisherProperties();
   const [metrics, setMetrics] = useState<PublisherMetrics | null>(null);
   const [metricsLoading, setMetricsLoading] = useState(true);
   const [consultations, setConsultations] = useState<Consultation[]>([]);
@@ -159,9 +159,9 @@ export default function PublisherDashboard() {
     try {
       if (action === "pause") await publisherPropertyService.pause(actionProperty.id);
       else await publisherPropertyService.remove(actionProperty.id);
+      applyPropertyStatus(actionProperty.id, action === "pause" ? "paused" : "deleted");
       setAction(null);
       setActionProperty(null);
-      refresh();
     } catch (reason) {
       setActionError(reason instanceof Error ? reason.message : "No se pudo completar la acción. Intentá nuevamente.");
     } finally {
@@ -170,12 +170,16 @@ export default function PublisherDashboard() {
   };
 
   const reactivateProperty = async (property: PublisherProperty) => {
+    if (savingAction) return;
+    setSavingAction(true);
     setActionError("");
     try {
       await publisherPropertyService.reactivate(property.id);
-      refresh();
+      applyPropertyStatus(property.id, "active");
     } catch (reason) {
       setActionError(reason instanceof Error ? reason.message : "No se pudo reactivar la publicación.");
+    } finally {
+      setSavingAction(false);
     }
   };
 
@@ -265,10 +269,11 @@ export default function PublisherDashboard() {
                         </div>
                         <div className="publisher-listing-meta">
                           {isMostViewed && <span className="publisher-most-viewed-badge"><Eye size={13} />Más Vista</span>}
+                          <span className={`publisher-operation-badge is-${property.operationType}`}>{OPERATION_TYPES[property.operationType]}</span>
                           <span className={`publisher-status ${property.publicationStatus === "active" ? "is-active" : "is-paused"}`}>{status}</span>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <button className="publisher-listing-menu-trigger" type="button" aria-label={`Acciones para ${property.title}`}>
+                              <button className="publisher-listing-menu-trigger" type="button" aria-label={`Acciones para ${property.title}`} disabled={savingAction}>
                                 <MoreVertical size={19} />
                               </button>
                             </DropdownMenuTrigger>

@@ -8,6 +8,6 @@ export function Skeleton({ className, ...props }: HTMLAttributes<HTMLDivElement>
 export function SkeletonStatus({ label, className, children }: { label: string; className?: string; children: ReactNode }) {
   return <div className={className} role="status" aria-label={label} aria-busy="true">
     <span className="sr-only">{label}</span>
-    <div aria-hidden="true">{children}</div>
+    {children}
   </div>;
 }

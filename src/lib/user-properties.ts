@@ -9,5 +9,5 @@ export function isOwnProperty(user: AuthUser | null, property: { publisherId?: s
 }
 
 export function canFavoriteProperty(user: AuthUser | null, property: object) {
-  return canUseInterestedFeatures(user) && !isOwnProperty(user, property);
+  return (canUseInterestedFeatures(user) || user?.role === "admin") && !isOwnProperty(user, property);
 }

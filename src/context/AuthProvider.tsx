@@ -8,8 +8,7 @@ import * as publisherApplicationService from "../services/publisherApplicationSe
 import { favoriteService } from "../services/favoriteService";
 import { publisherPropertyService } from "../services/publisherPropertyService";
 import type { PublicPublisherApplicationInput } from "../types/publisher-application";
-import { canUseInterestedFeatures } from "../lib/user-properties";
-import { favoriteIdsFromResponse } from "../lib/favorites";
+import { canManageFavorites, favoriteIdsFromResponse } from "../lib/favorites";
 import { AuthContext, type AuthDialog } from "./auth-context";
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
@@ -114,7 +113,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const refreshFavorites = useCallback(async () => {
-    if (!user || !canUseInterestedFeatures(user)) {
+    if (!user || !canManageFavorites(user)) {
       setFavoriteIds([]);
       setFavoriteOwnerId(null);
       setFavoritesError(null);
@@ -139,7 +138,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let active = true;
     const load = async () => {
-      if (!user || !canUseInterestedFeatures(user)) {
+      if (!user || !canManageFavorites(user)) {
         setFavoriteIds([]);
         setFavoriteOwnerId(null);
         setFavoritesError(null);
@@ -161,7 +160,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
   const visibleFavoriteIds = useMemo(() => user && favoriteOwnerId === user.id ? favoriteIds : [], [favoriteIds, favoriteOwnerId, user]);
   const toggleFavorite = useCallback(async (propertyId: string) => {
-    if (!user || !canUseInterestedFeatures(user) || pendingFavoriteIds.has(propertyId)) return;
+    if (!canManageFavorites(user) || pendingFavoriteIds.has(propertyId)) return;
     const wasFavorite = visibleFavoriteIds.includes(propertyId);
     setPendingFavoriteIds((previous) => new Set(previous).add(propertyId));
     setFavoriteIds((previous) => wasFavorite ? previous.filter((id) => id !== propertyId) : [...previous, propertyId]);

@@ -8,7 +8,6 @@ import {
   MessageCircle,
   Plus,
   User,
-  UsersRound,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/use-auth";
@@ -23,6 +22,7 @@ import {
 } from "./ui/dropdown-menu";
 import NotificationsMenu from "./NotificationsMenu";
 import { canUseInterestedFeatures } from "../lib/user-properties";
+import { canManageFavorites } from "../lib/favorites";
 import { roleHome } from "../lib/auth-navigation";
 import "./HeaderUser.css";
 
@@ -40,7 +40,8 @@ export default function HeaderUser() {
   if (!user) return null;
 
   const home = roleHome(user.role);
-  const hasActivity = canUseInterestedFeatures(user);
+  const hasInterestedFeatures = canUseInterestedFeatures(user);
+  const hasActivity = hasInterestedFeatures || user.role === "admin";
   const activityActive = ["/activity", "/consultations", "/search-alerts", "/view-history"].includes(pathname);
   const publisherActive = ["/dashboard", "/newProperty", "/editProperty", "/detailPublisher"].some((path) => pathname === path || pathname.startsWith(`${path}/`));
 
@@ -76,7 +77,7 @@ export default function HeaderUser() {
         </nav>
 
         <div className="user-header-actions">
-          {hasActivity && (
+          {hasInterestedFeatures && (
             <Button asChild className="user-header-publish rounded-full" size="sm">
               <Link to={user.role === "publisher" ? "/newProperty" : "/become-publisher"}>
                 <Plus aria-hidden="true" />Publicar
@@ -84,7 +85,7 @@ export default function HeaderUser() {
             </Button>
           )}
 
-          {hasActivity && (
+          {canManageFavorites(user) && (
             <Button
               asChild
               variant="ghost"
@@ -95,38 +96,6 @@ export default function HeaderUser() {
                 <Heart className="h-5 w-5 text-muted-foreground" />
               </Link>
             </Button>
-          )}
-
-          {user.role === "admin" && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label="Usuarios"
-                  title="Usuarios"
-                >
-                  <UsersRound className="h-5 w-5 text-muted-foreground" />
-                </Button>
-              </DropdownMenuTrigger>
-
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Usuarios</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-
-                <DropdownMenuItem asChild>
-                  <Link to="/admin/users">
-                    Administrar usuarios
-                  </Link>
-                </DropdownMenuItem>
-
-                <DropdownMenuItem asChild>
-                  <Link to="/admin/applications">
-                    Solicitudes de publicadores
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           )}
 
           <NotificationsMenu />

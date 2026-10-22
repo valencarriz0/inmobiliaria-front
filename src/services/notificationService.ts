@@ -1,6 +1,6 @@
 import { apiRequest } from "./api.ts";
 import { getAuthToken } from "./authStorage.ts";
-export type NotificationType = "new_consultation" | "publisher_approved" | "publisher_rejected" | "new_property_match";
+export type NotificationType = "new_consultation" | "publisher_approved" | "publisher_rejected" | "new_property_match" | "new_publisher_application";
 export interface AppNotification { id: string; type: NotificationType; title: string; message: string | null; consultationId: string | null; publisherApplicationId: string | null; searchAlertId: string | null; propertyId: string | null; readAt: string | null; createdAt: string; }
 export interface NotificationListResponse { notifications: AppNotification[]; unreadCount: number; }
 const options = () => ({ token: getAuthToken() });

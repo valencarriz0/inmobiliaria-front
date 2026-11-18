@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
@@ -34,14 +34,16 @@ describe("HeaderUser", () => {
     expect(screen.queryByRole("button", { name: "Mi actividad" })).toBeNull();
   });
 
-  it("enlaza directamente al panel y coloca Publicar antes del corazón", () => {
+  it("coloca el panel primero en la navegación y Publicar antes del corazón", () => {
     renderHeader("publisher");
 
     expect(screen.queryByRole("button", { name: "Usuarios" })).toBeNull();
     const publish = screen.getByRole("link", { name: "Publicar" });
     expect(publish.getAttribute("href")).toBe("/newProperty");
     expect(publish.nextElementSibling).toBe(screen.getByRole("link", { name: "Favoritos" }));
-    expect(screen.getByRole("link", { name: "Panel Publicador" }).getAttribute("href")).toBe("/dashboard");
+    const panel = screen.getByRole("link", { name: "Panel Publicador" });
+    expect(panel.getAttribute("href")).toBe("/dashboard");
+    expect(within(screen.getByRole("navigation", { name: "Navegación principal" })).getAllByRole("link")[0]).toBe(panel);
     expect(screen.queryByRole("button", { name: "Panel Publicador" })).toBeNull();
   });
 
@@ -70,7 +72,9 @@ describe("HeaderUser", () => {
 
   it("ofrece al administrador su actividad desde el nav y Cuenta sin mostrar acciones de publicador", async () => {
     renderHeader("admin");
-    expect(screen.getByRole("link", { name: "Panel administrador" }).getAttribute("href")).toBe("/admin");
+    const panel = screen.getByRole("link", { name: "Panel administrador" });
+    expect(panel.getAttribute("href")).toBe("/admin");
+    expect(within(screen.getByRole("navigation", { name: "Navegación principal" })).getAllByRole("link")[0]).toBe(panel);
     expect(screen.getByRole("link", { name: "Mi actividad" }).getAttribute("href")).toBe("/activity");
     expect(screen.queryByRole("link", { name: "Publicar" })).toBeNull();
     expect(screen.getByRole("link", { name: "Favoritos" }).getAttribute("href")).toBe("/favorites");

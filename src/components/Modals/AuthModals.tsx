@@ -24,7 +24,7 @@ function userFormErrors(details?: ApiErrorDetails) {
   return Object.fromEntries(Object.entries(details).filter(([field]) => fields.has(field as keyof UserFormValues))) as Partial<Record<keyof UserFormValues, string>>;
 }
 
-export default function AuthModals() {
+export default function AuthModals({ triggerVariant = "default" }: { triggerVariant?: "default" | "outline" }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { login: authenticate, register, authDialog, setAuthDialog } = useAuth();
@@ -112,7 +112,14 @@ export default function AuthModals() {
 
   return (
     <>
-      <Button size="sm" className="bg-primary px-2 text-xs text-primary-foreground hover:bg-primary/90 sm:px-3 sm:text-sm" onClick={() => changeDialog("login")}>Acceder</Button>
+      <Button
+        size="sm"
+        variant={triggerVariant}
+        className={`px-2 text-xs sm:px-3 sm:text-sm ${triggerVariant === "outline" ? "hover:bg-muted hover:text-foreground" : ""}`}
+        onClick={() => changeDialog("login")}
+      >
+        Acceder
+      </Button>
       <Dialog open={passwordChanged || authDialog !== null} onOpenChange={(open) => { if (!open) { setPasswordChanged(false); changeDialog(null); } }}>
         <DialogContent className={`${authDialog === "register" ? "sm:max-w-xl" : "sm:max-w-md"} max-h-[90dvh] overflow-y-auto`}>
           {passwordChanged ? <><DialogHeader><DialogTitle>Contraseña modificada correctamente</DialogTitle><DialogDescription>Por seguridad, iniciá sesión nuevamente con tu nueva contraseña.</DialogDescription></DialogHeader><DialogFooter><Button onClick={() => { setPasswordChanged(false); changeDialog("login"); }}>Iniciar sesión</Button></DialogFooter></> : authDialog === "favorite" ? (
@@ -124,7 +131,7 @@ export default function AuthModals() {
               <DialogFooter className="sm:justify-center">
                 <div className="flex w-full flex-col gap-3">
                   <div className="flex flex-wrap justify-center gap-2">
-                    <Button type="button" className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => changeDialog("login")}>Iniciar sesión</Button>
+                    <Button type="button" onClick={() => changeDialog("login")}>Iniciar sesión</Button>
                     <Button type="button" variant="outline" onClick={() => changeDialog(null)}>Cancelar</Button>
                   </div>
                   <Button type="button" variant="link" className="h-auto p-0 text-xs" onClick={() => changeDialog("register")}>¿No tenés cuenta? Registrate</Button>

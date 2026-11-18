@@ -6,7 +6,6 @@ import {
   LayoutDashboard,
   LogOut,
   MessageCircle,
-  Plus,
   User,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -21,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import NotificationsMenu from "./NotificationsMenu";
+import HeaderPublishLink from "./HeaderPublishLink";
 import { canUseInterestedFeatures } from "../lib/user-properties";
 import { canManageFavorites } from "../lib/favorites";
 import { roleHome } from "../lib/auth-navigation";
@@ -46,8 +46,8 @@ export default function HeaderUser() {
   const publisherActive = ["/dashboard", "/newProperty", "/editProperty", "/detailPublisher"].some((path) => pathname === path || pathname.startsWith(`${path}/`));
 
   return (
-    <header className="user-header sticky top-0 z-50 isolate w-full border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="user-header-inner container mx-auto">
+    <header className="page-gutters user-header sticky top-0 z-50 isolate border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="user-header-inner">
         <Link to={home} aria-label="InmuConnect" className="user-header-brand flex items-center gap-1 sm:gap-2">
           <Home className="h-5 w-5 shrink-0 text-foreground sm:h-6 sm:w-6" />
           <span className="user-header-brand-name text-base font-bold text-foreground sm:text-xl">
@@ -56,14 +56,6 @@ export default function HeaderUser() {
         </Link>
 
         <nav className="user-header-navigation" aria-label="Navegación principal">
-          <Button asChild variant="ghost" className={`user-header-nav-item ${pathname === "/" ? "is-active" : ""}`}>
-            <Link to="/" aria-current={pathname === "/" ? "page" : undefined}>Catálogo</Link>
-          </Button>
-          {hasActivity && (
-            <Button asChild variant="ghost" className={`user-header-nav-item ${activityActive ? "is-active" : ""}`}>
-              <Link to="/activity" aria-current={activityActive ? "page" : undefined}>Mi actividad</Link>
-            </Button>
-          )}
           {user.role === "publisher" && (
             <Button asChild variant="ghost" className={`user-header-nav-item ${publisherActive ? "is-active" : ""}`}>
               <Link to="/dashboard" aria-current={publisherActive ? "page" : undefined}>Panel Publicador</Link>
@@ -74,15 +66,19 @@ export default function HeaderUser() {
               <Link to="/admin"><LayoutDashboard aria-hidden="true" />Panel administrador</Link>
             </Button>
           )}
+          <Button asChild variant="ghost" className={`user-header-nav-item ${pathname === "/" ? "is-active" : ""}`}>
+            <Link to="/" aria-current={pathname === "/" ? "page" : undefined}>Catálogo</Link>
+          </Button>
+          {hasActivity && (
+            <Button asChild variant="ghost" className={`user-header-nav-item ${activityActive ? "is-active" : ""}`}>
+              <Link to="/activity" aria-current={activityActive ? "page" : undefined}>Mi actividad</Link>
+            </Button>
+          )}
         </nav>
 
         <div className="user-header-actions">
           {hasInterestedFeatures && (
-            <Button asChild className="user-header-publish rounded-full" size="sm">
-              <Link to={user.role === "publisher" ? "/newProperty" : "/become-publisher"}>
-                <Plus aria-hidden="true" />Publicar
-              </Link>
-            </Button>
+            <HeaderPublishLink to={user.role === "publisher" ? "/newProperty" : "/become-publisher"} />
           )}
 
           {canManageFavorites(user) && (

@@ -12,7 +12,7 @@ const BotonVolver = ({ to, fallbackTo = "/" }: BotonVolverProps) => {
   const navigate = useNavigate();
 
   return (
-    <div className="container mx-auto px-4 mt-2">
+    <div className="page-gutters mt-2">
       <Button
         variant="ghost"
         size="sm"

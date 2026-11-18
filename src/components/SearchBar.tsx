@@ -102,7 +102,7 @@ export default function SearchBar({ initialValues, onSearch, onClear, onCreateAl
         const value = selection === "all" ? "" : selection;
         updateValues((previous) => ({ ...previous, [field]: value }));
       }}>
-        <SelectTrigger {...fieldProps(field)} className="h-12 w-full rounded-xl border-border bg-background px-3.5 text-foreground shadow-none data-[size=default]:h-12">
+        <SelectTrigger {...fieldProps(field)} className="h-12 w-full border-border bg-background px-3.5 text-foreground shadow-none data-[size=default]:h-12">
           <SelectValue placeholder={label}>{options.find(([value]) => value === values[field])?.[1] ?? label}</SelectValue>
         </SelectTrigger>
         <SelectContent>
@@ -115,7 +115,7 @@ export default function SearchBar({ initialValues, onSearch, onClear, onCreateAl
   );
 
   return (
-    <form aria-label="Buscar propiedades" noValidate onSubmit={handleSearch} className="mx-auto mb-12 w-full rounded-2xl border border-border/80 bg-background p-4 shadow-[0_4px_20px_rgba(23,23,23,0.06)] sm:p-5 lg:p-6">
+    <form aria-label="Buscar propiedades" noValidate onSubmit={handleSearch} className="mb-8 w-full border-b pb-6">
       <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-2 md:grid-cols-[1.6fr_1fr_1fr] lg:grid-cols-[1.45fr_1fr_1fr_1fr_0.65fr_1fr_0.8fr] lg:gap-2">
         <PropertyLocationCombobox value={values}
           onChange={(location) => updateValues((previous) => ({ ...previous, ...location }))}
@@ -126,12 +126,12 @@ export default function SearchBar({ initialValues, onSearch, onClear, onCreateAl
         <PropertyPriceFilter value={values}
           onChange={(price) => updateValues((previous) => ({ ...previous, ...price }))}
           error={errors.currency ?? errors.minPrice ?? errors.maxPrice} />
-        <Button aria-label="Limpiar filtros" variant="outline" className="h-12 w-full min-w-0 rounded-xl border-border bg-background px-2 text-sm font-normal text-foreground shadow-none hover:bg-muted hover:text-foreground" type="button" onClick={clear}>Limpiar</Button>
-        <Button aria-label={alertStatus === "created" ? "Alerta creada" : "Crear alerta con esta búsqueda"} variant="outline" className="h-12 w-full min-w-0 rounded-xl border-border bg-background px-2 text-sm font-normal text-foreground shadow-none hover:bg-muted hover:text-foreground" type="button" disabled={creatingAlert} onClick={() => void createAlert()}>
+        <Button aria-label="Limpiar filtros" variant="outline" className="h-12 w-full min-w-0 border-border bg-background px-2 text-sm font-normal text-foreground shadow-none hover:bg-muted hover:text-foreground" type="button" onClick={clear}>Limpiar</Button>
+        <Button aria-label={alertStatus === "created" ? "Alerta creada" : "Crear alerta con esta búsqueda"} variant="outline" className="h-12 w-full min-w-0 border-border bg-background px-2 text-sm font-normal text-foreground shadow-none hover:bg-muted hover:text-foreground" type="button" disabled={creatingAlert} onClick={() => void createAlert()}>
           {creatingAlert ? <LoaderCircle className="size-4 animate-spin" aria-hidden="true" /> : alertStatus === "created" ? <Check className="size-4" aria-hidden="true" /> : <BellPlus className="size-4 shrink-0" aria-hidden="true" />}
           <span className="truncate">{creatingAlert ? "Guardando" : alertStatus === "created" ? "Creada" : alertStatus === "error" ? "Reintentar" : "Crear alerta"}</span>
         </Button>
-        <Button className="h-12 w-full min-w-0 rounded-xl bg-primary px-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90" type="submit">
+        <Button className="h-12 w-full min-w-0 px-2" type="submit">
           <Search className="h-4 w-4 shrink-0" aria-hidden="true" /> Buscar
         </Button>
         {alertStatus && <span className="sr-only" role={alertStatus === "error" ? "alert" : "status"}>{alertStatus === "created" ? "Alerta creada correctamente." : "No se pudo crear la alerta. Podés reintentar."}</span>}

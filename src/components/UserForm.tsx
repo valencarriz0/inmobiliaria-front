@@ -73,7 +73,7 @@ export default function UserForm({ role, initialUser, withPassword = false, read
           <legend className="text-sm font-medium">Tipo de publicador <span aria-hidden="true">*</span></legend>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {([["individual", "Propietario particular"], ["agency", "Inmobiliaria"]] as const).map(([value, label]) => (
-              <Label key={value} className={`flex cursor-pointer items-center gap-2 rounded-lg border p-3 ${values.publisherType === value ? "border-primary bg-tertiary text-tertiary-foreground" : "bg-background dark:bg-input/30"}`}>
+              <Label key={value} className={`flex cursor-pointer items-center gap-2 rounded-md border p-3 ${values.publisherType === value ? "border-primary bg-tertiary text-tertiary-foreground" : "bg-background dark:bg-input/30"}`}>
                 <input {...fieldProps("publisherType")} id={`${fieldProps("publisherType").id}-${value}`}
                   type="radio" required value={value} checked={values.publisherType === value} className="accent-accent"
                   onChange={() => setValues({ ...values, publisherType: value, agencyName: value === "individual" ? "" : values.agencyName })} />

@@ -1129,45 +1129,6 @@
   font-size: 20px;
 }
 
-.publisher-general-stats {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.publisher-general-stats-header {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.publisher-general-stats-header h1 {
-  margin: 0;
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-}
-
-.publisher-general-stats-header p {
-  margin: 5px 0 0;
-  color: #858a82;
-  font-size: 13px;
-}
-
-.publisher-period-control {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  color: #858a82;
-  font-size: 12px;
-}
-
-.publisher-period-control [data-slot="select-trigger"] {
-  min-width: 170px;
-  background: #fff;
-}
-
 .publisher-general-stat-cards {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1221,107 +1182,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-.publisher-general-metric-trend {
-  display: flex;
-  min-height: 18px;
-  align-items: center;
-  gap: 5px;
-  color: #7d837a;
-  font-size: 11px;
-  line-height: 1.25;
-}
-
-.publisher-general-metric-trend.is-up {
-  color: #3b7d26;
-}
-
-.publisher-general-metric-trend.is-down {
-  color: #a24c3c;
-}
-
-.publisher-general-metric-trend svg {
-  flex: 0 0 auto;
-}
-
-.publisher-activity-card {
-  border: 1px solid #e7e9e6;
-  border-radius: 14px;
-  background: #fff;
-  padding: 18px 18px 10px;
-}
-
-.publisher-activity-heading {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.publisher-activity-heading h2 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.publisher-activity-heading p {
-  margin: 5px 0 0;
-  color: #858a82;
-  font-size: 12px;
-}
-
-.publisher-activity-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  color: #777d74;
-  font-size: 12px;
-}
-
-.publisher-activity-legend span {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.publisher-activity-legend i {
-  width: 17px;
-  height: 3px;
-  border-radius: 999px;
-  background: #b8e835;
-}
-
-.publisher-activity-legend i.is-consultations {
-  background: #73a63a;
-}
-
-.publisher-activity-chart-wrap {
-  position: relative;
-  margin-top: 14px;
-}
-
-.publisher-activity-chart-wrap svg {
-  display: block;
-  width: 100%;
-  height: 280px;
-  overflow: visible;
-}
-
-.publisher-chart-empty {
-  position: absolute;
-  inset: 0 0 26px;
-  display: grid;
-  place-items: center;
-  color: #858a82;
-  font-size: 14px;
-  pointer-events: none;
-}
-
-.publisher-rate-note {
-  margin: -6px 2px 0;
-  color: #888e85;
-  font-size: 11px;
-}
-
 .publisher-stats-error {
   display: flex;
   min-height: 240px;
@@ -1340,15 +1200,6 @@
 }
 
 @media (max-width: 680px) {
-  .publisher-general-stats-header {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .publisher-period-control [data-slot="select-trigger"] {
-    width: 100%;
-  }
-
   .publisher-general-stat-cards {
     gap: 8px;
   }
@@ -1371,23 +1222,6 @@
 
   .publisher-general-metric-value {
     font-size: 25px;
-  }
-
-  .publisher-general-metric-trend {
-    font-size: 10px;
-  }
-
-  .publisher-activity-card {
-    padding: 14px 11px 8px;
-  }
-
-  .publisher-activity-heading {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .publisher-activity-chart-wrap svg {
-    height: 220px;
   }
 }
 

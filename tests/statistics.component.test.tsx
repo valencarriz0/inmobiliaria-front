@@ -1,14 +1,11 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Children, isValidElement } from "react";
-import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import Statistics from "../src/pages/Publisher/Statistics";
+import GeneralStatisticsTab from "../src/pages/Publisher/GeneralStatisticsTab";
 
 const metricsMock = vi.hoisted(() => vi.fn());
 vi.mock("../src/services/publisherMetricsService", () => ({ getPublisherMetrics: metricsMock }));
-vi.mock("../src/components/HeaderUser", () => ({ default: () => <header>Encabezado</header> }));
-vi.mock("../src/components/BotonVolver", () => ({ default: () => <button>Volver</button> }));
 vi.mock("../src/components/ui/select", () => {
   const SelectTrigger = () => null;
   const SelectContent = () => null;
@@ -39,26 +36,35 @@ describe("Statistics", () => {
     },
     mostViewed: null,
     properties: [],
-    activity: [],
+    activity: [
+      { date: "2026-11-16", views: 18, consultations: 0 },
+      { date: "2026-11-17", views: 0, consultations: 3 },
+    ],
     ...overrides,
   });
 
-  it("muestra métricas y un estado vacío para propiedades", async () => {
+  it("alterna las series sin recargar y permite leer el valor diario con el teclado", async () => {
     metricsMock.mockResolvedValue(metrics());
-    render(<MemoryRouter><Statistics /></MemoryRouter>);
+    const user = userEvent.setup();
+    render(<GeneralStatisticsTab />);
 
-    expect(await screen.findByText("18")).toBeTruthy();
-    expect(screen.getByText("Todavía no tenés publicaciones para mostrar estadísticas.")).toBeTruthy();
+    expect(await screen.findByRole("img", { name: "Distribución diaria de vistas" })).toBeTruthy();
     expect(metricsMock).toHaveBeenCalledWith(30);
-    expect(screen.getByText("Tasa de consulta")).toBeTruthy();
-    expect(screen.getByRole("img", { name: "Evolución diaria de vistas y consultas en el período seleccionado" })).toBeTruthy();
+    await user.click(screen.getByRole("tab", { name: "Consultas" }));
+    expect(screen.getByRole("img", { name: "Distribución diaria de consultas" })).toBeTruthy();
+    await user.tab();
+    await user.tab();
+    expect(document.activeElement).toBe(screen.getByRole("group", { name: "Explorar consultas por día" }));
+    await user.keyboard("{End}");
+    expect(screen.getByText("17 nov · 3 consultas")).toBeTruthy();
+    expect(metricsMock).toHaveBeenCalledTimes(1);
   });
 
   it("muestra un error y vuelve a solicitar métricas al reintentar", async () => {
     metricsMock.mockRejectedValueOnce(new Error("sin red")).mockResolvedValueOnce(metrics({
       summary: { activeProperties: 0, pausedProperties: 0, totalViews: 0, totalConsultations: 0, totalFavorites: 0, previousPeriod: { views: 0, consultations: 0, favorites: 0 } },
     }));
-    render(<MemoryRouter><Statistics /></MemoryRouter>);
+    render(<GeneralStatisticsTab />);
 
     expect((await screen.findByRole("alert")).textContent).toContain("No se pudieron cargar las estadísticas");
     await userEvent.setup().click(screen.getByRole("button", { name: "Reintentar" }));
@@ -68,37 +74,29 @@ describe("Statistics", () => {
   it("vuelve a consultar todas las métricas al cambiar el período", async () => {
     metricsMock.mockResolvedValue(metrics());
     const user = userEvent.setup();
-    render(<MemoryRouter><Statistics /></MemoryRouter>);
+    render(<GeneralStatisticsTab />);
 
-    await screen.findByText("18");
+    await screen.findByRole("img", { name: "Distribución diaria de vistas" });
     await user.selectOptions(screen.getByRole("combobox", { name: "Seleccionar período" }), "7");
 
     await waitFor(() => expect(metricsMock).toHaveBeenLastCalledWith(7));
   });
 
-  it("muestra ubicación y métricas de la propiedad con navegación al detalle", async () => {
+  it("distingue una tasa sin vistas de una tasa válida de cero", async () => {
     metricsMock.mockResolvedValue(metrics({
-      properties: [{
-        propertyId: "property-a",
-        title: "Casa de tres ambientes",
-        publicationStatus: "active",
-        city: "Trenque Lauquen",
-        province: "Buenos Aires",
-        image: "https://example.test/casa.jpg",
-        views: 120,
-        previousViews: 100,
-        consultations: 6,
-        previousConsultations: 4,
-        favorites: 9,
-        previousFavorites: 8,
-      }],
+      summary: {
+        totalViews: 0,
+        totalConsultations: 1,
+        totalFavorites: 0,
+        previousPeriod: { views: 10, consultations: 0, favorites: 1 },
+      },
+      activity: [{ date: "2026-11-17", views: 0, consultations: 1 }],
     }));
-    render(<MemoryRouter><Statistics /></MemoryRouter>);
+    render(<GeneralStatisticsTab />);
 
-    const propertyLink = await screen.findByRole("link", { name: /Casa de tres ambientes/ });
-    expect(propertyLink.getAttribute("href")).toBe("/detailPublisher/property-a");
-    expect(screen.getByText("Trenque Lauquen, Buenos Aires")).toBeTruthy();
-    expect(screen.getAllByText("Favoritos", { selector: "p" }).length).toBeGreaterThan(0);
-    expect(screen.getByText("6", { selector: "p" })).toBeTruthy();
+    const rate = await screen.findByRole("region", { name: "Tasa de consulta" });
+    expect(within(rate).getByText("Sin vistas")).toBeTruthy();
+    expect(within(rate).getByText("0%")).toBeTruthy();
+    expect(within(rate).getByText(/1 consulta sobre 0 vistas/)).toBeTruthy();
   });
 });

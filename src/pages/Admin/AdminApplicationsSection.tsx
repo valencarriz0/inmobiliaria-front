@@ -80,7 +80,7 @@ export function AdminApplicationsSection() {
   };
 
   return <section className="admin-management-panel admin-applications-panel" aria-labelledby="admin-applications-title">
-    <div className="publisher-panel-heading admin-section-heading">
+    <div className="publisher-panel-heading">
       <div><h2 id="admin-applications-title">Revisión de solicitudes</h2><p>Altas para propietarios e inmobiliarias</p></div>
       <div className="publisher-listing-sort-control admin-application-filter">
         <label htmlFor="admin-application-status">Estado</label>
@@ -115,7 +115,7 @@ export function AdminApplicationsSection() {
 
         {item.rejectionReason && <p className="admin-application-reason"><X size={14} aria-hidden="true" /><span><strong>Motivo del rechazo</strong>{item.rejectionReason}</span></p>}
         {item.status === "pending" && <div className="publisher-consultation-actions admin-application-actions">
-          <button className="publisher-consultation-action admin-application-approve" type="button" disabled={resolving === item.id} onClick={() => setApproving(item)}><Check size={14} aria-hidden="true" />Aprobar</button>
+          <Button type="button" size="sm" disabled={resolving === item.id} onClick={() => setApproving(item)}><Check aria-hidden="true" />Aprobar</Button>
           <button className="publisher-consultation-action is-subtle" type="button" disabled={resolving === item.id} onClick={() => { setRejecting(item); setReason(""); }}><X size={14} aria-hidden="true" />Rechazar</button>
         </div>}
       </article>)}

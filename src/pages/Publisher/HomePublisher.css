@@ -1,13 +1,11 @@
 .publisher-dashboard-page {
   min-height: 100vh;
-  background: #f6f7f5;
-  color: #171917;
+  background: var(--background);
+  color: var(--foreground);
 }
 
-.publisher-dashboard {
-  width: min(1600px, 100%);
-  margin: 0 auto;
-  padding: 28px 30px 36px;
+.page-content.publisher-dashboard {
+  padding-top: 0;
 }
 
 .publisher-overview {
@@ -21,7 +19,7 @@
 .publisher-panel {
   min-width: 0;
   border: 1px solid #e7e9e6;
-  border-radius: 17px;
+  border-radius: var(--tab-card-radius);
   background: #fff;
   box-shadow: 0 2px 8px rgb(30 40 24 / 2%);
 }
@@ -155,26 +153,19 @@
   gap: 14px;
 }
 
-.publisher-workspace {
-  overflow: hidden;
-  border: 1px solid #e7e9e6;
-  border-radius: 17px;
-  background: #fff;
-  box-shadow: 0 2px 8px rgb(30 40 24 / 2%);
-}
-
 .publisher-tabs {
   display: flex;
   align-items: stretch;
-  gap: 28px;
+  gap: clamp(14px, 3vw, 28px);
   border-bottom: 1px solid #e9ebe8;
-  padding: 0 22px;
+  overflow-x: auto;
 }
 
 .publisher-tab {
   position: relative;
   display: inline-flex;
   min-height: 58px;
+  flex: 0 0 auto;
   align-items: center;
   gap: 8px;
   border: 0;
@@ -189,7 +180,7 @@
 .publisher-tab::after {
   position: absolute;
   right: 0;
-  bottom: -1px;
+  bottom: 0;
   left: 0;
   height: 3px;
   border-radius: 3px 3px 0 0;
@@ -224,16 +215,8 @@
 }
 
 .publisher-tabpanel {
-  min-height: 490px;
-  padding: 18px;
-}
-
-.publisher-tabpanel > .publisher-panel {
-  min-height: 450px;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-  padding: 0;
+  min-width: 0;
+  padding-top: 20px;
 }
 
 .publisher-listing-grid,
@@ -281,18 +264,19 @@
 }
 
 .publisher-panel-heading {
+  --publisher-panel-heading-space: 12px;
   display: flex;
-  min-height: 43px;
-  align-items: center;
+  flex-wrap: wrap;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 10px;
-  margin: 0 2px 12px;
+  gap: var(--publisher-panel-heading-space) 10px;
+  margin: 0 2px var(--publisher-panel-heading-space);
 }
 
 .publisher-panel-heading h1,
 .publisher-panel-heading h2 {
   margin: 0;
-  font-size: 19px;
+  font-size: 21px;
   font-weight: 700;
   letter-spacing: -0.45px;
   line-height: 1.2;
@@ -334,28 +318,6 @@
   background: #bce933;
 }
 
-.publisher-new-publication-button {
-  display: inline-flex;
-  min-height: 40px;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  border-radius: 999px;
-  background: #cafa41;
-  padding: 0 16px;
-  color: #20251a;
-  font-size: 12px;
-  font-weight: 700;
-  text-decoration: none;
-  white-space: nowrap;
-  transition: background 150ms ease, transform 150ms ease;
-}
-
-.publisher-new-publication-button:hover {
-  background: #bce933;
-  transform: translateY(-1px);
-}
-
 .publisher-listing-toolbar {
   display: flex;
   align-items: flex-end;
@@ -364,8 +326,8 @@
 
 .publisher-listing-sort-control {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  align-items: center;
+  gap: 8px;
   color: #858a82;
   font-size: 11px;
 }
@@ -392,7 +354,7 @@
   display: block;
   min-width: 0;
   border: 1px solid #e9ebe8;
-  border-radius: 12px;
+  border-radius: var(--tab-card-radius);
   padding: 10px 11px 9px;
   color: inherit;
   text-decoration: none;
@@ -579,7 +541,7 @@
   justify-content: center;
   gap: 5px;
   border: 1px solid #e5e9df;
-  border-radius: 7px;
+  border-radius: var(--control-radius);
   background: #fff;
   padding: 0 8px;
   color: #333930;
@@ -619,7 +581,7 @@
   align-items: center;
   gap: 11px;
   border: 1px solid #e9ebe8;
-  border-radius: 11px;
+  border-radius: var(--tab-card-radius);
   padding: 8px 9px;
   color: inherit;
   text-decoration: none;
@@ -797,7 +759,7 @@
   flex: 0 0 32px;
   place-items: center;
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--control-radius);
   background: transparent;
   color: #4e534d;
 }
@@ -925,17 +887,13 @@
 
 .publisher-consultation-error button {
   border: 1px solid #dfe6d3;
-  border-radius: 7px;
+  border-radius: var(--control-radius);
   background: #fff;
   padding: 7px 12px;
   color: #425b20;
   font: inherit;
   font-size: 12px;
   font-weight: 600;
-}
-
-.user-consultations-dashboard {
-  padding-top: 14px;
 }
 
 .user-consultations-empty {
@@ -959,32 +917,7 @@
   line-height: 1.5;
 }
 
-.user-consultations-primary-action {
-  display: inline-flex;
-  min-height: 38px;
-  align-items: center;
-  justify-content: center;
-  margin-top: 6px;
-  border-radius: 999px;
-  background: #cafa41;
-  padding: 0 16px;
-  color: #20251a;
-  font-size: 12px;
-  font-weight: 700;
-  text-decoration: none;
-  transition: background 150ms ease, transform 150ms ease;
-}
-
-.user-consultations-primary-action:hover {
-  background: #bce933;
-  transform: translateY(-1px);
-}
-
 @media (max-width: 1100px) {
-  .publisher-dashboard {
-    padding: 22px 20px 30px;
-  }
-
   .publisher-overview {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1011,10 +944,6 @@
 }
 
 @media (max-width: 680px) {
-  .publisher-dashboard {
-    padding: 16px 12px 24px;
-  }
-
   .publisher-overview {
     gap: 8px;
   }
@@ -1067,12 +996,6 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .publisher-tabs {
-    justify-content: space-between;
-    gap: 5px;
-    padding: 0 12px;
-  }
-
   .publisher-tab {
     min-height: 54px;
     gap: 5px;
@@ -1080,12 +1003,7 @@
   }
 
   .publisher-tabpanel {
-    min-height: 0;
-    padding: 14px 11px;
-  }
-
-  .publisher-tabpanel > .publisher-panel {
-    min-height: 0;
+    padding-top: 16px;
   }
 
   .publisher-stats-panel {
@@ -1095,11 +1013,6 @@
   .publisher-panel {
     min-height: 0;
     padding: 14px 11px;
-  }
-
-  .publisher-panel-heading h1,
-  .publisher-panel-heading h2 {
-    font-size: 17px;
   }
 
   .publisher-consultation-heading {
@@ -1120,6 +1033,7 @@
   .publisher-listings-panel > .publisher-panel-heading {
     align-items: stretch;
     flex-direction: column;
+    flex-wrap: nowrap;
   }
 
   .publisher-listing-toolbar {
@@ -1130,6 +1044,12 @@
   .publisher-listing-sort-control {
     min-width: 0;
     flex: 1;
+  }
+
+  .publisher-listing-toolbar .publisher-listing-sort-control {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
   }
 
   .publisher-listing-sort-control [data-slot="select-trigger"] {
@@ -1159,11 +1079,6 @@
 .publisher-trend,
 .publisher-top-views {
   font-size: 12px;
-}
-
-.publisher-panel-heading h1,
-.publisher-panel-heading h2 {
-  font-size: 21px;
 }
 
 .publisher-panel-heading p {
@@ -1268,7 +1183,7 @@
   justify-content: space-between;
   gap: 11px;
   border: 1px solid #e7e9e6;
-  border-radius: 14px;
+  border-radius: var(--tab-card-radius);
   background: #fff;
   padding: 15px;
 }

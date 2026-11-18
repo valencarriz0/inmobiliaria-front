@@ -25,8 +25,8 @@ export default function Activity() {
   return (
     <div className="publisher-dashboard-page">
       <HeaderUser />
-      <main className="publisher-dashboard user-consultations-dashboard">
-        <section className="publisher-workspace" aria-label="Mi actividad">
+      <main className="page-content publisher-dashboard">
+        <section aria-label="Mi actividad">
           <div className="publisher-tabs" role="tablist" aria-label="Secciones de mi actividad">
             {tabs.map(({ value, label }, index) => (
               <button

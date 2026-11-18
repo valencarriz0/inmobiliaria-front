@@ -5,6 +5,7 @@ import ConsultationCard from "../../components/ConsultationCard";
 import { consultationService } from "../../services/consultationService";
 import type { Consultation } from "../../types/consultation";
 import { CardListSkeleton } from "../../components/LoadingSkeletons";
+import { Button } from "../../components/ui/button";
 
 export default function Consultations() {
   const [consultations, setConsultations] = useState<Consultation[]>([]);
@@ -34,10 +35,10 @@ export default function Consultations() {
     };
   }, [retry]);
 
-  return <article className="publisher-panel publisher-consultations-panel">
+  return <section aria-labelledby="my-consultations-title">
     <div className="publisher-panel-heading">
       <div>
-        <h1>Mis consultas</h1>
+        <h1 id="my-consultations-title">Mis consultas</h1>
         <p>Solicitudes de información que enviaste a otros publicadores</p>
       </div>
     </div>
@@ -55,9 +56,9 @@ export default function Consultations() {
           <MessageCircle size={24} aria-hidden="true" />
           <h2>Todavía no realizaste consultas</h2>
           <p>Explorá las propiedades y contactá al publicador de la que te interese.</p>
-          <Link className="user-consultations-primary-action" to="/">Explorar propiedades</Link>
+          <Button asChild className="mt-1.5"><Link to="/">Explorar propiedades</Link></Button>
         </div>
       )}
     </div>
-  </article>;
+  </section>;
 }

@@ -83,7 +83,7 @@ export function AdminUsersSection() {
   };
 
   return <section className="admin-management-panel admin-users-panel" aria-labelledby="admin-users-title">
-    <div className="publisher-panel-heading admin-section-heading">
+    <div className="publisher-panel-heading">
       <div><h2 id="admin-users-title">Gestión de cuentas</h2><p>Usuarios interesados y publicadores registrados</p></div>
     </div>
 

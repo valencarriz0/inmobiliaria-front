@@ -22,9 +22,9 @@ export default function AdminDashboard() {
 
   return <div className="publisher-dashboard-page admin-dashboard-page">
     <HeaderUser />
-    <main className="publisher-dashboard admin-dashboard">
+    <main className="page-content admin-dashboard">
       <AdminMetricsSection />
-      <section className="publisher-workspace admin-workspace" aria-label="Gestión del panel administrador">
+      <section aria-label="Gestión del panel administrador">
         <div className="publisher-tabs" role="tablist" aria-label="Secciones del panel administrador">
           {tabs.map(([tab, label]) => <button
             key={tab}
@@ -50,7 +50,7 @@ export default function AdminDashboard() {
             }}
           >{label}</button>)}
         </div>
-        <div className="admin-tabpanel" id="admin-tabpanel" role="tabpanel" aria-labelledby={`admin-tab-${activeTab}`}>
+        <div className="publisher-tabpanel" id="admin-tabpanel" role="tabpanel" aria-labelledby={`admin-tab-${activeTab}`}>
           {activeTab === "publications" && <AdminPropertiesSection />}
           {activeTab === "users" && <AdminUsersSection />}
           {activeTab === "applications" && <AdminApplicationsSection />}

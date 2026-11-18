@@ -91,7 +91,10 @@ export function AdminPropertiesSection() {
     setAction({ property, kind });
   };
 
-  return <section className="publisher-panel publisher-listings-panel admin-publications-panel" aria-label="Publicaciones" aria-busy={loading}>
+  return <section className="publisher-listings-panel admin-publications-panel" aria-labelledby="admin-publications-title" aria-busy={loading}>
+    <div className="publisher-panel-heading">
+      <h2 id="admin-publications-title">Publicaciones</h2>
+    </div>
     <SearchBarAdmin filters={filters} onChange={setFilters} />
 
     {error ? <div className="publisher-empty-state publisher-consultation-error" role="alert">

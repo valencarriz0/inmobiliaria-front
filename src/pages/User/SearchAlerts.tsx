@@ -51,7 +51,7 @@ function Editor({ alert, close, saved }: { alert: SearchAlert | null; close: () 
   const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const errors = submitted ? validatePropertySearch(values) : {};
-  const selectClassName = "h-12 w-full rounded-xl border-border bg-background px-3.5 text-sm font-normal text-foreground shadow-none data-[size=default]:h-12";
+  const selectClassName = "h-12 w-full border-border bg-background px-3.5 text-sm font-normal text-foreground shadow-none data-[size=default]:h-12";
 
   useEffect(() => {
     if (!alert) return;
@@ -89,7 +89,7 @@ function Editor({ alert, close, saved }: { alert: SearchAlert | null; close: () 
       </DialogHeader>
       <form className="space-y-5" onSubmit={save}>
         <InputField id="alert-name" label="Nombre" errorId="alert-name-error" value={name}
-          className="h-12 rounded-xl border-border px-3.5 text-sm shadow-none" onChange={(event) => setName(event.target.value)} />
+          className="h-12 border-border px-3.5 text-sm shadow-none" onChange={(event) => setName(event.target.value)} />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="min-w-0 space-y-2">
             <Label htmlFor="alert-operation-type">Categoría</Label>
@@ -129,14 +129,14 @@ function Editor({ alert, close, saved }: { alert: SearchAlert | null; close: () 
             <FieldError id="alert-currency-error">{errors.currency}</FieldError>
           </div>
           <InputField id="alert-min" label="Precio mínimo" errorId="alert-min-error" inputMode="decimal" placeholder="Sin mínimo" value={values.minPrice}
-            className="h-12 rounded-xl border-border px-3.5 text-sm shadow-none" onChange={(event) => updateValues({ minPrice: event.target.value })} error={errors.minPrice} />
+            className="h-12 border-border px-3.5 text-sm shadow-none" onChange={(event) => updateValues({ minPrice: event.target.value })} error={errors.minPrice} />
           <InputField id="alert-max" label="Precio máximo" errorId="alert-max-error" inputMode="decimal" placeholder="Sin máximo" value={values.maxPrice}
-            className="h-12 rounded-xl border-border px-3.5 text-sm shadow-none" onChange={(event) => updateValues({ maxPrice: event.target.value })} error={errors.maxPrice} />
+            className="h-12 border-border px-3.5 text-sm shadow-none" onChange={(event) => updateValues({ maxPrice: event.target.value })} error={errors.maxPrice} />
         </div>
         <FieldError>{error}</FieldError>
         <DialogFooter className="border-t border-border pt-5">
-          <Button type="button" variant="outline" disabled={saving} className="h-11 rounded-xl border-border px-5 shadow-none" onClick={close}>Cancelar</Button>
-          <Button disabled={saving} className="h-11 rounded-xl bg-primary px-5 text-primary-foreground hover:bg-primary/90">{saving ? "Guardando..." : "Guardar cambios"}</Button>
+          <Button type="button" variant="outline" disabled={saving} className="h-11 px-5 shadow-none" onClick={close}>Cancelar</Button>
+          <Button disabled={saving} className="h-11 px-5">{saving ? "Guardando..." : "Guardar cambios"}</Button>
         </DialogFooter>
       </form>
     </DialogContent>
@@ -199,7 +199,7 @@ export default function SearchAlerts() {
   };
 
   return <>
-    <article className="publisher-panel">
+    <section>
       <div className="publisher-panel-heading">
         <div>
           <h1>Mis alertas</h1>
@@ -223,7 +223,7 @@ export default function SearchAlerts() {
               !price && alert.currency,
             ];
             const criteria = criteriaParts.filter(Boolean).join(" · ") || "Todas las propiedades";
-            return <article key={alert.id} className="rounded-2xl border border-border bg-background p-5 shadow-[0_3px_14px_rgba(23,23,23,0.04)] sm:p-6">
+            return <article key={alert.id} className="rounded-[var(--tab-card-radius)] border border-border bg-background p-5 shadow-[0_3px_14px_rgba(23,23,23,0.04)] sm:p-6">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div className="flex min-w-0 flex-1 items-start gap-3">
                   <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-accent text-foreground"><Bell size={20} aria-hidden="true" /></span>
@@ -236,7 +236,7 @@ export default function SearchAlerts() {
                 <span className={`publisher-status ${alert.isActive ? "is-active" : "is-paused"}`}>{alert.isActive ? "Activa" : "Pausada"}</span>
               </div>
               <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
-                <Button asChild className="rounded-xl bg-primary text-sm font-semibold text-primary-foreground hover:bg-primary/90">
+                <Button asChild>
                   <Link to={alertSearchPath(alert)}><Search className="size-4" aria-hidden="true" /> Ver coincidencias</Link>
                 </Button>
                 <div className="ml-auto flex items-center gap-1">
@@ -262,10 +262,10 @@ export default function SearchAlerts() {
           <Bell size={24} aria-hidden="true" />
           <h2>Todavía no creaste alertas</h2>
           <p>Buscá propiedades en el catálogo y guardá una alerta para recibir novedades.</p>
-          <Link className="user-consultations-primary-action" to="/">Explorar propiedades</Link>
+          <Button asChild className="mt-1.5"><Link to="/">Explorar propiedades</Link></Button>
         </div>
       )}
-    </article>
+    </section>
     <Editor
       alert={editing}
       close={() => setEditing(null)}

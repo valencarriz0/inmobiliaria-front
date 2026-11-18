@@ -41,6 +41,7 @@ import {
   AlertDialogTitle,
 } from "../../components/ui/alert-dialog";
 import { FieldError } from "../../components/ui/field-error";
+import { Button } from "../../components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import "./HomePublisher.css";
 
@@ -186,10 +187,10 @@ export default function PublisherDashboard() {
   return (
     <div className="publisher-dashboard-page">
       <HeaderUser />
-      <main className="publisher-dashboard">
+      <main className="page-content publisher-dashboard">
         {(error || metricsError || actionError) && <p className="publisher-inline-error" role="alert">{actionError || error || "No se pudieron cargar las métricas. Podés volver a intentarlo desde Estadísticas."}</p>}
 
-        <section className="publisher-workspace" aria-label="Gestión de publicaciones">
+        <section aria-label="Gestión de publicaciones">
           <div className="publisher-tabs" role="tablist" aria-label="Secciones del panel">
             {([
               ["listings", "Mis publicaciones"],
@@ -225,7 +226,7 @@ export default function PublisherDashboard() {
 
           <div className="publisher-tabpanel" id="publisher-tabpanel" role="tabpanel" aria-labelledby={`publisher-tab-${activeTab}`}>
             {activeTab === "listings" && (
-              <article className="publisher-panel publisher-listings-panel">
+              <section className="publisher-listings-panel">
                 <div className="publisher-panel-heading">
                   <div>
                     <h1>Mis publicaciones</h1>
@@ -246,7 +247,9 @@ export default function PublisherDashboard() {
                         </SelectContent>
                       </Select>
                     </div>
-                    <Link className="publisher-new-publication-button" to="/newProperty"><Plus size={19} /> Nueva publicación</Link>
+                    <Button asChild size="lg">
+                      <Link to="/newProperty"><Plus aria-hidden="true" /> Nueva publicación</Link>
+                    </Button>
                   </div>
                 </div>
                 <div className="publisher-listing-list publisher-listing-grid">
@@ -300,11 +303,11 @@ export default function PublisherDashboard() {
                     );
                   }) : <p className="publisher-empty-state">Todavía no publicaste propiedades.</p>}
                 </div>
-              </article>
+              </section>
             )}
 
             {activeTab === "consultations" && (
-              <article className="publisher-panel publisher-consultations-panel">
+              <section>
                 <div className="publisher-panel-heading">
                   <div>
                     <h1>Consultas recibidas</h1>
@@ -333,7 +336,7 @@ export default function PublisherDashboard() {
                     </div>
                   )}
                 </div>
-              </article>
+              </section>
             )}
 
             {activeTab === "stats" && (

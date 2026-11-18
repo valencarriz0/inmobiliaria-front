@@ -100,10 +100,8 @@ export default function Profile() {
     <div className="min-h-screen bg-background">
       <HeaderUser />
       <BotonVolver fallbackTo={roleHome(user.role)} />
-      <main className="container mx-auto max-w-4xl px-4 py-8 space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-3xl font-bold">Mi perfil</h1>
-        </div>
+      <main className="page-content grid items-start gap-6 lg:grid-cols-2">
+        <h1 className="text-3xl font-bold lg:col-span-2">Mi perfil</h1>
         <Card id="datos-personales" className="scroll-mt-40 rounded-2xl bg-muted dark:bg-card">
           <CardHeader><CardTitle>Datos personales</CardTitle></CardHeader>
           <CardContent className="space-y-6">

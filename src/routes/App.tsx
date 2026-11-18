@@ -13,7 +13,6 @@ import AdminPropertyDetail from "../pages/Admin/PropertyDetail";
 import Header from "../components/Header";
 import AuthModals from "../components/Modals/AuthModals";
 import { Button } from "../components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import Favorites from "../pages/User/Favorites";
 import Activity from "../pages/User/Activity";
 import VerifyEmail from "../pages/User/VerifyEmail";
@@ -27,22 +26,28 @@ import { Skeleton, SkeletonStatus } from "../components/ui/skeleton";
 function AccessRequired() {
   return <div className="min-h-screen bg-background">
     <Header page="/post" />
-    <main className="container mx-auto max-w-xl px-4 py-12">
-      <Card>
-          <CardHeader><CardTitle><h1>Iniciá sesión para continuar</h1></CardTitle></CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-muted-foreground">Esta sección está disponible para usuarios autenticados.</p>
-          <AuthModals />
-          <Button asChild variant="link"><Link to="/">Volver al catálogo</Link></Button>
-        </CardContent>
-      </Card>
+    <main className="page-content space-y-4">
+      <h1 className="text-2xl font-bold">Iniciá sesión para continuar</h1>
+      <p className="text-muted-foreground">Esta sección está disponible para usuarios autenticados.</p>
+      <div className="flex flex-wrap items-center gap-3">
+        <AuthModals />
+        <Button asChild variant="link"><Link to="/">Volver al catálogo</Link></Button>
+      </div>
     </main>
   </div>;
 }
 
 function RequireAuth() {
   const { user, isLoading } = useAuth();
-  if (isLoading) return <div className="min-h-screen bg-background"><Header page="/post" /><SkeletonStatus label="Restaurando sesión..." className="container mx-auto space-y-6 px-4 py-12"><Skeleton className="h-9 w-52" /><div className="grid gap-5 md:grid-cols-3">{[0, 1, 2].map((item) => <Skeleton key={item} className="h-64 rounded-2xl" />)}</div></SkeletonStatus></div>;
+  if (isLoading) return <div className="min-h-screen bg-background">
+    <Header page="/post" />
+    <main className="page-content">
+      <SkeletonStatus label="Restaurando sesión..." className="space-y-6">
+        <Skeleton className="h-9 w-52" />
+        <div className="grid gap-5 md:grid-cols-3">{[0, 1, 2].map((item) => <Skeleton key={item} className="h-64 rounded-2xl" />)}</div>
+      </SkeletonStatus>
+    </main>
+  </div>;
   return user ? <Outlet /> : <AccessRequired />;
 }
 

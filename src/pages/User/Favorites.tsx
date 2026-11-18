@@ -5,7 +5,6 @@ import HeaderUser from "../../components/HeaderUser";
 import BotonVolver from "../../components/BotonVolver";
 import PropertyList from "../../components/PropertyList";
 import { Button } from "../../components/ui/button";
-import { Card, CardContent } from "../../components/ui/card";
 import { useAuth } from "../../hooks/use-auth";
 import { getPublicPropertyById } from "../../services/publicPropertyService";
 import type { PublicPropertySummary } from "../../types/public-property";
@@ -54,21 +53,21 @@ export default function Favorites() {
   return <div className="min-h-screen bg-background">
     <HeaderUser />
     <BotonVolver fallbackTo="/" />
-    <main className="container mx-auto px-4 py-12 space-y-6">
+    <main className="page-content space-y-6">
       <div className="space-y-2">
         <h1 className="text-3xl font-bold">Mis propiedades favoritas</h1>
         <p className="text-muted-foreground">Encontrá rápidamente las propiedades que guardaste.</p>
       </div>
       {loading ? <PropertyGridSkeleton label="Cargando favoritos..." /> : error ? <div className="space-y-3">
         <p role="alert">{error}</p><Button variant="outline" onClick={retryLoad}>Reintentar</Button>
-      </div> : properties.length > 0 ? <PropertyList properties={properties} /> : <Card className="rounded-2xl">
-        <CardContent className="flex flex-col items-center gap-4 py-8 text-center">
+      </div> : properties.length > 0 ? <PropertyList properties={properties} /> : (
+        <section className="flex flex-col items-center gap-4 py-8 text-center">
           <Heart className="h-10 w-10 fill-primary text-foreground" aria-hidden="true" />
           <h2 className="text-xl font-semibold">{favoriteIds.length ? "Tus favoritos no están disponibles por el momento" : "Todavía no guardaste propiedades"}</h2>
           <p className="text-muted-foreground">Explorá el catálogo y guardá las que más te interesen.</p>
           <Button asChild><Link to="/">Explorar propiedades</Link></Button>
-        </CardContent>
-      </Card>}
+        </section>
+      )}
     </main>
   </div>;
 }

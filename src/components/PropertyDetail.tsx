@@ -107,7 +107,7 @@ export default function PropertyDetail({ property }: { property: PublicPropertyD
   return (
     <div className="min-h-screen bg-background">
       <BotonVolver />
-      <main className="container mx-auto py-10 px-4 grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <main className="page-content grid grid-cols-1 gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2 min-w-0 space-y-6">
           <div>
             <div className="flex flex-wrap items-start justify-between gap-3">
@@ -253,7 +253,7 @@ export default function PropertyDetail({ property }: { property: PublicPropertyD
                 <div role="status" className="rounded-xl border border-accent/20 bg-background p-5 text-center">
                   <p className="font-semibold">Esta es tu propiedad</p>
                   <p className="mt-1 text-sm text-muted-foreground">El envío de consultas está deshabilitado para propiedades propias.</p>
-                  <Button type="button" disabled className="mt-4 h-11 w-full rounded-full">
+                  <Button type="button" disabled className="mt-4 h-11 w-full">
                     Enviar consulta
                   </Button>
                 </div>
@@ -293,7 +293,7 @@ export default function PropertyDetail({ property }: { property: PublicPropertyD
                       placeholder={field.placeholder}
                       disabled={isSubmittingContact}
                       value={field.value}
-                      className="h-11 rounded-xl border-border bg-background px-4"
+                      className="h-11 border-border bg-background px-4"
                       onChange={(event) => { field.setValue(event.target.value); setContactError(""); }}
                       error={contactValidation.errors[field.name]}
                       errorId={contactValidation.errorId(field.name)}
@@ -316,7 +316,7 @@ export default function PropertyDetail({ property }: { property: PublicPropertyD
                     Al enviar este formulario, tus datos se compartirán con el publicador únicamente para responder esta consulta.
                   </p>
                   {contactError && <p role="alert" className="text-sm text-destructive">{contactError}</p>}
-                  <Button type="submit" disabled={isSubmittingContact} className="h-11 w-full cursor-pointer rounded-full bg-primary text-primary-foreground hover:bg-primary/90">
+                  <Button type="submit" disabled={isSubmittingContact} className="h-11 w-full">
                     <Send className="size-4" aria-hidden="true" />
                     {isSubmittingContact ? "Enviando..." : "Enviar consulta"}
                   </Button>

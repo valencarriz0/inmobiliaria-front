@@ -3,7 +3,6 @@ import { Link, Navigate, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import Header from "../../components/Header";
 import UserForm from "../../components/UserForm";
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { useAuth } from "../../hooks/use-auth";
 import { ApiError } from "../../services/api";
@@ -83,9 +82,9 @@ export default function PublisherRegistration({ mode }: { mode: "visitor" | "int
     }
   }
 
-  const applicationStatus = application && <Card className="rounded-2xl bg-muted dark:bg-card">
-    <CardHeader><CardTitle>Solicitud {publisherApplicationStatusLabels[application.status]}</CardTitle></CardHeader>
-    <CardContent className="space-y-4">
+  const applicationStatus = application && (
+    <section className="space-y-4">
+      <h2 className="text-xl font-semibold">Solicitud {publisherApplicationStatusLabels[application.status]}</h2>
       {application.status === "pending" && <p>Tu solicitud está pendiente de revisión.</p>}
       {application.status === "approved" && <><p>Tu solicitud fue aprobada. Actualizá tu sesión para acceder a las funciones de publicador.</p><Button onClick={() => void loadApplication()}>Actualizar estado</Button></>}
       {application.status === "rejected" && <>
@@ -93,32 +92,41 @@ export default function PublisherRegistration({ mode }: { mode: "visitor" | "int
         {application.rejectionReason && <p className="text-sm text-muted-foreground">Motivo: {application.rejectionReason}</p>}
         {canReapplyPublisherApplication(application.status) && <Button onClick={() => { setApplication(null); setFormError(""); }}>Volver a solicitar</Button>}
       </>}
-    </CardContent>
-  </Card>;
+    </section>
+  );
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header page="/post" />
-      <div className="container mx-auto px-4 mt-2">
+      <div className="page-gutters mt-2">
         <Button asChild variant="ghost" size="sm"><Link to={upgrade ? "/profile" : "/post"}><ArrowLeft className="h-4 w-4" />Volver</Link></Button>
       </div>
-      <main className="flex-1 container mx-auto max-w-3xl px-4 py-8 space-y-8">
-        <div className="text-center space-y-4">
+      <main className="page-content flex-1 space-y-6">
+        <div className="space-y-2">
           <h1 className="text-3xl lg:text-4xl font-bold text-foreground">{upgrade ? "Quiero publicar propiedades" : "Registro de publicadores"}</h1>
           <p className="text-muted-foreground text-lg">Completá los datos para solicitar la habilitación como publicador.</p>
         </div>
-        {upgrade && isLoadingApplication ? <FormSkeleton label="Consultando el estado de tu solicitud..." /> : null}
-        {upgrade && applicationError ? <div className="space-y-3 text-center"><p role="alert">{applicationError}</p><Button variant="outline" onClick={() => void loadApplication()}>Reintentar</Button></div> : null}
+        {upgrade && isLoadingApplication && <div className="max-w-3xl"><FormSkeleton label="Consultando el estado de tu solicitud..." /></div>}
+        {upgrade && applicationError ? <div className="space-y-3"><p role="alert">{applicationError}</p><Button variant="outline" onClick={() => void loadApplication()}>Reintentar</Button></div> : null}
         {applicationStatus}
-        {publicSuccess ? <Card><CardContent className="space-y-4 py-6"><h2 className="text-xl font-semibold">Solicitud enviada</h2><p role="status">{publicSuccess} Verificá tu correo antes de iniciar sesión.</p><div className="flex gap-2"><Button asChild><Link to="/">Iniciar sesión</Link></Button><Button asChild variant="outline"><Link to="/">Ir al inicio</Link></Button></div></CardContent></Card> : !isLoadingApplication && !applicationError && !application && <Card className="rounded-2xl bg-muted dark:bg-card min-w-0">
-          <CardHeader><CardTitle className="text-2xl font-bold text-center">{upgrade ? "Datos del publicador" : "Registro de publicador"}</CardTitle></CardHeader>
-          <CardContent>
+        {publicSuccess ? (
+          <section className="space-y-4">
+            <h2 className="text-xl font-semibold">Solicitud enviada</h2>
+            <p role="status">{publicSuccess} Verificá tu correo antes de iniciar sesión.</p>
+            <div className="flex flex-wrap gap-2">
+              <Button asChild><Link to="/">Iniciar sesión</Link></Button>
+              <Button asChild variant="outline"><Link to="/">Ir al inicio</Link></Button>
+            </div>
+          </section>
+        ) : !isLoadingApplication && !applicationError && !application && (
+          <section className="max-w-3xl space-y-4">
+            <h2 className="text-xl font-semibold">{upgrade ? "Datos del publicador" : "Datos de registro"}</h2>
             <UserForm key={upgrade ? "upgrade" : "register"} role="publisher" publisherFields initialUser={user ?? undefined}
               withPassword={!upgrade} readOnlyEmail={upgrade} submitLabel="Enviar solicitud"
               onCancel={() => navigate(upgrade ? "/profile" : "/post")}
               onSubmit={upgrade ? submitAuthenticated : submitPublic} isSubmitting={isSubmitting} formError={formError} />
-          </CardContent>
-        </Card>}
+          </section>
+        )}
       </main>
     </div>
   );

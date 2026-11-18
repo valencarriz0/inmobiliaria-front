@@ -89,7 +89,7 @@ export default function PropertyForm({ initialProperty, submitLabel, onSubmit, o
     return <InputField {...fieldProps(field)} label={label} required={required} aria-required={required} disabled={disabled}
       value={values[field]} onChange={(event) => updateField(field, event.target.value)} inputMode={inputMode}
       placeholder={placeholder ?? (disabled ? "No aplica para terrenos" : undefined)} error={errors[field]} errorId={errorId(field)}
-      className="h-11 rounded-xl border-border shadow-none" />;
+      className="h-11 border-border shadow-none" />;
   }
 
   function selectField<T extends string>(field: keyof PropertyFormValues, label: string, value: T | "", options: readonly { value: T; label: string }[], onChange: (value: T | "") => void, required = false, disabled = false) {
@@ -144,7 +144,7 @@ export default function PropertyForm({ initialProperty, submitLabel, onSubmit, o
   return <form noValidate onSubmit={handleSubmit} className="space-y-6" aria-busy={saving}>
     <div className="grid items-start gap-5 lg:grid-cols-[250px_minmax(0,1fr)] xl:gap-7">
       <GuidedFormSteps steps={steps} activeStep={step} onSelect={setStep} />
-      <div className="min-w-0 rounded-2xl border border-border bg-background p-4 shadow-sm sm:p-6">
+      <div className="min-w-0">
       <FieldError>{submitError}</FieldError>
       <fieldset disabled={saving} className="space-y-6 min-w-0">
       {step === 0 && <section className="space-y-5" aria-labelledby="property-basic-title">
@@ -207,7 +207,7 @@ export default function PropertyForm({ initialProperty, submitLabel, onSubmit, o
         <fieldset><legend className="mb-3 text-sm font-medium">Comodidades</legend><div className="flex flex-wrap gap-6">
           {optionList(PROPERTY_AMENITIES).map(({ value, label }, index) => <Label key={value} className="flex cursor-pointer items-center gap-2"><input {...fieldProps("amenities")} id={`${fieldProps("amenities").id}-${index}`} type="checkbox" value={value} checked={values.amenities.includes(value)} onChange={(event) => updateField("amenities", event.target.checked ? [...values.amenities, value] : values.amenities.filter((amenity) => amenity !== value))} className="size-4" /><span className="text-sm">{label}</span></Label>)}
         </div><FieldError id={errorId("amenities")}>{errors.amenities}</FieldError></fieldset>
-        <div><Label htmlFor={fieldProps("description").id} className="mb-1 block text-sm font-medium">Descripción <span className="text-destructive">*</span></Label><Textarea {...fieldProps("description")} required aria-required placeholder="Ejemplo: Hermosa casa ubicada en una zona tranquila..." rows={5} value={values.description} onChange={(event) => updateField("description", event.target.value)} className="rounded-xl border-border bg-background shadow-none" /><FieldError id={errorId("description")}>{errors.description}</FieldError></div>
+        <div><Label htmlFor={fieldProps("description").id} className="mb-1 block text-sm font-medium">Descripción <span className="text-destructive">*</span></Label><Textarea {...fieldProps("description")} required aria-required placeholder="Ejemplo: Hermosa casa ubicada en una zona tranquila..." rows={5} value={values.description} onChange={(event) => updateField("description", event.target.value)} className="border-border bg-background shadow-none" /><FieldError id={errorId("description")}>{errors.description}</FieldError></div>
         <PropertyImages images={values.images} onChange={(images) => { updateField("images", images); setImageSelectionError(undefined); touch("images"); }} onSelectionError={(error) => { setImageSelectionError(error); touch("images"); }} fieldProps={fieldProps("images")} error={errors.images} errorId={errorId("images")} />
       </section>}
 

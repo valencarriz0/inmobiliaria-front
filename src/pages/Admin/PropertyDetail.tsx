@@ -88,7 +88,7 @@ export default function AdminPropertyDetail() {
   };
 
   if (loading) return <div className="min-h-screen bg-background"><HeaderUser /><PropertyDetailSkeleton label="Cargando publicación..." /></div>;
-  if (!property) return <div className="min-h-screen bg-background"><HeaderUser /><main className="container mx-auto px-4 py-10 text-center"><p role="alert">{error || "Publicación no encontrada."}</p><Button className="mt-4" variant="outline" onClick={() => void load()}>Reintentar</Button></main></div>;
+  if (!property) return <div className="min-h-screen bg-background"><HeaderUser /><main className="page-content"><p role="alert">{error || "Publicación no encontrada."}</p><Button className="mt-4" variant="outline" onClick={() => void load()}>Reintentar</Button></main></div>;
 
   const latitude = property.latitude === null ? null : Number(property.latitude);
   const longitude = property.longitude === null ? null : Number(property.longitude);
@@ -100,7 +100,7 @@ export default function AdminPropertyDetail() {
   return <div className="min-h-screen bg-background">
     <HeaderUser />
     <BotonVolver to="/admin" />
-    <main className="container mx-auto grid grid-cols-1 gap-8 px-4 py-10 lg:grid-cols-3">
+    <main className="page-content grid grid-cols-1 gap-8 lg:grid-cols-3">
       <div className="min-w-0 space-y-6 lg:col-span-2">
         <div>
           <div className="flex flex-wrap items-center gap-3">

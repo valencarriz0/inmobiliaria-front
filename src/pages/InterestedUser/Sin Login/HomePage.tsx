@@ -8,7 +8,7 @@ export default function HomePageWireframe() {
     <div className="min-h-screen bg-background">
       <Header page={"/post"} />
 
-      <main className="container mx-auto py-12 px-4">
+      <main className="page-content">
         <PropertyCatalog loggedIn={Boolean(user)} />
       </main>
 

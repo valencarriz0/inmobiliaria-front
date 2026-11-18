@@ -10,13 +10,15 @@ export default function PropertyDetailPage() {
   const { property, loading, error } = useProperty(id);
 
   if (loading) return <div className="min-h-screen bg-background"><Header page="/post" /><PropertyDetailSkeleton /></div>;
-  if (error) return <p role="alert" className="text-center py-10">{error}</p>;
-
-  if (!property) {
+  if (error || !property) {
     return (
-      <div className="text-center py-10">
-        <h2 className="text-2xl font-semibold mb-4">Propiedad no disponible</h2>
-        <Button asChild><Link to="/">Volver al catálogo</Link></Button>
+      <div className="min-h-screen bg-background">
+        <Header page="/post" />
+        <main className="page-content space-y-4">
+          <h1 className="text-2xl font-semibold">Propiedad no disponible</h1>
+          {error && <p role="alert">{error}</p>}
+          <Button asChild><Link to="/">Volver al catálogo</Link></Button>
+        </main>
       </div>
     );
   }

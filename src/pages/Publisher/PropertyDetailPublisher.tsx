@@ -40,12 +40,15 @@ export default function PropertyDetailPublisher() {
   const { property, loading, error, refresh } = useProperty(id, "publisher");
 
   if (loading) return <div className="min-h-screen bg-background"><HeaderUser /><PropertyDetailSkeleton /></div>;
-  if (error) return <p role="alert" className="text-center py-10">{error}</p>;
-  if (!property || property.publicationStatus === "deleted") {
+  if (error || !property || property.publicationStatus === "deleted") {
     return (
-      <div className="text-center py-10 space-y-4">
-        <p>Propiedad no disponible</p>
-        <Button asChild><Link to="/dashboard">Volver a mis propiedades</Link></Button>
+      <div className="min-h-screen bg-background">
+        <HeaderUser />
+        <main className="page-content space-y-4">
+          <h1 className="text-2xl font-semibold">Propiedad no disponible</h1>
+          {error && <p role="alert">{error}</p>}
+          <Button asChild><Link to="/dashboard">Volver a mis propiedades</Link></Button>
+        </main>
       </div>
     );
   }
@@ -128,7 +131,7 @@ function PublisherPropertyDetail({ property, refresh }: { property: PublisherPro
 
       <BotonVolver to="/dashboard" />
       {/* Contenido principal */}
-      <main className="container mx-auto py-10 px-4 grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <main className="page-content grid grid-cols-1 gap-8 lg:grid-cols-3">
         {/* Columna principal */}
         <div className="lg:col-span-2 space-y-6">
           {/* Título, ubicación y Guardar */}
@@ -322,8 +325,7 @@ function PublisherPropertyDetail({ property, refresh }: { property: PublisherPro
               </Button>
               <Button variant="outline" className="w-full" onClick={() => setHistoryOpen(true)} disabled={saving}>Historial de cambios</Button>
               <Button
-                variant="outline"
-                className="w-full flex items-center justify-center"
+                className="w-full"
                 disabled={saving}
                 onClick={() => navigate(`/editProperty/${property.id}`)}
               >
@@ -383,7 +385,6 @@ function PublisherPropertyDetail({ property, refresh }: { property: PublisherPro
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction
-              className="bg-secondary text-secondary-foreground hover:bg-secondary/90"
               disabled={saving}
               onClick={(event) => { event.preventDefault(); void runAction("pause"); }}
             >

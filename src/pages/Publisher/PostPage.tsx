@@ -2,12 +2,6 @@ import BotonVolver from "../../components/BotonVolver";
 import Header from "../../components/Header";
 import { useAuth } from "../../hooks/use-auth";
 import { Button } from "../../components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../../components/ui/card";
 import { Home } from "lucide-react";
 import { Link, Navigate } from "react-router-dom";
 import { publishingEntryRedirect } from "../../lib/auth-navigation";
@@ -21,33 +15,17 @@ export default function Publish() {
     <div className="min-h-screen flex flex-col bg-background">
       <Header page="/register" />
       <BotonVolver to="/" />
-      {/* Contenido principal */}
-      <main className="flex flex-1 items-center justify-center px-4">
-        <Card className="max-w-xl w-full text-center shadow-lg rounded-2xl p-2 sm:p-8">
-          <CardHeader>
-            <CardTitle className="text-3xl font-bold">
-              Publica tu propiedad
-            </CardTitle>
-          </CardHeader>
-
-          <CardContent className="space-y-8">
-            {/* Texto orientador */}
-            <p className="text-muted-foreground text-lg font-medium">
-              ¿Tenés una inmobiliaria o sos propietario?
-            </p>
-
-            {/* Icono grande visual */}
-            <div className="flex items-center justify-center">
-              <Home className="h-24 w-24 fill-primary text-foreground" />
-            </div>
-
-            <Button asChild className="h-auto min-h-12 w-full whitespace-normal bg-primary text-lg text-primary-foreground hover:bg-primary/90">
-              <Link to={registrationPath}>
-                {user ? "Quiero publicar propiedades" : "Regístrate ahora y comienza"}
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
+      <main className="page-content flex-1 space-y-5">
+        <Home className="size-12 fill-primary text-foreground" aria-hidden="true" />
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold">Publicá tu propiedad</h1>
+          <p className="text-lg text-muted-foreground">¿Tenés una inmobiliaria o sos propietario?</p>
+        </div>
+        <Button asChild className="h-auto min-h-12 whitespace-normal">
+          <Link to={registrationPath}>
+            {user ? "Quiero publicar propiedades" : "Regístrate ahora y comienza"}
+          </Link>
+        </Button>
       </main>
 
       <footer className="bg-muted py-6 px-4 mt-12">

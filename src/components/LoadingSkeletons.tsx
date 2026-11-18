@@ -14,7 +14,7 @@ export function PropertyGridSkeleton({ label = "Cargando propiedades...", count 
 }
 
 export function PropertyDetailSkeleton({ label = "Cargando propiedad..." }: { label?: string }) {
-  return <SkeletonStatus label={label} className="container mx-auto grid grid-cols-1 gap-8 px-4 py-10 lg:grid-cols-3">
+  return <SkeletonStatus label={label} className="page-content grid grid-cols-1 gap-8 lg:grid-cols-3">
     <div className="space-y-6 lg:col-span-2">
       <div className="space-y-3"><Skeleton className="h-9 w-3/4" /><Skeleton className="h-4 w-1/3" /></div>
       <Skeleton className="aspect-[16/9] w-full rounded-2xl" />
@@ -27,14 +27,14 @@ export function PropertyDetailSkeleton({ label = "Cargando propiedad..." }: { la
 }
 
 export function FormSkeleton({ label = "Cargando formulario..." }: { label?: string }) {
-  return <SkeletonStatus label={label} className="container mx-auto max-w-6xl space-y-8 px-4 py-10">
+  return <SkeletonStatus label={label} className="space-y-8">
     <Skeleton className="h-9 w-56" /><div className="grid gap-5 rounded-xl border border-border p-6 sm:grid-cols-2">{Array.from({ length: 8 }, (_, index) => <div key={index} className="space-y-2"><Skeleton className="h-4 w-28" /><Skeleton className="h-11 w-full" /></div>)}</div>
   </SkeletonStatus>;
 }
 
 export function CardListSkeleton({ label, count = 3, variant = "cards" }: { label: string; count?: number; variant?: "cards" | "listings" | "consultations" | "alerts" }) {
   return <SkeletonStatus label={label} className={`col-span-full w-full ${variant === "cards" || variant === "alerts" || variant === "listings" ? "grid gap-4" : "grid gap-4 lg:grid-cols-2"}`}>
-    {Array.from({ length: count }, (_, index) => <div key={index} className="rounded-2xl border border-border bg-background p-5 shadow-sm sm:p-6">
+    {Array.from({ length: count }, (_, index) => <div key={index} className="rounded-[var(--tab-card-radius)] border border-border bg-background p-5 shadow-sm sm:p-6">
       <div className="flex items-start gap-4">
         <Skeleton className={variant === "listings" ? "h-28 w-32 shrink-0" : "h-12 w-12 shrink-0 rounded-xl"} />
         <div className="flex-1 space-y-3"><Skeleton className="h-5 w-2/3" /><Skeleton className="h-4 w-1/2" /><Skeleton className="h-4 w-1/3" /></div>
